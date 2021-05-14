@@ -2,14 +2,14 @@
 ## WEP-001: Weave GitOps Core, Phase 1
 ### Glossary 
 
-*   **Adapter** - how an application is configured for a particular environment.  This includes Kustomization files and helm values files
-*   **Application** - a workload that the GitOps runtime will delivery
-*   **Application Repo** - a git repository that holds all the Kubernetes manifests in order to execute the application
+*   **Adapter** - refers to the process of "adapting" an application for a specific target.  For example, combining a base configuration from the application folder with environment specific values needed for the target environment. This could be kustomize, helm values, and in the near future profile values.
+*   **Application** - a workload that the GitOps runtime will deliver
+*   **Application Repo** - a git repository that holds all the Kubernetes manifests in order to execute the application.  e.g., services, deployments, configmaps.
 *   **Environment** - primarily used to describe a Kubernetes cluster.  Becomes more useful when we support a platform layer.  Current thinking is the environment + platform layer becomes a target.
-*   **GitOps Runtime** - Consists of flux and all the tools in the GitOps toolkit.  I.e., kustomize controller, notification controller, image automation controller, etc.
-*   **Infra Repo** - repo containing the GitOps runtime (Flux + WeGO manifests)
+*   **GitOps Runtime** - Consists of flux and all the tools in the GitOps toolkit.  i.e., kustomize controller, notification controller, image automation controller, etc.
+*   **Infra Repo** - repo containing the GitOps runtime (Flux + WeGO manifests).  Output from `flux bootstrap` plus WeGO CRDs and controllers
 *   **Target** - where the workload will be delivered - can be a Kubernetes cluster or a Team workspace
-*   **Wego Repo** - repo containing applications and optionally infrastructure.  The infra repo and Wego repo can be combined into a single repo. 
+*   **Wego Repo** - repo containing resources for GitOpsing applications.  e.g., source resources, kustomization resources, helm resources.  Additionally, the wego repo can contain application manifests directly.  A user may choose to combine the infra repo and wego repo by taking the repo created in `wego install` and using that repo for `wego add` calls.
 
 ### Summary 
 
@@ -58,15 +58,14 @@ WeGO adds high level entities to GitOps so users are assembling these entities i
 
 #### Non-Goals 
 
-
-
 *   Parity with ArgoCD (we want to compete, but not copy)
 *   Replacing some/any parts of WKP
 *   Cluster bootstrapping
 *   Replace flux
 *    - but only due to this WEP only covering the CLI.  When we add the UI, we will require parity between the two.
-*   The ability to perform all operations within a Kubernetes cluster without using the CL or UII.  i.e., using only WeGO operators.  All capabilities will have manifests but phase 1 will require some imperative calls.
+*   The ability to perform all operations within a Kubernetes cluster without using the CL or UI.  i.e., using only WeGO operators.  All capabilities will have manifests but phase 1 will require some imperative calls.
     *   Some manifests explode in CLI, some in UI
+    * **This will be one of the first areas addressed in the the next phase.  We will need the ablity to add applications without the UI or CLI. i.e., declaratively.** 
 *   The ability to run on ARM architectures
 
 
@@ -74,7 +73,7 @@ WeGO adds high level entities to GitOps so users are assembling these entities i
 
 PRFAQ/Lean Canvas/GitHub issue/ Jira issue
 
-*   [WGO breakdown notes][bd-notes]
+*   [WeGO breakdown notes][bd-notes]
 *   [Miro board][miro-board] 
 *   [Weave GitOps kickoff deck][kickoff-deck]
  
@@ -88,10 +87,10 @@ Phase 1 of the core product will provide the following capabilities
 *   An idempotent CLI to check the version of the CLI and inform the user if there is an update
     *   (updating WeGO will be covered in a future WEP)
 *   An idempotent CLI to add an application for GitOps delivery
-*   A CLI to status an application’s GitOps delivery
+*   A CLI for displaying the status of an appplication and progress of the application within the GitOps pipeline (i.e. the application has been sync'd but no other actions have occurred)
 *   A configuration file 
     *   Arguments to pass to Flux on bootstrap 
-    *   Use of branches or commits directly to git
+    *   Use of branches or commits directly to a git repository
     *   Branch naming pattern
     *   Logging level
     *   Directory structure
@@ -130,7 +129,7 @@ As an app developer, I want to view the status of my application in the GitOps p
 
 
 
-*   We won’t be able to push secrets off from the initial version.  I.e. secrets won’t be GitOps automatically.  I.e., we won’t be installing SealedSecrets or SOPS
+*   We won’t be able to push secrets off from the initial version.  i.e. secrets won’t be GitOps automatically.  i.e., we won’t be installing SealedSecrets or leveraging SOPS
 
 
 ### Design Details 
@@ -138,7 +137,11 @@ As an app developer, I want to view the status of my application in the GitOps p
 
 #### Wego config 
 
-Whenever possible, we will allow the user to override the default opinion being used in commands.  To do this, wego will have a configuration file with parameters and default values in it.  This configuration file will also be stored in the cluster as a configmap.  The first wego command issued should create this config file.
+Whenever possible, we will allow the user to override the default opinion(s) being used in commands.  To do this, wego will have a configuration file with parameters and default values in it.  This configuration file will also be stored in the cluster as a configmap.  The first wego command issued should create this config file.
+
+This configuration will live in the Wego repo so that other users who might be running additional wego commands against the repo will be using the same configuration.  
+
+Each target cluster will have this configmap installed in it.  However, in phase 1 there is only a single target cluster.
 
 **Wego Install and Add**
 
@@ -183,7 +186,7 @@ The user starts with an existing application repo containing Kubernetes manifest
     4. generate a source and kustomize resources into the wego repository under the named target.  These will live in the &lt;targetname>-gitops-runtime.yaml file.  
     5. create an &lt;app name>-gitops-runtime.yaml file in the target/&lt;app name> directory containing the source, notification, helm, kustomize resources as necessary
     6. Commit changes to the branch
-    7. Push to a git server (defiend in Step 1) (will need to be defined in the gitops-runtime file 
+    7. Push to a git server (defined in Step 1) (will need to be defined in the gitops-runtime file 
     8. Create PR for branch (MR in GitLab)
 3. Apply the target/&lt;target name>-gitops-runtime.yaml to the cluster
     9. Which is pointing at the main branch and therefore the application won’t be automatically deployed
@@ -224,7 +227,7 @@ _Original [https://miro.com/app/board/o9J_lTe0Pt0=/](https://miro.com/app/board/
 
 ```yaml
 apiVersion: wego.weave.works/v1alpha1
-kind: WegoApp
+kind: App
 metadata:
  name: mywego
 spec:
@@ -283,7 +286,7 @@ Wego will be installed either via curl or homebrew on os/X.
 
 ### Test Plan 
 
-We will utilize a combination of unit tests and BDD tests at the integration level.  We will test against SaaS versions of the GitHub [https://github.com/](https://github.com/) and GitLab [https://about.gitlab.com/](https://about.gitlab.com/) servers.
+We will utilize a combination of unit tests and BDD tests at the integration level.  We will test against SaaS versions of the GitHub [https://github.com/](https://github.com/) and GitLab [https://about.gitlab.com/](https://about.gitlab.com/) servers. In a future phase, we will expand this to include enterprise or on-prem versions.
 
 We will unit test all public interfaces in our go package code with a line coverage goal of 80%. 
 
