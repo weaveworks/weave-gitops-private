@@ -64,7 +64,6 @@ WeGO adds high level entities to GitOps so users are assembling these entities i
 *   Replace flux
 *    - but only due to this WEP only covering the CLI.  When we add the UI, we will require parity between the two.
 *   The ability to perform all operations within a Kubernetes cluster without using the CL or UI.  i.e., using only WeGO operators.  All capabilities will have manifests but phase 1 will require some imperative calls.
-    *   Some manifests explode in CLI, some in UI
     * **This will be one of the first areas addressed in the the next phase.  We will need the ablity to add applications without the UI or CLI. i.e., declaratively.** 
 *   The ability to run on ARM architectures
 
@@ -243,7 +242,7 @@ The WegoApp custom resource will be used by the UI and an operator in future rev
 
 
 
-*   The directory structure for the wego repo will be created as depicted in [Wego Directory Structure](#wego-directory-structure)
+*   The default directory structure for the wego repo is depicted in [Wego Directory Structure](#wego-directory-structure)
 *   The application manifests are contained under a single directory within the application repo.  
 *   We will perform all git operations on a branch
 *   The wego repo will be private 
@@ -281,7 +280,7 @@ Wego status is used to inform the user about applications and the GitOps runtime
 
 ### Installing wego itself 
 
-Wego will be installed either via curl or homebrew on os/X. 
+Wego will be installed either via curl or homebrew. 
 
 
 ### Test Plan 
