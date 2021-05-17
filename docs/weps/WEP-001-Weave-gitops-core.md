@@ -7,7 +7,7 @@
 *   **Application Repo** - a git repository that holds all the Kubernetes manifests in order to execute the application.  e.g., services, deployments, configmaps.
 *   **Environment** - primarily used to describe a Kubernetes cluster.  Becomes more useful when we support a platform layer.  Current thinking is the environment + platform layer becomes a target.
 *   **GitOps Runtime** - Consists of flux and all the tools in the GitOps toolkit.  i.e., kustomize controller, notification controller, image automation controller, etc.
-*   **Infra Repo** - repo containing the GitOps runtime (Flux + WeGO manifests).  Output from `flux bootstrap` plus WeGO CRDs and controllers
+*   **Infra Repo** - repo containing the GitOps runtime (Flux + WeGO manifests).  Output from `flux install --export` plus WeGO CRDs and controllers
 *   **Target** - where the workload will be delivered - can be a Kubernetes cluster or a Team workspace
 *   **Wego Repo** - repo containing resources for GitOpsing applications.  e.g., source resources, kustomization resources, helm resources.  Additionally, the wego repo can contain application manifests directly.  A user may choose to combine the infra repo and wego repo by taking the repo created in `wego install` and using that repo for `wego add` calls.
 
@@ -152,7 +152,7 @@ _See original at [miro board][miro-orig] and the frame titled “WeGO Core phase
 
 #### Wego install 
 
-This installs the GitOps runtime into an environment.  In this phase, we execute the flux bootstrap command with --verbose which prints the manifests necessary to install the GitOps runtime. Assuming the user has a cluster, and their kubeconfig is pointing to it, the user will execute 
+This installs the GitOps runtime into an environment.  In this phase, we execute the `flux install` command with --export which prints the manifests necessary to install the GitOps runtime. Assuming the user has a cluster, and their kubeconfig is pointing to it, the user will execute 
 
 ```console
 wego install | kubectl apply -f -
