@@ -180,18 +180,20 @@ The user starts with an existing application repo containing Kubernetes manifest
 1. create a git repo with the structure identified in [Wego Directory Structure](#wego-directory-structure)
     1. The user may provide a repo for use as the wego repo.  This is important for environments (like Weaveworks) that restrict repo creation.  In this instance, we will add a wego top-level directory and a cluster name underneath which will house this information.
 2. create a branch for these changes
-    2. Using a branch is the default behavior for wego.  This will be configurable in the config file.  Users might want to configure wego to push directly to the main branch so they don’t have to go through a PR review cycle.  Application developers running wego against a local k8s cluster likely won’t need the overhead.
-    3. generate an app.yaml file to capture the application metadata.  See Wego application
-    4. generate a source and kustomize resources into the wego repository under the named target.  These will live in the &lt;targetname>-gitops-runtime.yaml file.  
-    5. create an &lt;app name>-gitops-runtime.yaml file in the target/&lt;app name> directory containing the source, notification, helm, kustomize resources as necessary
-    6. Commit changes to the branch
-    7. Push to a git server (defined in Step 1) (will need to be defined in the gitops-runtime file 
-    8. Create PR for branch (MR in GitLab)
-3. Apply the target/&lt;target name>-gitops-runtime.yaml to the cluster
+    1. Using a branch is the default behavior for wego.  This will be configurable in the config file.  Users might want to configure wego to push directly to the main branch so they don’t have to go through a PR review cycle.  Application developers running wego against a local k8s cluster likely won’t need the overhead.
+    2. generate an app.yaml file to capture the application metadata.  See Wego application
+    3. generate source and kustomize resources into the wego repository under the named target.  These will live in the &lt;targetname&gt;-gitops-runtime.yaml file.  
+    4. create an &lt;app name&gt;-gitops-runtime.yaml file in the target/&lt;app name&gt; directory containing the source, notification, helm, kustomize resources as necessary
+    5. Commit changes to the branch
+    6. Push to a git server (defined in Step 1) NB: will need to be defined in the gitops-runtime file 
+    7. Create PR for branch (MR in GitLab)
+3. Apply the target/&lt;target name&gt;-gitops-runtime.yaml to the cluster
     9. Which is pointing at the main branch and therefore the application won’t be automatically deployed
-4. When PR is approved and merged, gitops runtime from the previous step will deploy the &lt;app name>-gitops-runtime.yaml which will deliver the app to the cluster.
+4. When PR is approved and merged, gitops runtime from the previous step will deploy the &lt;app name&gt;-gitops-runtime.yaml which will deliver the app to the cluster.
     10. If wego has been configured to commit to the main branch, this step will be unnecessary 
 5. GitOps runtime engages to deliver the WeGOApp to the cluster
+
+The operations against the GitServer will be performed using the users credentials from the machine where `wego add` is executed.  In future phases, we will require SSH keys and/or API tokens stored as secrets within the cluster to perform these operations.
 
 Additional `wego add` invocations using the same cluster and wego repo will 
 
@@ -201,12 +203,12 @@ Additional `wego add` invocations using the same cluster and wego repo will
 2. create a branch for these changes
     1. Using a branch is the default behavior for wego.  This will be configurable in the config file.  Users might want to configure wego to push directly to the main branch so they don’t have to go through a PR review cycle.  Application developers running wego against a local k8s cluster likely won’t need the overhead.
     2. generate an app.yaml file to capture the application metadata.  See wego application
-    3. create an &lt;app name>-gitops-runtime.yaml file in the target/&lt;app name> directory containing the source, notification, helm, kustomize controllers as necessary
+    3. create an &lt;app name&gt;-gitops-runtime.yaml file in the target/&lt;app name&gt; directory containing the source, notification, helm, kustomize controllers as necessary
     4. Commit changes to the branch
     5. Push to a git server (will need to be defined in the gitops-runtime file 
     6. Create PR for branch (MR in GitLab)
 3. _Skipped_
-4. When PR is approved and merged, gitops runtime from the previous step will deploy the &lt;app name>-gitops-runtime.yaml which will deliver the app to the cluster.
+4. When PR is approved and merged, gitops runtime from the previous step will deploy the &lt;app name&gt;-gitops-runtime.yaml which will deliver the app to the cluster.
     7. If wego has been configured to commit to the main branch, this step will be unnecessary 
 5. GitOps runtime engages to deliver the WeGOApp to the cluster
 
