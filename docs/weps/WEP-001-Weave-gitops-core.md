@@ -261,10 +261,10 @@ Similar to `wego install` add will interact with the checkpoint system to add me
 
 Wego status is used to inform the user about applications and the GitOps runtime.  The command will 
 
+#### Wego app status 
 
+Wego app status is used to inform the user about application(s).  The command will 
 
-*   Inform the user if the correct CRD versions for wego are installed
-*   Print the output of `flux check`
 *   For each WegoApp
     *   Print the app name
     *   Show last sync time
@@ -275,7 +275,18 @@ Wego status is used to inform the user about applications and the GitOps runtime
 
 ##### Opinions 
 
+*   none
 
+#### Wego runtime status 
+
+Wego runtime status is used to inform the user about applications and the GitOps runtime.  The command will 
+
+*   Inform the user if the correct CRD versions for wego are installed
+*   Print the output of `flux check`
+*   Inform the user if a newer version of wego is available 
+
+
+##### Opinions 
 
 *   none
 
