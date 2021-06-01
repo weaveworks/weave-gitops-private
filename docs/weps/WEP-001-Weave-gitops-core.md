@@ -9,7 +9,7 @@
 *   **GitOps Runtime** - Consists of flux and all the tools in the GitOps toolkit.  i.e., kustomize controller, notification controller, image automation controller, etc.
 *   **Infra Repo** - repo containing the GitOps runtime (Flux + WeGO manifests).  Output from `flux install --export` plus WeGO CRDs and controllers
 *   **Target** - where the workload will be delivered - can be a Kubernetes cluster or a Team workspace
-*   **Wego Repo** - repo containing resources for GitOpsing applications.  e.g., source resources, kustomization resources, helm resources.  Additionally, the wego repo can contain application manifests directly.  A user may choose to combine the infra repo and wego repo by taking the repo created in `wego install` and using that repo for `wego add` calls.
+*   **Wego Repo** - repo containing resources for GitOpsing applications.  e.g., source resources, kustomization resources, helm resources.  Additionally, the wego repo can contain application manifests directly.  A user may choose to combine the infra repo and wego repo by taking the repo created in `wego runtime install` and using that repo for `wego app add` calls.
 
 ### Summary 
 
@@ -142,23 +142,23 @@ This configuration will live in the Wego repo so that other users who might be r
 
 Each target cluster will have this configmap installed in it.  However, in phase 1 there is only a single target cluster.
 
-**Wego Install and Add**
+**Wego runtime install and Wego app add**
 
-![wego install & add](images/wego-add-install.jpg "Install and Add")
+![wego runtime install & wego app add](images/wego-add-install.jpg "Install and Add")
 
 
 _See original at [miro board][miro-orig] and the frame titled “WeGO Core phase 1 wep”_
 
 
-#### Wego install 
+#### wego runtime install 
 
 This installs the GitOps runtime into an environment.  In this phase, we execute the `flux install` command with --export which prints the manifests necessary to install the GitOps runtime. Assuming the user has a cluster, and their kubeconfig is pointing to it, the user will execute 
 
 ```console
-wego install | kubectl apply -f -
+wego runtime install | kubectl apply -f -
 ```
 
-In addition to installing the GitOps runtime, install will add the WeGO CRDs.  We need the WeGO CRDs installed so users can `kubectl` the list of wego objects in their cluster.  Additionally, this will help the wego status command.   In phase one, this will consist of the WeGOApp CRD.  See WeGO App Definition in the WeGO Add section for additional details. 
+In addition to installing the GitOps runtime, install will add the WeGO CRDs.  We need the WeGO CRDs installed so users can `kubectl` the list of wego objects in their cluster.  Additionally, this will help the wego status command.   In phase one, this will consist of the WeGOApp CRD.  See WeGO App Definition in the Wego app add section for additional details. 
 
 When a user issues this command, an entry is made into the checkpoint SaaS service which provides us metrics on usage.  Wksctl control does this today and we will need similar data in our readme.  [Wksctl faq on checkpoint][wksctl-faq]
 
@@ -169,13 +169,13 @@ When a user issues this command, an entry is made into the checkpoint SaaS servi
     *   This may be overridden by setting infraRepo=true in the wego config file.  However, being able to override this in phase 1 is not required...
 
 
-#### Wego add
+#### Wego app add
 
-See Wego Install and Add
+See Wego runtime install and wego app add
 
 This command is used to configure the GitOps runtime to deliver an application to a cluster.
 
-The user starts with an existing application repo containing Kubernetes manifests.  The user also has a Kubernetes cluster configured with the GitOps runtime i.e., has issued `wego install` against it.  If this is the first time running add for this cluster, wego add will 
+The user starts with an existing application repo containing Kubernetes manifests.  The user also has a Kubernetes cluster configured with the GitOps runtime i.e., has issued `wego runtime install` against it.  If this is the first time running add for this cluster, `wego app add` will 
 
 1. create a git repo with the structure identified in [Wego Directory Structure](#wego-directory-structure)
     1. The user may provide a repo for use as the wego repo.  This is important for environments (like Weaveworks) that restrict repo creation.  In this instance, we will add a wego top-level directory and a cluster name underneath which will house this information.
@@ -193,9 +193,9 @@ The user starts with an existing application repo containing Kubernetes manifest
     10. If wego has been configured to commit to the main branch, this step will be unnecessary 
 5. GitOps runtime engages to deliver the WeGOApp to the cluster
 
-The operations against the GitServer will be performed using the users credentials from the machine where `wego add` is executed.  In future phases, we will require SSH keys and/or API tokens stored as secrets within the cluster to perform these operations.
+The operations against the GitServer will be performed using the users credentials from the machine where `wego app add` is executed.  In future phases, we will require SSH keys and/or API tokens stored as secrets within the cluster to perform these operations.
 
-Additional `wego add` invocations using the same cluster and wego repo will 
+Additional `wego app add` invocations using the same cluster and wego repo will 
 
 
 
@@ -212,7 +212,7 @@ Additional `wego add` invocations using the same cluster and wego repo will
     7. If wego has been configured to commit to the main branch, this step will be unnecessary 
 5. GitOps runtime engages to deliver the WeGOApp to the cluster
 
-Similar to `wego install` add will interact with the checkpoint system to add metrics on usage.  One difference, `wego add` will inform the user if the version of wego they are using is out of date.
+Similar to `wego runtime install` add will interact with the checkpoint system to add metrics on usage.  One difference, `wego app add` will inform the user if the version of wego they are using is out of date.
 
 
 ### Wego Directory Structure
@@ -252,14 +252,10 @@ The WegoApp custom resource will be used by the UI and an operator in future rev
 
 #### Wego version 
 
-This command will print the version of wego installed and the version of flux that will be utilized by wego install.
+This command will print the version of wego installed and the version of flux that will be utilized by wego runtime install.
 
-Similar to `wego install` add will interact with the checkpoint system to add metrics on usage.  One difference, `wego add` will inform the user if the version of wego they are using is out of date.
+Similar to `wego runtime install` version will interact with the checkpoint system and inform the user if the version of wego they are using is out of date.
 
-
-#### Wego status 
-
-Wego status is used to inform the user about applications and the GitOps runtime.  The command will 
 
 #### Wego app status 
 
