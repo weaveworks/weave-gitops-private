@@ -128,7 +128,7 @@ As an app developer, I want to view the status of my application in the GitOps p
 
 
 
-*   We won’t be able to push secrets off from the initial version.  i.e. secrets won’t be GitOps automatically.  i.e., we won’t be installing SealedSecrets or leveraging SOPS
+*   We won’t deal with secrets in the initial version.  i.e. secrets won’t be GitOps automatically.  i.e., we won’t be installing SealedSecrets or leveraging SOPS
 
 
 ### Design Details 
@@ -171,7 +171,7 @@ When a user issues this command, an entry is made into the checkpoint SaaS servi
 
 #### Wego app add
 
-See Wego runtime install and wego app add
+See Wego runtime install and Wego app add image
 
 This command is used to configure the GitOps runtime to deliver an application to a cluster.
 
