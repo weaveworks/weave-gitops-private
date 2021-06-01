@@ -152,10 +152,10 @@ _See original at [miro board][miro-orig] and the frame titled “WeGO Core phase
 
 #### wego runtime install 
 
-This installs the GitOps runtime into an environment.  In this phase, we execute the `flux install` command with --export which prints the manifests necessary to install the GitOps runtime. Assuming the user has a cluster, and their kubeconfig is pointing to it, the user will execute 
+This installs the GitOps runtime into an environment.  In this phase, we execute the `flux install` command to install the GitOps runtime. Assuming the user has a cluster, and their kubeconfig is pointing to it, the user will execute 
 
 ```console
-wego runtime install | kubectl apply -f -
+wego runtime install
 ```
 
 In addition to installing the GitOps runtime, install will add the WeGO CRDs.  We need the WeGO CRDs installed so users can `kubectl` the list of wego objects in their cluster.  Additionally, this will help the wego status command.   In phase one, this will consist of the WeGOApp CRD.  See WeGO App Definition in the Wego app add section for additional details. 
