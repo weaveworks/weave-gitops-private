@@ -289,7 +289,7 @@ Wego runtime status is used to inform the user about applications and the GitOps
 
 ### Installing wego itself 
 
-Wego will be installed either via curl or homebrew. 
+Wego will be installed via curl.  Future versions may support other mechanisms such as yum or homebrew. 
 
 
 ### Test Plan 
