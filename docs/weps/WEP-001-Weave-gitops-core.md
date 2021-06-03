@@ -136,11 +136,28 @@ As an app developer, I want to view the status of my application in the GitOps p
 
 #### Wego config 
 
-Whenever possible, we will allow the user to override the default opinion(s) being used in commands.  To do this, wego will have a configuration file with parameters and default values in it.  This configuration file will also be stored in the cluster as a configmap.  The first wego command issued should create this config file.
+Whenever possible, we will allow the user to override the default opinion(s) used in commands.  To do this, wego will have a configuration file with parameters and default values in it.  This configuration file will also be stored in the cluster as a configmap.  The first wego command issued should create this config file.
 
 This configuration will live in the Wego repo so that other users who might be running additional wego commands against the repo will be using the same configuration.  
 
 Each target cluster will have this configmap installed in it.  However, in phase 1 there is only a single target cluster.
+
+The configuration will live in the wego directory as a configmap manifest file.  There will be a single key `wego.properties` containing the configuration values.  In the future, this configmap will be mounted into wego pods.  We are mounting the configmap instead of using individual environment settings so we can dynamically react to updates to the configuration.
+
+```yaml
+apiVersion: v1
+data:
+  wego.properties: |
+    foo=bar
+    wego.repo=NONE
+    infra.repo=NONE
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: wego-config
+```
+
+
 
 **Wego runtime install and Wego app add**
 
