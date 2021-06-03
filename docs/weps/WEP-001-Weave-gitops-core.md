@@ -243,8 +243,7 @@ The WegoApp custom resource will be used by the UI and an operator in future rev
 ##### Opinions 
 
 
-
-*   The default directory structure for the wego repo is depicted in [Wego Directory Structure](#wego-directory-structure)
+*   If no wego repo is passed, the GitOps automation manifests will be put in the application repo
 *   The application manifests are contained under a single directory within the application repo.  
 *   We will perform all git operations on a branch
 *   The wego repo will be private 
