@@ -151,6 +151,7 @@ data:
     foo=bar
     wego.repo=NONE
     infra.repo=NONE
+    app.add.use_branches=false
 kind: ConfigMap
 metadata:
   creationTimestamp: null
@@ -192,11 +193,12 @@ See Wego gitops enable and Wego app add image
 
 This command is used to configure the GitOps runtime to deliver an application to a cluster.
 
-The user starts with an existing application repo containing Kubernetes manifests.  The user also has a Kubernetes cluster configured with the GitOps runtime i.e., has issued `wego gitops enable` against it.  If this is the first time running add for this cluster, `wego app add` will 
+The user starts with an existing application repo containing Kubernetes manifests.  The user also has a Kubernetes cluster configured with the GitOps runtime i.e., has issued `wego gitops enable` against it.  If this is the first time adding an app to this cluster, `wego app add` will 
 
-1. create a git repo with the structure identified in [Wego Directory Structure](#wego-directory-structure)
-    1. The user may provide a repo for use as the wego repo.  This is important for environments (like Weaveworks) that restrict repo creation.  In this instance, we will add a wego top-level directory and a cluster name underneath which will house this information.
-2. create a branch for these changes
+1. add a .wego directory to the App Repo with the structure identified in [Wego Directory Structure](#wego-directory-structure).  
+    1. The user may choose to provide a repo for use as the wego repo.  This is important for environments (like Weaveworks) that restrict repo creation and for environments that want to keep application configuration independent of gitops automation.  In this instance, we will add a wego top-level directory and a cluster name underneath which will house this information.
+    2. The user may also choose not to have us save the GitOps Automation into a repo by passing `none` as the wego repo url.  
+2. create a branch for these changes (unless the user passes `none` as the wego repo)
     1. Using a branch is the default behavior for wego.  This will be configurable in the config file.  Users might want to configure wego to push directly to the main branch so they don’t have to go through a PR review cycle.  Application developers running wego against a local k8s cluster likely won’t need the overhead.
     2. generate an app.yaml file to capture the application metadata.  See Wego application
     3. generate source and kustomize resources into the wego repository under the named target.  These will live in the &lt;targetname&gt;-gitops-runtime.yaml file.  
@@ -205,9 +207,9 @@ The user starts with an existing application repo containing Kubernetes manifest
     6. Push to a git server (defined in Step 1) NB: will need to be defined in the gitops-runtime file 
     7. Create PR for branch (MR in GitLab)
 3. Apply the target/&lt;target name&gt;-gitops-runtime.yaml to the cluster
-    9. Which is pointing at the main branch and therefore the application won’t be automatically deployed
+    1. Which is pointing at the main branch and therefore the application won’t be automatically deployed
 4. When PR is approved and merged, gitops runtime from the previous step will deploy the &lt;app name&gt;-gitops-runtime.yaml which will deliver the app to the cluster.
-    10. If wego has been configured to commit to the main branch, this step will be unnecessary 
+    1. If wego has been configured to commit to the main branch or specified `none` as the wego repo, this step will be unnecessary 
 5. GitOps runtime engages to deliver the WeGOApp to the cluster
 
 The operations against the GitServer will be performed using the users credentials from the machine where `wego app add` is executed.  In future phases, we will require SSH keys and/or API tokens stored as secrets within the cluster to perform these operations.
