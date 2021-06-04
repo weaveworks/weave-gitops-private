@@ -9,7 +9,7 @@
 *   **GitOps Runtime** - Consists of flux and all the tools in the GitOps toolkit.  i.e., kustomize controller, notification controller, image automation controller, etc.
 *   **Infra Repo** - repo containing the GitOps runtime (Flux + WeGO manifests).  Output from `flux install --export` plus WeGO CRDs and controllers
 *   **Target** - where the workload will be delivered - can be a Kubernetes cluster or a Team workspace
-*   **Wego Repo** - repo containing resources for GitOpsing applications.  e.g., source resources, kustomization resources, helm resources.  Additionally, the wego repo can contain application manifests directly.  A user may choose to combine the infra repo and wego repo by taking the repo created in `wego gitops enable` and using that repo for `wego app add` calls.
+*   **Wego Repo** - repo containing resources for GitOpsing applications.  e.g., source resources, kustomization resources, helm resources.  Additionally, the wego repo can contain application manifests directly.  A user may choose to combine the infra repo and wego repo by taking the repo used in `wego gitops enable` and using that repo for `wego app add` calls.
 
 ### Summary 
 
@@ -142,7 +142,7 @@ This configuration will live in the Wego repo so that other users who might be r
 
 Each target cluster will have this configmap installed in it.  However, in phase 1 there is only a single target cluster.
 
-The configuration will live in the wego directory as a configmap manifest file.  There will be a single key `wego.properties` containing the configuration values.  In the future, this configmap will be mounted into wego pods.  We are mounting the configmap instead of using individual environment settings so we can dynamically react to updates to the configuration.
+The configuration will live in the wego directory as a configmap manifest file.  There will be a single key `wego.properties` containing the configuration values.  In the future, this configmap will be mounted into wego pods.  We are mounting the configmap instead of using individual environment settings so we can dynamically react to updates to the configuration. For more details on mounting config maps see [Mounted configmaps][mounted-configmaps].
 
 ```yaml
 apiVersion: v1
@@ -209,7 +209,7 @@ The user starts with an existing application repo containing Kubernetes manifest
 3. Apply the target/&lt;target name&gt;-gitops-runtime.yaml to the cluster
     1. Which is pointing at the main branch and therefore the application won’t be automatically deployed
 4. When PR is approved and merged, gitops runtime from the previous step will deploy the &lt;app name&gt;-gitops-runtime.yaml which will deliver the app to the cluster.
-    1. If wego has been configured to commit to the main branch or specified `none` as the wego repo, this step will be unnecessary 
+    1. If the user configured wego to commit to the main branch or specified `none` as the wego repo, this step will be unnecessary 
 5. GitOps runtime engages to deliver the WeGOApp to the cluster
 
 The operations against the GitServer will be performed using the users credentials from the machine where `wego app add` is executed.  In future phases, we will require SSH keys and/or API tokens stored as secrets within the cluster to perform these operations.
@@ -411,3 +411,4 @@ None
 [bd-notes]: https://docs.google.com/document/d/1X9CkxwqhTLCcN1ATl_EE3ZSFLYI70odR1seXrHG-1Sw/edit?usp=sharing
 [miro-board]: https://miro.com/app/board/o9J_lYUmbQI=/
 [kickoff-deck]: https://docs.google.com/presentation/d/1LzHoQJnNoHWlgoHTSzuOwBwa4H1aftoREG5uDWmuJhg/edit?usp=sharing
+[mounted-configmaps]: https://kubernetes.io/docs/concepts/configuration/configmap/#mounted-configmaps-are-updated-automatically
