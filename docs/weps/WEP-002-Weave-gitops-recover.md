@@ -92,6 +92,9 @@ As an platform operator, I want to separate the platform workloads and GORT from
 LEFT OFF HERE
 <hr>
 
+![Whiteboard discussion](images/wb-wego-recover.jpg "Install and recover")
+
+
 *   Supported Kubernetes versions only
 *   GitHub and GitLab only - we won’t explicitly support (test) other Git providers such as BitBucket
 *   Latest browsers only
