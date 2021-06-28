@@ -9,9 +9,9 @@
 *   **GitOps Automation** - The resources necessar to install workloads into a cluster. Abbreviated - **GOAT**
 *   **GitOps Runtime** - Consists of flux and all the tools in the GitOps toolkit.  i.e., kustomize controller, notification controller, image automation controller, etc.  Abbreviated - **GORT**
 *   **Git Ref** - A Git repo URL and optionally branch or tag
-*   **Infra Repo** - repo containing the GitOps runtime (Flux + WeGO manifests).  Output from `flux install --export` plus WeGO CRDs and controllers
 *   **Target** - where the workload will be delivered - can be a Kubernetes cluster or a Team workspace
-*   **Wego Repo** - repo containing resources for GitOpsing applications.  e.g., source resources, kustomization resources, helm resources.  Additionally, the wego repo can contain application manifests directly.  A user may choose to combine the infra repo and wego repo by taking the repo used in `wego gitops enable` and using that repo for `wego app add` calls.
+*   **Wego App Repo** - repo containing resources for GitOpsing applications.  e.g., source resources, kustomization resources, helm resources.  Additionally, the wego app repo can contain application manifests directly.  A user may choose to combine the wego platform repo and wego app repo by referencing the repo used in `wego gitops install` and using that repo for `wego app add` calls.
+*   **Wego Platform Repo** - repo containing the GitOps runtime (Flux + WeGO manifests).  Output from `flux install --export` plus WeGO CRDs and controllers
 
 ### Summary 
 
@@ -64,9 +64,9 @@ PRFAQ/Lean Canvas/GitHub issue/ Jira issue
 
 ### Proposal 
 
-Persist the GORT.  Update `install` to take a `--git-ref` flag.  When passed, we will create the directory structure identifed in [WeGO Core WEP][WKP-001] with the addition of an application named `$platform$` - which contains the manifests for the GORT.
+Persist the GORT.  Update `wego gitops install` to take an additional flag for specifying the wego platform repo.  When passed, we will create the directory structure identifed in [WeGO Core WEP][wep-001] with the addition of an application named `$platform$` - which contains the manifests for the GORT.
 
-Create `Recover` command, which will add a GOAT for the --git-ref *and* install the GORT manifests from the repo.  The GORT is required for GitOps, hence, recover will need to install it.
+Create `wego gitops recover` command. The command will take 0 or 1 wego platform repo reference and 0 or more wego app repo references.  This will enable a user to recover all gitops workloads in a single command.  Additionally, if a customer has different teams responsible for workloads, e.g., platform sre and application sre, each can perform a `wego gitops recover` for their repo(s).
 
 ##### Story 1 
 
@@ -119,7 +119,7 @@ LEFT OFF HERE
 
 Whenever possible, we will allow the user to override the default opinion(s) used in commands.  To do this, wego will have a configuration file with parameters and default values in it.  This configuration file will also be stored in the cluster as a configmap.  The first wego command issued should create this config file.
 
-This configuration will live in the Wego repo so that other users who might be running additional wego commands against the repo will be using the same configuration.  
+This configuration will live in the wego app repo so that other users who might be running additional wego commands against the repo will be using the same configuration.  
 
 Each target cluster will have this configmap installed in it.  However, in phase 1 there is only a single target cluster.
 
@@ -130,8 +130,8 @@ apiVersion: v1
 data:
   wego.properties: |
     foo=bar
-    wego.repo=NONE
-    infra.repo=NONE
+    wego.app.repo=NONE
+    weago.platform.repo=NONE
     app.add.use_branches=false
 kind: ConfigMap
 metadata:
@@ -164,8 +164,8 @@ When a user issues this command, an entry is made into the checkpoint SaaS servi
 
 ##### Opinions 
 
-*   Adding the gitops runtime manifests is performed in an imperative manner.  We won’t create an Infra Repo to house those manifests. We believe most customers will want to store the infrastructure manifests separately from application manifests
-    *   This may be overridden by setting infraRepo=true in the wego config file.  However, being able to override this in phase 1 is not required...
+*   Adding the gitops runtime manifests is performed in an imperative manner.  We won’t create an Wego Platform Repo to house those manifests. We believe most customers will want to store the infrastructure manifests separately from application manifests
+    *   This may be overridden by setting wego.platform.repo=true in the wego config file.  However, being able to override this in phase 1 is not required...
 
 
 #### Wego app add
@@ -177,12 +177,12 @@ This command is used to configure the GitOps runtime to deliver an application t
 The user starts with an existing application repo containing Kubernetes manifests.  The user also has a Kubernetes cluster configured with the GitOps runtime i.e., has issued `wego gitops enable` against it.  If this is the first time adding an app to this cluster, `wego app add` will 
 
 1. add a .wego directory to the App Repo with the structure identified in [Wego Directory Structure](#wego-directory-structure).  
-    1. The user may choose to provide a repo for use as the wego repo.  This is important for environments (like Weaveworks) that restrict repo creation and for environments that want to keep application configuration independent of gitops automation.  In this instance, we will add a wego top-level directory and a cluster name underneath which will house this information.
+    1. The user may choose to provide a repo for use as the wego app repo.  This is important for environments (like Weaveworks) that restrict repo creation and for environments that want to keep application configuration independent of gitops automation.  In this instance, we will add a wego top-level directory and a cluster name underneath which will house this information.
     2. The user may also choose not to have us save the GitOps Automation into a repo by passing `none` as the wego repo url.  
 2. create a branch for these changes (unless the user passes `none` as the wego repo)
     1. Using a branch is the default behavior for wego.  This will be configurable in the config file.  Users might want to configure wego to push directly to the main branch so they don’t have to go through a PR review cycle.  Application developers running wego against a local k8s cluster likely won’t need the overhead.
     2. generate an app.yaml file to capture the application metadata.  See Wego application
-    3. generate source and kustomize resources into the wego repository under the named target.  These will live in the &lt;targetname&gt;-gitops-runtime.yaml file.  
+    3. generate source and kustomize resources into the wego app repository under the named target.  These will live in the &lt;targetname&gt;-gitops-runtime.yaml file.  
     4. create an &lt;app name&gt;-gitops-runtime.yaml file in the target/&lt;app name&gt; directory containing the source, notification, helm, kustomize resources as necessary
     5. Commit changes to the branch
     6. Push to a git server (defined in Step 1) NB: will need to be defined in the gitops-runtime file 
@@ -195,7 +195,7 @@ The user starts with an existing application repo containing Kubernetes manifest
 
 The operations against the GitServer will be performed using the users credentials from the machine where `wego app add` is executed.  In future phases, we will require SSH keys and/or API tokens stored as secrets within the cluster to perform these operations.
 
-Additional `wego app add` invocations using the same cluster and wego repo will 
+Additional `wego app add` invocations using the same cluster and wego app repo will 
 
 
 
@@ -243,10 +243,10 @@ The WegoApp custom resource will be used by the UI and an operator in future rev
 ##### Opinions 
 
 
-*   If no wego repo is passed, the GitOps automation manifests will be put in the application repo
+*   If no wego app repo is passed, the GitOps automation manifests will be put in the application repo
 *   The application manifests are contained under a single directory within the application repo.  
 *   We will perform all git operations on a branch
-*   The wego repo will be private 
+*   The wego app repo will be private 
 
 
 #### Wego version 
