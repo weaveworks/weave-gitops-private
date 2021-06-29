@@ -70,17 +70,17 @@ Create `wego gitops recover` command. The command will take 0 or 1 wego platform
 
 ##### Story 1 
 
-As an application operator, I want to recover my cluster workloads without having to run all the `wego` commands again.
+As an application operator, I want to recover my cluster workloads without having to run all the `wego` commands again. So, I run `wego recover [list of app names]` to have gitops automations setup, pointed to the correct gitref, and therefore have my workloads recreated in the cluster.
 
 
 ##### Story 2 
 
-As an platform operation, I want the ability to update the GORT of my clusters using PR so that I don't have to manually execute commands on each cluster.
+As an platform operation, I want the ability to update the GORT of my clusters using PR so that I don't have to manually execute commands on each cluster.  So, I go into the wego platform repository and update the platform's base model model (and target adapters if nessisary) with a new config, and have the gitops runtime apply those changes to the cluster. 
 
 
 ##### Story 3 
 
-As an app developer, I want to store my application GOAT in the same repo as the platform GORT so that I don't have repo sprawl
+As a platform Operator, I want the ability to restore the gitops automation for my cluster all at once, restoring the platform gitops automation, and all of the applications too.  To do this I use `wego gitops restore` and pass it the gitref for a platform definition. 
 
 ##### Story 4
 
