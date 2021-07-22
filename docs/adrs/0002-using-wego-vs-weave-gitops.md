@@ -27,11 +27,12 @@ Including:
 * When naming Weave GitOps objects in Kubernetes, they will have a `wego-` prefix
 * Code variables - developer choice
 * Code comments - developer choice, except for public facing docs
+* Release artifacts if it consists of only the wego binary for the os and architecture.  e.g., `wego-darwin-x86_64`
 
 ### weave-gitops
 * Name of code repository for Weave GitOps core
-* **change** The release packages will be prefixed with `weave-gitops`
-* **new** When we have additional distribution packages, they will use `weave-gitops` as a prefix as well
+* **new** The release packages will be prefixed with `weave-gitops` when they comprise more than just the wego binary
+* **new** When we have additional distribution packages, they will use `weave-gitops`. e.g., `brew install weave-gitops`
 
 
 ## Consequences
