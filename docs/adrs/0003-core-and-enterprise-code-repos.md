@@ -78,6 +78,11 @@ The UI would be developed by pulling in the core UI and building on top of it.  
 
 We are moving forward with option 4.  We will start to separate mccp cluster create and team workspaces from the weaveworks/wks repo.
 
+Weave GitOps repositories
+* weave-gitops (public) Used for opensource code development.  Foundation for the UI.
+* weave-gitops-enterprise (private) Used for enterprise code leveraging core.  Will have MCCP and Team workspace code
+* weave-gitops-docs (public) Shared documentation for all editions
+* weave-gitops-pkg (public) _future_ for now, the shared package code will live in weave-gitops
 ## Consequences
 
 The upgrade process, the UI to install a new UI.  i.e., we aren't just turning on new features.
