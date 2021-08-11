@@ -72,6 +72,19 @@ Notes:
 
 Q. How can we best replace the WG deployments with WGE deployments?
 
+- Can we use `pctl upgrade`? Initial chats w/ profiles team suggests this would be a stretch.
+- "Build up" profile operations in a single PR? E.g. `remove wg && add wge`
+- A special helper command to remove and add?
+
+Q. How can we preserve ingress?
+
+- Maybe come up with a service/ingress naming convention that both projects use, so removing the WG one and adding the WGE one re-creates w/ same name ready to keep being used?
+
+Q. OAuth secrets etc?
+
+- Make sure to _not_ delete certain parts of WG? E.g. secrets its created.
+- WG makes sure these aspects are slightly de-coupled from WG profile?
+
 ## Decision
 
 ??
