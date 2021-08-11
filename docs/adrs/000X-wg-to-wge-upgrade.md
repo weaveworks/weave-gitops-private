@@ -50,6 +50,7 @@ After upgrading:
 - Any state that WG has built up should be inherited and preserved by WGE
   - We don't want to disrupt any user workloads / deployments
   - There might be configuration options / preferences that should be preserved?
+  - If WG is installing an OAuth thingy the secrets associated with that should be preserved
 
 Notes:
 
@@ -57,12 +58,12 @@ Notes:
 
 ## Options
 
-- Some `wego upgrade` command that
-
-## Proposal
+### Replace it all, supporting entitlements services
 
 - An entitlements service to generate entitlements (expiration date, enabled feature list) signed by a private key
+  - _Note: we have example code to implement this from good old WKP_
 - Code in WGE services that includes the public key to validate entitlement authenticity and show an warning if entitlements have expired.
+  - _Note: we have example code to implement this from good old WKP_
 - `mccp upgrade` command that will remove the wego deployments and replace them with WGE deployments
   - Some preflight checking for version compatibility support
   - Any ingress points should be preserved. E.g. any services that WG creates to support accessing its api endpoints should be re-created with the same name / ports.
