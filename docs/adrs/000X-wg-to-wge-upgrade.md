@@ -42,7 +42,7 @@ The API server and UI are the main integration points with WGE
 
 After upgrading:
 
-- The user should still have all the WG functionality availble to them via WGE
+- The user should still have all the WG functionality available to them via WGE
 - Whatever ingress method used to access the WG UI should now show the WGE UI.
   - Q. Is ingress management a WG responsibility that WGE will take over?
 - Whatever CLI tools that queried the WG api-server should still work and query the WGE api-server
