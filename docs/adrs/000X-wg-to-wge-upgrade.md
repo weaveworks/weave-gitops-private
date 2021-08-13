@@ -64,6 +64,26 @@ WG and WGE are not installed at the same time and so can look "more identical", 
 
 **Cons**: No UI flow as WG will be removed before another UI is there to replace it.
 
+```mermaid
+flowchart
+  subgraph WG
+    subgraph wg-profile
+      wg-api-service
+    end
+    wg-ingress[ingress] --> wg-api-service[wg-system/svc/weave-gitops-api-server]
+  end
+  subgraph WG-removed
+    wg-ingress-removed[ingress] --> None
+  end
+  subgraph WGE
+    subgraph wge-profile
+      wge-api-service
+    end
+    wge-ingress[ingress] --> wge-api-service[wg-system/svc/weave-gitops-api-server]
+  end
+  WG --> WG-removed --> WGE
+```
+
 ### 2. Install WGE and remove WG
 
 Both installed at the same time. Ingress is the "control point", the switch that can be flipped, the user would have to reconfigure ingress to point to WGE, then WG could be removed. Allows a nicer UI flow:
@@ -79,6 +99,45 @@ Both installed at the same time. Ingress is the "control point", the switch that
 
 **Cons**: Bit more finicky, needs user to know about / configure the ingress point.
 
+```mermaid
+flowchart
+  subgraph WG
+    subgraph wg-profile
+      wg-api-service
+    end
+    wg-ingress[ingress] --> wg-api-service[wg-system/svc/weave-gitops-api-server]
+  end
+
+  subgraph WGE-installed
+    subgraph wg-profile2[wg-profile]
+      wg-api-service2
+    end
+    wg-ingress2[ingress] --> wg-api-service2[wg-system/svc/weave-gitops-api-server]
+    subgraph wge-profile
+      wge-api-service[wge-system/svc/weave-gitops-api-server]
+    end
+  end
+
+  subgraph WGE-configured
+    subgraph wg-profile3[wg-profile]
+      wg-api-service3[wg-system/svc/weave-gitops-api-server]
+    end
+    subgraph wge-profile2[wge-profile]
+      wge-api-service2[wge-system/svc/weave-gitops-api-server]
+    end
+    wg-ingress3[ingress] --> wge-api-service2[wge-system/svc/weave-gitops-api-server]
+  end
+
+  subgraph WGE
+    subgraph wge-profile4[wge-profile]
+      wge-api-service4[wge-system/svc/weave-gitops-api-server]
+    end
+    wg-ingress4[ingress] --> wge-api-service4[wge-system/svc/weave-gitops-api-server]
+  end
+
+  WG --> WGE-installed --> WGE-configured --> WGE
+```
+
 ### 3. "Replace" WG with WGE
 
 Similar to 1. above, in that we remove WG before installing WGE, but try and pull this off in a single operation / git reconciliation somehow.
@@ -88,6 +147,23 @@ A "Replace application" operation in the UI perhaps. Then the UI in the browser 
 **Pros**: Supports UI flow
 
 **Cons**: If something goes wrong need to drop down to the CLI to resolve
+
+```mermaid
+flowchart
+  subgraph WG
+    subgraph wg-profile
+      wg-api-service
+    end
+    wg-ingress[ingress] --> wg-api-service[wg-system/svc/weave-gitops-api-server]
+  end
+  subgraph WGE
+    subgraph wge-profile
+      wge-api-service
+    end
+    wge-ingress[ingress] --> wge-api-service[wg-system/svc/weave-gitops-api-server]
+  end
+  WG --> WGE
+```
 
 ## Questions
 
