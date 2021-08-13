@@ -75,11 +75,19 @@ Both installed at the same time. Ingress is the "control point", the switch that
 4. Instructions on how to switch ingress over to WGE
 5. Uninstall WG profile via the Applications section in WGE UI
 
+**Pros**: Supports UI flow
+
+**Cons**: Bit more finicky, needs user to know about / configure the ingress point.
+
 ### 3. "Replace" WG with WGE
 
 Similar to 1. above, in that we remove WG before installing WGE, but try and pull this off in a single operation / git reconciliation somehow.
 
 A "Replace application" operation in the UI perhaps. Then the UI in the browser could "poll through" the re-deployment of the api-server and eventually reloading the browser would show the new UI.
+
+**Pros**: Supports UI flow
+
+**Cons**: If something goes wrong need to drop down to the CLI to resolve
 
 ## Questions
 
