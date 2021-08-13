@@ -171,6 +171,10 @@ Q. Are there any components of WG that shouldn't be running at the same time if 
 
 - ?
 
+Q. Will the weave-gitops eco-system make assumptions about its namespace (as flux does w/ flux-system) e.g. for plugins to use so that switching namespaces to `weave-gitops-enterprise-system` or something would cause issues?
+
+- ?
+
 Q. OAuth secrets etc?
 
 - Make sure to _not_ delete certain parts of WG? E.g. secrets its created.

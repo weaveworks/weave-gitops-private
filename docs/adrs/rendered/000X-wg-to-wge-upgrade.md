@@ -93,7 +93,7 @@ so a replacement would be transparent.
 **Cons**: No UI flow as WG will be removed before another UI is there to
 replace it.
 
-![Image](1a38192e6bc8429f82f1c88b746a79fb.png)
+![Image](4574c1c2cd654e468faa961e9f5f557e.png)
 
 ### 2. Install WGE and remove WG
 
@@ -114,7 +114,7 @@ to point to WGE, then WG could be removed. Allows a nicer UI flow:
 **Cons**: Bit more finicky, needs user to know about / configure the
 ingress point.
 
-![Image](1ac0741027d2433b9af207a630b43d76.png)
+![Image](95e6ec0761e947419a45efad8af7bfc4.png)
 
 ### 3. “Replace” WG with WGE
 
@@ -130,13 +130,20 @@ eventually reloading the browser would show the new UI.
 **Cons**: If something goes wrong need to drop down to the CLI to
 resolve
 
-![Image](254cea6858884a9e878c264415ef0f33.png)
+![Image](89d7c72089204b798e7f97caf9d704ac.png)
 
 Questions
 ---------
 
 Q. Are there any components of WG that shouldn’t be running at the same
 time if duplicated by WGE, e.g. some `Application` reconcilation loop?
+
+-   ?
+
+Q. Will the weave-gitops eco-system make assumptions about its namespace
+(as flux does w/ flux-system) e.g. for plugins to use so that switching
+namespaces to `weave-gitops-enterprise-system` or something would cause
+issues?
 
 -   ?
 
