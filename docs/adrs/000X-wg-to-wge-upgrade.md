@@ -165,6 +165,39 @@ flowchart
   WG --> WGE
 ```
 
+### 4. Augment the base install
+
+Leave as much of WG intact and add additional functionality.
+
+**Pros**: Additive, feels more like an upgrade.
+
+**Cons**: The UI needs to be replaced somehow. Requires a "flipping of the ingress", e.g. `wego ui` will port-forward to `wego-system/svc/api-server` or something, this should now point to the WGE UI. (Unless `wego ui` always looks for WGE first?)
+
+```mermaid
+flowchart
+  subgraph WG
+    subgraph wg-profile
+      wg-api-service
+    end
+    wg-ingress[ingress] --> wg-api-service[wg-system/svc/weave-gitops-api-server]
+  end
+  subgraph WGE
+    subgraph wg-profile2[wg-profile]
+      wg-api-service2[wg-system/svc/weave-gitops-api-server]
+    end
+    subgraph wge-profile
+      wge-api-service
+      wge-system/svc/wge-ui-server
+      wge-ingress-controller
+    end
+    wge-ingress[ingress] --> /v1/applications --> wg-api-service2[wg-system/svc/weave-gitops-api-server]
+    wge-ingress[ingress] --> /* --> wge-ingress-controller
+    wge-ingress-controller --> wge-api-service[wge-system/svc/weave-gitops-api-server]
+    wge-ingress-controller --> wge-system/svc/wge-ui-server
+  end
+  WG --> WGE
+```
+
 ## Questions
 
 Q. Are there any components of WG that shouldn't be running at the same time if duplicated by WGE, e.g. some `Application` reconcilation loop?
@@ -180,6 +213,29 @@ Q. OAuth secrets etc?
 - Make sure to _not_ delete certain parts of WG? E.g. secrets its created.
 - WG makes sure these aspects are slightly de-coupled from WG profile?
 
-## Decision
+## Decision (and work breakdown)
 
-??
+### Profiles
+
+Write a profile around the WGE helm chart
+
+### Entitlements
+
+Use a similar model to WKP for generation. We want to establish a _convention_ for storing the entitlements so perhaps it tries to create a PR in `weave-gitops-private/entitlements` by default with a `--dry-run` option. Entitlements will provide a _soft enforcement_ and show a warning in the UI and CLI.
+
+_The dockerhub authentication will be removed._
+
+### Upgrade process
+
+Option 3 above, have a tool or instructions on how to create a single PR that removes the WG profile (or deployments) and adds the WGE profile.
+
+The tool might be:
+
+- a command in WG: `wego upgrade`
+- a cli command plugin for wego: `wego upgrade`
+
+This tool can also run **Pre-flight** checks, especially which version upgrades are supported etc. (and a `--skip-preflight-checks`)
+
+### Downgrade process
+
+Revert the above PR
