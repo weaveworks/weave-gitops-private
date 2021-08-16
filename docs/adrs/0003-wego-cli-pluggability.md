@@ -82,7 +82,7 @@ Wego has two touch primary user touch points the wego UI and the wego CLI.  Both
 ### Hybrid approach
 If we can relax requirements 1 and 2 - we could add the commands for clusters, templates, and command flags but clearly indicate that they are enterprise-only features.  I've seen  many products have help strings with something similar to **(--enterprise only)**. The core CLI would be responsible for finding and calling the EE plugin.
 
-The EE plugin could provide all flags and commands so that they are only in the plugin.  Having the plugin provide and sub-commands and flags, loosens the coupling as core would only have a command `template` and the help would print **(available in Weave GitOps EE)
+The EE plugin could provide all flags and commands so that they are only in the plugin.  Having the plugin provide and sub-commands and flags, loosens the coupling as core would only have a command `template` and the help would print **(available in Weave GitOps EE)**
 
 #### Pros
 * Single core CLI code base
