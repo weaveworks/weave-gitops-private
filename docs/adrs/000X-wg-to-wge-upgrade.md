@@ -194,8 +194,8 @@ flowchart
       /
     end
     wge-ingress[ingress] --> wge-ingress-controller --> /v1/applications --> wg-api-service2[wg-system/svc/weave-gitops-api-server]
-    wge-ingress-controller --> / --> wge-api-service[wge-system/svc/weave-gitops-api-server]
-    wge-ingress-controller --> /v1/clusters --> wge-system/svc/wge-ui-server
+    wge-ingress-controller --> /v1/clusters --> wge-api-service[wge-system/svc/weave-gitops-api-server]
+    wge-ingress-controller --> / --> wge-system/svc/wge-ui-server
   end
   WG --> WGE
 ```

@@ -93,7 +93,7 @@ so a replacement would be transparent.
 **Cons**: No UI flow as WG will be removed before another UI is there to
 replace it.
 
-![Image](81dd072301e148ccb74772297cb0ff6e.png)
+![Image](cd0a33c8f7fe4cad970659e0dd98b874.png)
 
 ### 2. Install WGE and remove WG
 
@@ -114,7 +114,7 @@ to point to WGE, then WG could be removed. Allows a nicer UI flow:
 **Cons**: Bit more finicky, needs user to know about / configure the
 ingress point.
 
-![Image](f93330d7b7a34477b946dea729c22c1f.png)
+![Image](de3e6863b27d47d1a02415e76603bfc0.png)
 
 ### 3. “Replace” WG with WGE
 
@@ -130,7 +130,7 @@ eventually reloading the browser would show the new UI.
 **Cons**: If something goes wrong need to drop down to the CLI to
 resolve
 
-![Image](043cb275c4a24012b71eb6fab6c3f12b.png)
+![Image](9edf1df9662c490e89dc8bb0b678298f.png)
 
 ### 4. Augment the base install
 
@@ -143,7 +143,7 @@ the ingress”, e.g. `wego ui` will port-forward to
 `wego-system/svc/api-server` or something, this should now point to the
 WGE UI. (Unless `wego ui` always looks for WGE first?)
 
-![Image](7eb59aea08f64c3dbe4ac7dd7674586b.png)
+![Image](47743226cd0c4afca04624e3fbadfa9e.png)
 
 Questions
 ---------
