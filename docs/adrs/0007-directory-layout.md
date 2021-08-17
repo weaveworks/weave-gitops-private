@@ -10,7 +10,7 @@ Accepted
 
 The current directory structure introduces a new term "target", doesn't support environment customizations, doesn't provide a solution for application versions, and creates a tight coupling between applications (apps) and clusters. We require a new layout in order to addess these items.
 
-We thought a FAQ would be useful in describing the context for these changes.
+We thought an FAQ would be useful in describing the context for these changes.
 
 ### Glossary 
 * **Appplication** a collection of kubernetes manifests. Stored in .weave-gitops/apps/&lt;app name&gt;
@@ -137,7 +137,7 @@ When your app is ready to have a new version deployed, you can update the app in
 By following this git-ref strategy, you can leverage git for operations like diffing changes between versions, cherry-picking changes, and easily controlling a group of applications and the set of clusters running them.
 ## Decision
 
-Switch to the directory structure with 3 top level entries (apps, clusters, profiles) add support for versoins and environments.  
+Switch to the directory structure with 3 top level entries (apps, clusters, profiles) with support for versoins and environments.  Leverage kustomize with environments containing overlays to specialize applications for clusters.  Clusters have 2 level of workloads: System used for cluster-wide and platform level services, and User which is used for applications.   The GOAT(s) for System and User live in System.  The GORT will be a profile in the System.
 
 ```bash
 .weave-gitops/
@@ -159,6 +159,41 @@ Switch to the directory structure with 3 top level entries (apps, clusters, prof
     └── platform.wego.weave.works
 ```
 See below for a complete example.
+
+Example kustomization for the System of a management-hub cluster.  This installs 5 profiles and one applciation:
+* CAPD - CAPI provider for Docker
+* CAPA - CAPI provider for Amazon
+* loki, prometheus - observability 
+* platform - the Weave GitOps platform (GORT)
+* capi - the application holding rendered CAPI templates
+
+```yaml
+resources:
+- ../../../profiles/capa.wego.weave.works
+- ../../../profiles/capd.wego.weave.works
+- ../../../profiles/loki
+- ../../../profiles/platform.wego.weave.works
+- ../../../profiles/prometheus@2.24.0
+- ../../../apps/capi
+```
+
+Manifests for the dev-eu-fcabbe8 cluster:
+```bash
+.weave-gitops/clusters/dev-eu-fcabbe8/
+├── system
+│   ├── flux-source-resource.yaml
+│   ├── kustomization.yaml
+│   ├── system-flux-kustomization-resource.yaml
+│   └── user-flux-kustomization-resource.yaml
+├── user
+│   └── kustomization.yaml
+└── wego-cluster.yaml
+```
+* **flux-source-resource.yaml** This syncs this wego reop
+* **system-flux-kustomization-resource.yaml** This provides a kustomization path for the System directory and uses the GitRepository resource defined in flux-source-resource.yaml
+* **user-flux-kustomization-resource.yaml** This provides a kustomization path for the User directory and uses the GitRepository resource defined in flux-source-resource.yaml
+* **wego-cluster.yaml** Resource definition for the cluster.  _TBD_
+
 
 ## Alternatives considered
 
@@ -546,5 +581,5 @@ With the new structure, we will need to update existing installations:
     └── prometheus@v2.24.0
         ├── kustomization.yaml
         └── profile.yaml
-    ```
+```
 
