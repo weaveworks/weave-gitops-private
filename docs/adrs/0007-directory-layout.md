@@ -155,7 +155,281 @@ See below for a complete example.
 
 ## Alternatives considered
 
-**TODO add links to the wego-dirs repo branches**
+* [pkg dir for aps and profiles; clusters; targets associate clusters and pkg](https://github.com/weaveworks-gitops-poc/wego-dirs/tree/sep-core-runtime)
+
+```bash
+.weave-gitops/
+├── cluster
+│   ├── capi
+│   │   ├── spoke1-cluster.yaml
+│   │   ├── spoke1-machines.yaml
+│   │   └── spoke1.yaml
+│   └── unmanaged
+│       └── hub.yaml
+├── pkg
+│   ├── system
+│   │   ├── capd.wego.weave.works
+│   │   │   ├── app.yaml
+│   │   │   ├── kustomization.yaml
+│   │   │   └── template.yaml
+│   │   └── platform.wego.weave.works
+│   │       ├── app.yaml
+│   │       ├── kustomization.yaml
+│   │       └── platform.yaml
+│   └── user
+│       └── mynginx
+│           └── app.yaml
+└── target
+    ├── hub
+    │   └── system
+    │       ├── capd.wego.weave.works
+    │       │   └── kustomization.yaml
+    │       ├── cluster-kustomize-resource.yaml
+    │       ├── kustomize-resouce.yaml
+    │       ├── platform.wego.weave.works
+    │       │   └── kustomization.yaml
+    │       ├── source-resouce.yaml
+    │       └── user-kustomize-resource.yaml
+    └── spoke1
+        ├── system
+        │   ├── kustomize-resouce.yaml
+        │   ├── platform.wego.weave.works
+        │   │   └── kustomization.yaml
+        │   ├── source-resouce.yaml
+        │   └── user-kustomize-resource.yaml
+        └── user
+            └── mynginx
+                └── mynginx-gitops-runtime.yaml
+```
+
+* [Add base dirs to targets for kustomization](https://github.com/weaveworks-gitops-poc/wego-dirs/tree/add-bases)
+
+```bash
+└── target
+    ├── _base
+    │   ├── kustomization.yaml
+    │   └── system
+    │       ├── platform.wego.weave.works
+    │       │   └── kustomization.yaml
+    │       └── source-resouce.yaml
+    ├── _manager
+    │   ├── kustomization.yaml
+    │   └── system
+    │       └── cluster-kustomize-resource.yaml
+    ├── hub
+    │   ├── kustomization.yaml
+    │   └── system
+    │       ├── capd.wego.weave.works
+    │       │   └── kustomization.yaml
+    │       ├── kustomize-resouce.yaml
+    │       └── user-kustomize-resource.yaml
+    └── spoke1
+        ├── kustomization.yaml
+
+```
+
+* [apps, clusters, profiles with versioning and environments](https://github.com/weaveworks-gitops-poc/wego-dirs/tree/clusters-versioned-profiles)
+
+```bash
+.weave-gitops/
+├── apps
+│   ├── billing
+│   │   └── environments
+│   │       ├── dev
+│   │       │   └── kustomization.yaml
+│   │       ├── production-eu
+│   │       │   └── kustomization.yaml
+│   │       ├── production-us
+│   │       │   └── kustomization.yaml
+│   │       └── staging
+│   │           └── kustomization.yaml
+│   └── humanresources
+│       └── environments
+│           └── production
+│               └── kustomization.yaml
+├── clusters
+│   ├── management-hub
+│   │   └── user
+│   └── us-east-eks-c1a4f
+│       ├── kustomization.yaml
+│       └── observability-config.yaml
+└── profiles
+    └── observability
+        ├── v1
+        │   └── kustomization.yaml
+```
+* [resources and overlays](https://github.com/weaveworks-gitops-poc/wego-dirs/tree/resources-and-overlays)
+
+Notes: 
+* pkg becomes resource
+* An environment can reference 0,1, many overlays.
+* Overlays are optional - a way to keep things DRY
+* Overlays can reference other overlays - i.e., the dev overlay references
+the wego-base
+* resource/system contains wego-specific workloads
+* I feel like profiles would be a better name for overlays :)
+* Not certain the value resource/(platform, system, user) bring.  When we talk about this classification/grouping it usually centers around a set of resources (and their configuration) for an environment.  i.e. an overlay (or as I mentioned above - profile _feels_ like a better name)
+
+```bash
+.weave-gitops/
+├── cluster
+│   ├── managed
+│   │   └── spoke1
+│   └── unmanaged
+│       └── hub
+├── environment
+│   ├── dev-eu
+│   │   ├── environment.yaml
+│   │   ├── kustomization.yaml
+│   │   ├── system
+│   │   │   ├── kustomize-resouce.yaml
+│   │   │   └── user-kustomize-resource.yaml
+│   │   └── user
+│   │       └── mynginx
+│   │           └── mynginx-gitops-runtime.yaml
+│   └── hub
+│       ├── environment.yaml
+│       ├── kustomization.yaml
+│       └── system
+│           ├── capi-manager
+│           │   └── kustomization.yaml
+│           ├── kustomize-resouce.yaml
+│           └── user-kustomize-resource.yaml
+├── overlay
+│   ├── capi-manager
+│   │   └── kustomization.yaml
+│   ├── dev
+│   │   └── kustomization.yaml
+│   ├── observability
+│   │   └── kustomization.yaml
+│   └── wego-base
+│       └── kustomization.yaml
+└── resource
+    ├── platform
+    │   ├── loki
+    │   │   ├── kustomization.yaml
+    │   │   ├── loki-hr.yaml
+    │   │   ├── loki-promtail-hr.yaml
+    │   │   └── namespace.yaml
+    │   └── prometheus
+    │       ├── kustomization.yaml
+    │       └── profile.yaml
+    ├── system
+    │   ├── capa.wego.weave.works
+    │   │   ├── app.yaml
+    │   │   ├── kustomization.yaml
+    │   │   └── template.yaml
+    │   ├── capd.wego.weave.works
+    │   │   ├── app.yaml
+    │   │   ├── kustomization.yaml
+    │   │   └── template.yaml
+    │   └── platform.wego.weave.works
+    │       ├── app.yaml
+    │       ├── kustomization.yaml
+    │       └── platform.yaml
+    └── user
+        └── mynginx
+            └── app.yaml
+```
+
+* [add versions and profiles]()
+
+Notes:
+* rename cluster to metadata
+* mv resource to workload
+* add profile under workload
+* show multi-version kustomization capability with billing app
+* show a profile in the dev-eu clusuter
+
+```bash
+.weave-gitops/
+├── cluster
+│   ├── dev-eu
+│   │   ├── environment.yaml
+│   │   ├── kustomization.yaml
+│   │   ├── profile
+│   │   │   └── loki
+│   │   │       └── kustomization.yaml
+│   │   ├── system
+│   │   │   ├── kustomize-resouce.yaml
+│   │   │   ├── observability
+│   │   │   │   └── kustomization.yaml
+│   │   │   ├── user-kustomize-resource.yaml
+│   │   │   └── wego-base
+│   │   │       └── kustomization.yaml
+│   │   └── user
+│   │       ├── billing@v2
+│   │       │   └── kustomization.yaml
+│   │       └── mynginx
+│   │           └── mynginx-gitops-runtime.yaml
+│   └── hub
+│       ├── environment.yaml
+│       ├── kustomization.yaml
+│       └── system
+│           ├── capi-manager
+│           │   └── kustomization.yaml
+│           ├── kustomize-resouce.yaml
+│           ├── metadata-kustomize-resource.yaml
+│           ├── user-kustomize-resource.yaml
+│           └── wego-base
+│               └── kustomization.yaml
+├── metadata
+│   ├── cluster
+│   │   ├── managed
+│   │   │   └── dev-eu
+│   │   │       ├── cluster.yaml
+│   │   │       ├── machines.yaml
+│   │   │       └── wego-cluster.yaml
+│   │   └── unmanaged
+│   │       └── hub
+│   │           └── wego-cluster.yaml
+│   └── wego-configmap.yaml
+└── workload
+    ├── profile
+    │   ├── loki
+    │   │   ├── kustomization.yaml
+    │   │   ├── loki-hr.yaml
+    │   │   ├── loki-promtail-hr.yaml
+    │   │   ├── namespace.yaml
+    │   │   └── profile.yaml
+    │   └── prometheus
+    │       ├── kustomization.yaml
+    │       └── profile.yaml
+    ├── system
+    │   ├── capa.wego.weave.works
+    │   │   ├── app.yaml
+    │   │   ├── kustomization.yaml
+    │   │   └── template.yaml
+    │   ├── capi-manager
+    │   │   └── kustomization.yaml
+    │   └── platform.wego.weave.works
+    │       ├── app.yaml
+    │       ├── kustomization.yaml
+    │       └── platform.yaml
+    └── user
+        ├── billing
+        │   ├── env
+        │   │   └── dev
+        │   │       ├── common
+        │   │       │   └── replica_count.yaml
+        │   │       ├── v1
+        │   │       │   └── kustomize.yaml
+        │   │       └── v2
+        │   │           └── kustomize.yaml
+        │   ├── v1
+        │   │   ├── configmap.yaml
+        │   │   ├── deployment.yaml
+        │   │   ├── kustomize.yaml
+        │   │   └── service.yaml
+        │   └── v2
+        │       ├── configmap.yaml
+        │       ├── deployment.yaml
+        │       ├── kustomize.yaml
+        │       └── service.yaml
+        └── mynginx
+            └── app.yaml
+
+```
 
 ## Consequences
 
