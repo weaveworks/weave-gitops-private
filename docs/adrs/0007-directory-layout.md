@@ -13,10 +13,17 @@ The current directory structure introduces a new term "target", doesn't support 
 We thought a FAQ would be useful in describing the context for these changes.
 
 ### Glossary 
-* **Appplication** a collection of kubernetes manifests. Stored in /apps
-* **Cluster** a kubernetes cluster.  Stored in clusters/&lt;name&gt;
-* **Environment** a configuration of an application that can be applied to one or more clusters.  Stored in apps/&lt;name&gt;/env
-* **Profile** a package containing kubernetes manifests, helm charts, and/or other profiles.  Stored in  /profiles
+* **Appplication** a collection of kubernetes manifests. Stored in .weave-gitops/apps/&lt;app name&gt;
+* **CAPI Cluster** a kubernetes cluster.  CAPI provider is either installed as a profile or added directly via `clusterctl`.  The template needed to create a CAPI cluster is stored in .weave-gitops/apps/capi.  The rended template for a cluster is also stored in .weave-gitops/apps/capi/&lt;cluster name&gt;.yaml
+* **Cluster** a kubernetes cluster.  Stored in .weave-gitops/clusters/&lt;cluster name&gt;.  CAPI clusters will add a random suffix to the cluster-name.  For example, `my-dev-cluster-54d5e8`
+* **Environment** a configuration of an application that can be applied to one or more clusters.  Stored in .weave-gitops/apps/&lt;app name&gt;/env
+* **GOAT** GitOps AuTomation
+* **GORT** GitOps RunTime
+* **Profile** a software package and stored in  .weave-gitops/profiles/&lt;profile name&gt;.  Profiles can have versions and environments.  Both following the same pattern as apps.  These are comprised of one or more of the following.  
+    * kubernetes manifests
+    * helm charts
+    * other profiles.
+* **Version** an app or profile may append `@senmer` to the name in order to indicate a new version.  Note the use of versions is optional.
 
 ### FAQ
 **Q. I have a few manifests, what's the easiest way to deploy them?**
