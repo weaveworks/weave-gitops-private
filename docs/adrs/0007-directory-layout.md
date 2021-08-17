@@ -436,8 +436,25 @@ Notes:
 With the new structure, we will need to update existing installations: 
 * rename `.wego` to `.weave-gitops`
 * rename `targets` to `clusters`
-
-**TODO finish the mapping**
+* If the app manifests live in a separate repo:
+    * separate &lt;app name&gt;-deploy-gitops-runtime.yaml into 
+        * flux-source-resource.yaml
+        * flux-kustomization-resource.yaml
+        * if necessary - flux-helm-resource.yaml
+    * move the flux-* files into the apps/&lt;app name&gt; directory
+    * create a kustomization.yaml file in apps/&lt;app name&gt; directory that lists the flux files and any addtional manifests
+* if the app manifests live in this repo: 
+    * create a kustomization.yaml file in apps/&lt;app name&gt; directory that lists the manifests for the application
+* in clusters/&lt;cluster name&gt;/user directory, add
+    * kustomization.yaml which referes to apps/&lt;app name&gt; 
+    * If you want to persist the GOAT:
+        * in the clusters/&lt;cluster name&gt;/system directory
+            * create flux-source-resource.yaml which sync's this repo
+            * create user-flux-kustomization-resource.yaml which gives clusters/&lt;cluster name&gt;/user as the path
+    * If you **don't** want to persist the GOAT:
+        * create flux-source-resource.yaml which sync's this repo
+        * create user-flux-kustomization-resource.yaml which gives clusters/&lt;cluster name&gt;/user as the path
+        * apply these manifests to the cluster
 
 ## Compete example
 
