@@ -100,7 +100,7 @@ We thought an FAQ would be helpful for describing .
 
 **Q. Could the profiles directory be considered a "profile catalog" for profiles available to this Weave GitOps environment?**
 
-**A.** Seems like a reasonable idea.  **Kevin thoughts?**
+**A.** Yes, that is certainly possible.  We can look into supporting that in the near future. 
 
 **Q. Where are secrets stored in this layout**
 
