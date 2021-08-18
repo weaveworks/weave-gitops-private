@@ -10,7 +10,7 @@ Accepted
 
 The current directory structure introduces new terminology - "target", doesn't support environment customizations, doesn't provide a solution for application versions, and creates a tight coupling between applications (apps) and clusters. We require a new layout to address these items.
 
-We thought an FAQ would be helpful for describing .
+For this ADR, we are trying a new approach.  Instead of long prose describing the context, we have created an FAQ on how the updated directory structure addresses common questions and shortcomings we've encountered.
 
 ### Glossary
 * **Application** a collection of kubernetes manifests. Stored in .weave-gitops/apps/&lt;app name&gt;.
