@@ -13,7 +13,7 @@ The current directory structure introduces new terminology - "target", doesn't s
 We thought an FAQ would be helpful for describing .
 
 ### Glossary 
-* **Appplication** a collection of kubernetes manifests. Stored in .weave-gitops/apps/&lt;app name&gt;.
+* **Application** a collection of kubernetes manifests. Stored in .weave-gitops/apps/&lt;app name&gt;.
 * **CAPI Cluster** a kubernetes cluster with lifecycle management controlled via Cluster API (CAPI).  The CAPI provider is either installed as a profile or added directly via `clusterctl`.  The templates for creating CAPI clusters are stored in .weave-gitops/apps/capi.  The rendered template for a cluster is stored in .weave-gitops/apps/capi/&lt;cluster name&gt;.yaml
 * **Cluster** a kubernetes cluster.  Stored in .weave-gitops/clusters/&lt;cluster name&gt;.  CAPI clusters will add a random suffix to the cluster-name.  For example, `my-dev-cluster-54d5e8`
 * **Environment** a configuration of an application that can be applied to one or more clusters.  Stored in .weave-gitops/apps/&lt;app name&gt;/env
@@ -46,7 +46,7 @@ We thought an FAQ would be helpful for describing .
 
 **A.** No.  The kustomize file in the cluster can refer to you application directory directly. 
 
-**Q. When creating a cluster usig MCCP where are my CAPI manifests stored?**
+**Q. When creating a cluster using MCCP where are my CAPI manifests stored?**
 
 **A.** The are stored in a special application named `capi`.  They are named based on the cluster name you give. 
 
@@ -54,7 +54,7 @@ We thought an FAQ would be helpful for describing .
 
 **A.** Clusters are considered ephemeral and Weave GitOps appends those characters to keep the cluster name unique.
 
-**Q. When should I put manfiests in cluster/&lt;name&gt;/system vs cluster/&lt;name&gt;/user?**
+**Q. When should I put manifests in cluster/&lt;name&gt;/system vs cluster/&lt;name&gt;/user?**
 
 **A.** Typically, you want system or OS level workloads defined in system/ and user workloads or applications stored in user/.  You can configure user/ and system/ to sync on different intervals.
 
@@ -66,7 +66,7 @@ We thought an FAQ would be helpful for describing .
 
 **A.** Edit the kustomization.yaml file and remove the line pulling in the application.
 
-**Q. My application manafests and kustomizations live in a application repo.  How do environments work in this case?**
+**Q. My application manifests and Kustomizations live in a application repo.  How do environments work in this case?**
 
 **A.** When adding the app, the source resource will be stored in the apps/&lt;name&gt;/ directory.  For each kustomization in your application repo you will want to create an environment and kustomization file that informs Weave GitOps where to find the kustomzation overlay files.
 
@@ -84,7 +84,7 @@ We thought an FAQ would be helpful for describing .
 
 **Q. Can a cluster refer to more than one Weave GitOps repo?**
 
-**A.** Not currently, however, we do plan to support this.  We can envison a platform team building clusters for use by other teams.  That platform team would have their own Weave GitOps repo, provision the cluster, then make the cluster available to the team to use.  In this initial release the platform team would be responsible for system workloads and we recommend using the Code Owners facility to manage access.
+**A.** Not currently, however, we do plan to support this.  We can envision a platform team building clusters for use by other teams.  That platform team would have their own Weave GitOps repo, provision the cluster, then make the cluster available to the team to use.  In this initial release the platform team would be responsible for system workloads and we recommend using the Code Owners facility to manage access.
 
 **Q. If one of my apps is comprised of a helm chart, where should my values.yaml file live?**
 
@@ -130,7 +130,7 @@ We thought an FAQ would be helpful for describing .
 
 **Q. I keep all my application manifests in a mono repo using tags for releases. How can I control what application version is deployed to what cluster?**
 
-**A.** Each application in the wego directory within the wego repo will have a git source and kustimization where the git source will refer to your mono repo plus a repo ref (tag, branch).  Your clusters will have a git source and kustomization pointing to the wego repo plus a ref (tag, branch).  You can have clusters pulling the same version of apps by tieing them to the same ref.  
+**A.** Each application in the wego directory within the wego repo will have a git source and Kustomization where the git source will refer to your mono repo plus a repo ref (tag, branch).  Your clusters will have a git source and Kustomization pointing to the wego repo plus a ref (tag, branch).  You can have clusters pulling the same version of apps by tieing them to the same ref.  
 
 When your app is ready to have a new version deployed, you can update the app in the wego repo and either update the ref the cluster(s) points at or if your ref is a branch, cherry-pick your application changes to the branch.
 
@@ -497,7 +497,7 @@ With the new structure, we will need to update existing installations:
         * create user-flux-kustomization-resource.yaml, which gives clusters/&lt;cluster name&gt;/user as the path
         * apply these manifests to the cluster
 
-## Compete example
+## Complete example
 
 ```bash
 .weave-gitops/
