@@ -176,6 +176,13 @@ resources:
 * platform - the Weave GitOps platform (GORT)
 * capi - the application holding rendered CAPI templates
 
+Another example kustomization file from the dev cluster.  This pulls in version 2 of the billing app.  Also, the cluster needs the billing app modifications for running in the EU and therefore pulls the dev-eu environment.
+```yaml
+resources:
+- ../../../apps/billing@v2/env/dev-eu
+- ../../../apps/mynginx-with-remote-manifests
+```
+
 Manifests for the dev-eu-fcabbe8 cluster:
 ```bash
 .weave-gitops/clusters/dev-eu-fcabbe8/
