@@ -23,7 +23,7 @@ For this ADR, we are trying a new approach.  Instead of long prose describing th
     * kubernetes manifests
     * helm charts
     * other profiles.
-* **Version** an app or profile may append `@semver` to the name in order to indicate a new version.  Note: the use of versions is optional.
+* **Version** an app or profile may append `@semver` to the name to indicate a new version.  Note: the use of versions is optional. Their use would likely only be used in environments where the list of applications is small and change infrequently.  See the FAQ below on using branches or tags to achieve a more traditional git experience.
 
 ### FAQ
 **Q. I have a few manifests, what's the easiest way to deploy them?**
