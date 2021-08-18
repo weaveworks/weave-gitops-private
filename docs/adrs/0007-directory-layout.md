@@ -17,8 +17,8 @@ We thought an FAQ would be helpful for describing .
 * **CAPI Cluster** a kubernetes cluster with lifecycle management controlled via Cluster API (CAPI).  The CAPI provider is either installed as a profile or added directly via `clusterctl`.  The templates for creating CAPI clusters are stored in .weave-gitops/apps/capi.  The rendered template for a cluster is stored in .weave-gitops/apps/capi/&lt;cluster name&gt;.yaml
 * **Cluster** a kubernetes cluster.  Stored in .weave-gitops/clusters/&lt;cluster name&gt;.  CAPI clusters will add a random suffix to the cluster-name.  For example, `my-dev-cluster-54d5e8`
 * **Environment** a configuration of an application that can be applied to one or more clusters.  Stored in .weave-gitops/apps/&lt;app name&gt;/env
-* **GOAT** GitOps AuTomation
-* **GORT** GitOps RunTime
+* **GOAT** GitOps AuTomation - representing the resources needed to drive the GitOPs pipeline.  Specifically, flux source resources (GitRepository, S3, etc.), flux kustomization resources, and potentially helm resources.
+* **GORT** GitOps RunTime - the CRDs, controllers, RBAC, service accounts, etc., necessary to operate the GOAT resources.
 * **Profile** a software package that is stored in  .weave-gitops/profiles/&lt;profile name&gt;.  Profiles can have versions and environments which follow the same pattern as apps.  Profiles are comprised of one or more of the following: 
     * kubernetes manifests
     * helm charts
@@ -481,6 +481,8 @@ Notes:
 
 ## Consequences
 
+This superseeds the directory structure from the original [WEP document][wep-dir]
+
 With the new structure, we will need to update existing installations: 
 * rename `.wego` to `.weave-gitops`
 * rename `targets` to `clusters`
@@ -588,4 +590,5 @@ With the new structure, we will need to update existing installations:
         ├── kustomization.yaml
         └── profile.yaml
 ```
-
+<!-- references -->
+[wep-dir]: https://github.com/weaveworks/weave-gitops-private/blob/main/docs/weps/WEP-001-Weave-gitops-core.md#wego-directory-structure
