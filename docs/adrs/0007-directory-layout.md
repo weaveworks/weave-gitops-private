@@ -15,7 +15,7 @@ We thought an FAQ would be helpful for describing .
 ### Glossary 
 * **Application** a collection of kubernetes manifests. Stored in .weave-gitops/apps/&lt;app name&gt;.
 * **CAPI Cluster** a kubernetes cluster with lifecycle management controlled via Cluster API (CAPI).  The CAPI provider is either installed as a profile or added directly via `clusterctl`.  The templates for creating CAPI clusters are stored in .weave-gitops/apps/capi.  The rendered template for a cluster is stored in .weave-gitops/apps/capi/&lt;cluster name&gt;.yaml
-* **Cluster** a kubernetes cluster.  Stored in .weave-gitops/clusters/&lt;cluster name&gt;.  CAPI clusters will add a random suffix to the cluster-name.  For example, `my-dev-cluster-54d5e8`
+* **Cluster** a kubernetes cluster.  Stored in .weave-gitops/clusters/&lt;cluster name&gt;.
 * **Environment** a configuration of an application that can be applied to one or more clusters.  Stored in .weave-gitops/apps/&lt;app name&gt;/env
 * **GOAT** GitOps AuTomation - representing the resources needed to drive the GitOPs pipeline.  Specifically, flux source resources (GitRepository, S3, etc.), flux kustomization resources, and potentially helm resources.
 * **GORT** GitOps RunTime - the CRDs, controllers, RBAC, service accounts, etc., necessary to operate the GOAT resources.
@@ -200,6 +200,7 @@ Manifests for the dev-eu-fcabbe8 cluster:
 * **user-flux-kustomization-resource.yaml** This provides a kustomization path for the User directory and uses the GitRepository resource defined in flux-source-resource.yaml
 * **wego-cluster.yaml** Resource definition for the cluster.  _TBD_
 
+_Note: you may have noticed the example cluster name has a random suffix.  Cluster create will likely add a suffix to indicate it is a CAPI cluster._
 
 ## Alternatives considered
 
