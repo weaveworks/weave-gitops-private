@@ -108,7 +108,16 @@ We thought an FAQ would be helpful for describing .
 
 **Q. With the Weave GitOps repo containing configuration for numerous clusters, it seems like it could be easy to cause a lot of damage in a single commit**
 
-**A.** This is true.  We recommend that you have a limited set of maintainers for the repository and don't allow direct commits to the branch storing the configurations.
+**A.** This is true.  We recommend that you have a limited set of maintainers for the repository and don't allow direct commits to the branch(s) storing the configurations. Additionally, you can take advantage of code owners in [GitHub][co-github] and [GitLab][co-gitlab]. 
+
+Example CODEOWNERS file in GitHub
+```bash
+# clusters are controlled by the SRE team
+/.weave-gitops/clusters/ @sreteam
+
+# apps are controlled by the APP team
+/.weave-gitops/apps/ @appteam
+```
 
 **Q. My organization uses branches instead of directories for different environments/configs.  Is this possible with Weave GitOps**
 
@@ -593,3 +602,5 @@ With the new structure, we will need to update existing installations:
 ```
 <!-- references -->
 [wep-dir]: https://github.com/weaveworks/weave-gitops-private/blob/main/docs/weps/WEP-001-Weave-gitops-core.md#wego-directory-structure
+[co-gitlab]:https://docs.gitlab.com/ee/user/project/code_owners.html
+[co-github]: https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/creating-a-repository-on-github/about-code-owners
