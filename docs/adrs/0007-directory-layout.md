@@ -8,22 +8,22 @@ Accepted
 
 ## Context
 
-The current directory structure introduces a new term "target", doesn't support environment customizations, doesn't provide a solution for application versions, and creates a tight coupling between applications (apps) and clusters. We require a new layout in order to addess these items.
+The current directory structure introduces new terminology - "target", doesn't support environment customizations, doesn't provide a solution for application versions, and creates a tight coupling between applications (apps) and clusters. We require a new layout to address these items.
 
-We thought an FAQ would be useful in describing the context for these changes.
+We thought an FAQ would be helpful for describing .
 
 ### Glossary 
-* **Appplication** a collection of kubernetes manifests. Stored in .weave-gitops/apps/&lt;app name&gt;
-* **CAPI Cluster** a kubernetes cluster.  CAPI provider is either installed as a profile or added directly via `clusterctl`.  The template needed to create a CAPI cluster is stored in .weave-gitops/apps/capi.  The rended template for a cluster is also stored in .weave-gitops/apps/capi/&lt;cluster name&gt;.yaml
+* **Appplication** a collection of kubernetes manifests. Stored in .weave-gitops/apps/&lt;app name&gt;.
+* **CAPI Cluster** a kubernetes cluster with lifecycle management controlled via Cluster API (CAPI).  The CAPI provider is either installed as a profile or added directly via `clusterctl`.  The templates for creating CAPI clusters are stored in .weave-gitops/apps/capi.  The rendered template for a cluster is stored in .weave-gitops/apps/capi/&lt;cluster name&gt;.yaml
 * **Cluster** a kubernetes cluster.  Stored in .weave-gitops/clusters/&lt;cluster name&gt;.  CAPI clusters will add a random suffix to the cluster-name.  For example, `my-dev-cluster-54d5e8`
 * **Environment** a configuration of an application that can be applied to one or more clusters.  Stored in .weave-gitops/apps/&lt;app name&gt;/env
 * **GOAT** GitOps AuTomation
 * **GORT** GitOps RunTime
-* **Profile** a software package and stored in  .weave-gitops/profiles/&lt;profile name&gt;.  Profiles can have versions and environments.  Both following the same pattern as apps.  These are comprised of one or more of the following.  
+* **Profile** a software package that is stored in  .weave-gitops/profiles/&lt;profile name&gt;.  Profiles can have versions and environments which follow the same pattern as apps.  Profiles are comprised of one or more of the following: 
     * kubernetes manifests
     * helm charts
     * other profiles.
-* **Version** an app or profile may append `@senmer` to the name in order to indicate a new version.  Note the use of versions is optional.
+* **Version** an app or profile may append `@semver` to the name in order to indicate a new version.  Note: the use of versions is optional.
 
 ### FAQ
 **Q. I have a few manifests, what's the easiest way to deploy them?**
@@ -137,7 +137,7 @@ When your app is ready to have a new version deployed, you can update the app in
 By following this git-ref strategy, you can leverage git for operations like diffing changes between versions, cherry-picking changes, and easily controlling a group of applications and the set of clusters running them.
 ## Decision
 
-Switch to the directory structure with 3 top level entries (apps, clusters, profiles) with support for versoins and environments.  Leverage kustomize with environments containing overlays to specialize applications for clusters.  Clusters have 2 level of workloads: System used for cluster-wide and platform level services, and User which is used for applications.   The GOAT(s) for System and User live in System.  The GORT will be a profile in the System.
+Switch to the directory structure with three top-level entries (apps, clusters, profiles) with support for versions and environments. Leverage kustomize with environments containing overlays to specialize applications for clusters. Clusters have two levels of workloads: System used for cluster-wide and platform level services, and User used for applications. The GOAT(s) for System and User live in System. The GORT will be a profile in the System.
 
 ```bash
 .weave-gitops/
@@ -160,13 +160,7 @@ Switch to the directory structure with 3 top level entries (apps, clusters, prof
 ```
 See below for a complete example.
 
-Example kustomization for the System of a management-hub cluster.  This installs 5 profiles and one applciation:
-* CAPD - CAPI provider for Docker
-* CAPA - CAPI provider for Amazon
-* loki, prometheus - observability 
-* platform - the Weave GitOps platform (GORT)
-* capi - the application holding rendered CAPI templates
-
+Example kustomization for the System of a management-hub cluster.  This installs five profiles and one applications:
 ```yaml
 resources:
 - ../../../profiles/capa.wego.weave.works
@@ -176,6 +170,11 @@ resources:
 - ../../../profiles/prometheus@2.24.0
 - ../../../apps/capi
 ```
+* CAPD - CAPI provider for Docker
+* CAPA - CAPI provider for Amazon
+* loki, prometheus - observability 
+* platform - the Weave GitOps platform (GORT)
+* capi - the application holding rendered CAPI templates
 
 Manifests for the dev-eu-fcabbe8 cluster:
 ```bash
@@ -310,7 +309,7 @@ Notes:
 the wego-base
 * resource/system contains wego-specific workloads
 * I feel like profiles would be a better name for overlays :)
-* Not certain the value resource/(platform, system, user) bring.  When we talk about this classification/grouping it usually centers around a set of resources (and their configuration) for an environment.  i.e. an overlay (or as I mentioned above - profile _feels_ like a better name)
+* Not certain the value resource/(platform, system, user) bring.  When we talk about this classification/grouping, it usually centers around a set of resources (and their configuration) for an environment.  i.e., an overlay (or, as I mentioned above - profile _feels_ like a better name)
 
 ```bash
 .weave-gitops/
@@ -484,18 +483,18 @@ With the new structure, we will need to update existing installations:
         * flux-kustomization-resource.yaml
         * if necessary - flux-helm-resource.yaml
     * move the flux-* files into the apps/&lt;app name&gt; directory
-    * create a kustomization.yaml file in apps/&lt;app name&gt; directory that lists the flux files and any addtional manifests
+    * create a kustomization.yaml file in apps/&lt;app name&gt; directory that lists the flux files and any additional manifests
 * if the app manifests live in this repo: 
     * create a kustomization.yaml file in apps/&lt;app name&gt; directory that lists the manifests for the application
 * in clusters/&lt;cluster name&gt;/user directory, add
-    * kustomization.yaml which referes to apps/&lt;app name&gt; 
+    * kustomization.yaml, which refers to apps/&lt;app name&gt; 
     * If you want to persist the GOAT:
         * in the clusters/&lt;cluster name&gt;/system directory
-            * create flux-source-resource.yaml which sync's this repo
-            * create user-flux-kustomization-resource.yaml which gives clusters/&lt;cluster name&gt;/user as the path
+            * create flux-source-resource.yaml, which sync's this repo
+            * create user-flux-kustomization-resource.yaml, which gives clusters/&lt;cluster name&gt;/user as the path
     * If you **don't** want to persist the GOAT:
-        * create flux-source-resource.yaml which sync's this repo
-        * create user-flux-kustomization-resource.yaml which gives clusters/&lt;cluster name&gt;/user as the path
+        * create flux-source-resource.yaml, which sync's this repo
+        * create user-flux-kustomization-resource.yaml, which gives clusters/&lt;cluster name&gt;/user as the path
         * apply these manifests to the cluster
 
 ## Compete example
