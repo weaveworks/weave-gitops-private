@@ -21,20 +21,20 @@ Here is an example with a single application deployed to a kind cluster:
         └── podinfo-deploy
             └── podinfo-deploy-gitops-runtime.yaml
 ```
-In this example, the cluster is kind-wego2 and has the podinfo-deploy application deployed to it.  When deploying to another cluster, a copy of the podinfo-deploy/ is created. Having this duplicated will be an issue as the number of clusters increases.  Also, this structure makes it cumbersome to customize or specialize the podinfo-deploy application for multiple environments.  As the list of applications and clusters grows, this problem only gets worse.
+In this example, the cluster is kind-wego2 and has the podinfo-deploy application deployed to it.  When deploying to another cluster, another <cluster>/podinfo-deploy/ is created. Having this duplicated will be an issue as the number of clusters increases.  Also, this structure makes it cumbersome to specialize the podinfo-deploy application for multiple environments.  As the list of applications and clusters grows, this problem only gets worse.
 
 This ADR describes the new layout to solve those issues plus provide support for profiles. 
 
-While not covered in this ADR, the new structure is easier to parse progammatically.  A library will be developed to standardize the interaction with the structure.  i.e., we can abstract the directory and files to enable us to work with golang stucts instead.
+While not covered in this ADR, the new structure is easier to parse programmatically.  A library will be developed to standardize the interaction with the structure.  i.e., we can abstract the directory and files to enable us to work with golang structs instead.
 
 For this ADR, we are trying a new approach.  Instead of long prose describing the context, we have created an FAQ on how the updated directory structure addresses common questions and shortcomings we've encountered.
 
 ### Glossary
-* **Application** a collection of kubernetes manifests. Stored in .weave-gitops/apps/&lt;app name&gt;.
+* **Application** a collection of Kubernetes manifests. Stored in .weave-gitops/apps/&lt;app name&gt;.
 * **CAPI Cluster** a kubernetes cluster with lifecycle management controlled via Cluster API (CAPI).  The CAPI provider is either installed as a profile or added directly via `clusterctl`.  The templates for creating CAPI clusters are stored in .weave-gitops/apps/capi.  The rendered template for a cluster is stored in .weave-gitops/apps/capi/&lt;cluster name&gt;.yaml
 * **Cluster** a kubernetes cluster.  Stored in .weave-gitops/clusters/&lt;cluster name&gt;.
 * **Environment** a configuration of an application that can be applied to one or more clusters.  Stored in .weave-gitops/apps/&lt;app name&gt;/env
-* **GOAT** GitOps AuTomation - representing the resources needed to drive the GitOPs pipeline.  Specifically, flux source resources (GitRepository, S3, etc.), flux kustomization resources, and potentially helm resources.
+* **GOAT** GitOps AuTomation - representing the resources needed to drive the GitOps pipeline.  Specifically, Flux source resources (GitRepository, Bucket, etc.), Flux Kustomization resources, and potentially HelmReleases.
 * **GORT** GitOps RunTime - the CRDs, controllers, RBAC, service accounts, etc., necessary to operate the GOAT resources.
 * **Profile** a software package that is stored in .weave-gitops/profiles/&lt;profile name&gt; see https://profiles.dev/ for complete details.  Profiles can have versions and environments which follow the same pattern as apps.  Profiles are comprised of one or more of the following:
     * kubernetes manifests
@@ -230,7 +230,7 @@ _Note: you may have noticed the example cluster name has a random suffix.  Clust
 
 ## Alternatives considered
 
-* [pkg dir for aps and profiles; clusters; targets associate clusters and pkg](https://github.com/weaveworks-gitops-poc/wego-dirs/tree/sep-core-runtime)
+* [pkg dir for apps and profiles; clusters; targets associate clusters and pkg](https://github.com/weaveworks-gitops-poc/wego-dirs/tree/sep-core-runtime)
 
 ```bash
 .weave-gitops/
@@ -533,7 +533,7 @@ With the new structure, we will need to update existing installations:
         * create user-flux-kustomization-resource.yaml, which gives clusters/&lt;cluster name&gt;/user as the path
         * apply these manifests to the cluster
 
-We will need somethig (wego update, separate script or binary) to update existing installations.
+We will need something (wego update, separate script or binary) to update existing installations.
 
 **This ADR is only proposing a change to the directory structure.  It is not implying that a cluster can only have a single wego repository; that a git repository may only contain a single wego layout;  that we will no longer support storing the GOAT in an application configuration repo that results from using `wego app add .`.  However, these should be considered as this new structure handles these use cases, simplifying our implementation.**
 ## Complete example
