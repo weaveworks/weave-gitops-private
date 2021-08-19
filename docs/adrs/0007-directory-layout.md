@@ -8,7 +8,24 @@ Accepted
 
 ## Context
 
-The current directory structure introduces new terminology - "target", doesn't support environment customizations, doesn't provide a solution for application versions, and creates a tight coupling between applications (apps) and clusters. We require a new layout to address these items.
+The current [directory structure][wep-dir] introduces new terminology - "target", doesn't support environment customizations, doesn't provide a solution for application versions, lacks a solution for storing the GitOps Runtime (GORT), and creates a tight coupling between applications (apps) and clusters. 
+
+Here is an example with a single application deployed to a kind cluster:
+```bash
+.wego/
+├── apps
+│   └── podinfo-deploy
+│       └── app.yaml
+└── targets
+    └── kind-wego2
+        └── podinfo-deploy
+            └── podinfo-deploy-gitops-runtime.yaml
+```
+In this example, the cluster is kind-wego2 and has the podinfo-deploy application deployed to it.  When deploying to another cluster, a copy of the podinfo-deploy/ is created. Having this duplicated will be an issue as the number of clusters increases.  Also, this structure makes it cumbersome to customize or specialize the podinfo-deploy application for multiple environments.  As the list of applications and clusters grows, this problem only gets worse.
+
+This ADR describes the new layout to solve those issues plus provide support for profiles. 
+
+While not covered in this ADR, the new structure is easier to parse progammatically.  A library will be developed to standardize the interaction with the structure.  i.e., we can abstract the directory and files to enable us to work with golang stucts instead.
 
 For this ADR, we are trying a new approach.  Instead of long prose describing the context, we have created an FAQ on how the updated directory structure addresses common questions and shortcomings we've encountered.
 
