@@ -36,7 +36,7 @@ For this ADR, we are trying a new approach.  Instead of long prose describing th
 * **Environment** a configuration of an application that can be applied to one or more clusters.  Stored in .weave-gitops/apps/&lt;app name&gt;/env
 * **GOAT** GitOps AuTomation - representing the resources needed to drive the GitOPs pipeline.  Specifically, flux source resources (GitRepository, S3, etc.), flux kustomization resources, and potentially helm resources.
 * **GORT** GitOps RunTime - the CRDs, controllers, RBAC, service accounts, etc., necessary to operate the GOAT resources.
-* **Profile** a software package that is stored in  .weave-gitops/profiles/&lt;profile name&gt;.  Profiles can have versions and environments which follow the same pattern as apps.  Profiles are comprised of one or more of the following:
+* **Profile** a software package that is stored in .weave-gitops/profiles/&lt;profile name&gt; see https://profiles.dev/ for complete details.  Profiles can have versions and environments which follow the same pattern as apps.  Profiles are comprised of one or more of the following:
     * kubernetes manifests
     * helm charts
     * other profiles.
@@ -152,7 +152,7 @@ Example CODEOWNERS file in GitHub
 
 **Q. What is the difference between apps and profiles?**
 
-**A.** Apps are typically user workloads deployed to clusters and primarily referenced from the `user` directory.  Profiles generally are system-level workloads and primarily referenced from the `system` directory.  Another way to think about them is `system` is similar to `/usr/bin` while `user` is similar to `/usr/local/bin`.
+**A.** [Profiles][profiles] provide a standard way to package, find, install, define and resolve dependencies, upgrade, version, and configure Kubernetes workloads. They can be composed of yaml manifests, helm charts, and other profiles. Profiles generally are system-level workloads and are primarily referenced from the `system` directory.  Apps are a collection of yaml manifests or a helm chart. Apps are typically user workloads deployed to clusters and primarily referenced from the `user` directory. Another way to think about them is `system` is similar to `/usr/bin` while `user` is similar to `/usr/local/bin`.
 
 **Q. I keep all my application manifests in a mono repo using tags for releases. How can I control what application version is deployed to what cluster?**
 
@@ -624,3 +624,4 @@ We will need somethig (wego update, separate script or binary) to update existin
 [wep-dir]: https://github.com/weaveworks/weave-gitops-private/blob/main/docs/weps/WEP-001-Weave-gitops-core.md#wego-directory-structure
 [co-gitlab]:https://docs.gitlab.com/ee/user/project/code_owners.html
 [co-github]: https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/creating-a-repository-on-github/about-code-owners
+[profiles]: https://profiles.dev/
