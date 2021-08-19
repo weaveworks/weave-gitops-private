@@ -533,6 +533,9 @@ With the new structure, we will need to update existing installations:
         * create user-flux-kustomization-resource.yaml, which gives clusters/&lt;cluster name&gt;/user as the path
         * apply these manifests to the cluster
 
+We will need somethig (wego update, separate script or binary) to update existing installations.
+
+**This ADR is only proposing a change to the directory structure.  It is not implying that a cluster can only have a single wego repository; that a git repository may only contain a single wego layout;  that we will no longer support storing the GOAT in an application configuration repo that results from using `wego app add .`.  However, these should be considered as this new structure handles these use cases, simplifying our implementation.**
 ## Complete example
 
 ```bash
