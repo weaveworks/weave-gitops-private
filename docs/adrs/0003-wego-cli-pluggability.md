@@ -32,7 +32,7 @@ Wego has two touch primary user touch points the wego UI and the wego CLI.  Both
 7. A Plugin can be used with multiple nouns 
     * `template` (for CAPI) calls into enterprise plugin
     * `cluster` calls into enterprise plugin
-    * `workspace` calls into enterprise PI
+    * `workspace` calls into enterprise plugin
 8. A plugin must be able to add additional flags to core commands
     * e.g., wego app add `--workspace foo`  --name blah --url 
         * If the enterprise plugin is installed, then the flag is recognized 
@@ -98,14 +98,59 @@ The EE plugin could provide all flags and commands so that they are only in the 
 * eksctl approach [eksctl PR](https://github.com/weaveworks/eksctl-private/pull/309/files)
     * will need to add dynamic plugin lookup
 * kubectl plugin [Writing plugins](https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/) [plugin handling](https://github.com/kubernetes/kubectl/blob/4defba0cec1f594eb410c69bff05b51cddfba8ff/pkg/cmd/cmd.go#L104)
-* hashicorp [go-plugin](https://github.com/hashicorp/go-plugin/)
+* HashiCorp [go-plugin](https://github.com/HashiCorp/go-plugin/)
 * golang [native plugins](https://pkg.go.dev/plugin)
 
 ## Decision
+We will support two types of plugins in a phased approach.  We will support the noun-based plugins initially and add support for the command-based plugins in the future.
 
-¯\\\_(ツ)\_/¯
+### Noun-based plugins
+Add a section to the wego config file that allows a user to add plugins.  The fields are
+* **noun** - The noun wego will use in the CLI, i.e., wego profile
+* **name** - The name of the plugin
+* **cmd** The executable plus optional parameters, similar to CMD in a Dockerfile
+* **type** The type of the plugin (noun, cmd)
+```yaml
+   plugins
+   - noun: workspace
+     type: noun
+     name: workspace
+     cmd: 
+     - /usr/local/bin/workspace
+   - noun: cluster
+     type: noun
+     name: cluster
+     cmd:
+     - /usr/local/bin/mccp
+     - cluster
+   - noun: template 
+     type: noun
+     name: template
+     cmd:
+     - /usr/local/bin/mccp
+     - template
+```
+The CLI will read the plugin configuration, and when encountering a noun from the plugins list, it will invoke the cmd with stdin, stdout, stderr, and environment mapped for the cmd.
 
-**(Mark)** Hybrid approach using hashicorp go-plugin
+Noun-based plugins will utilize a mechanism similar to kubectl and eksctl.  
+
+### Command-based plugins
+These plugins augment existing noun-verb commands with additional capabilities.  For example, we can extend the `wego app add` command with a new flag `--plugin kpt`, which will leverage the KPT plugin via well-defined interfaces using the HashiCorp go-plugin mechanism.
+The config plugins section will add:
+* **verbs** the list of verbs to tie to this plugin
+
+```yaml
+   plugins
+   - moun: app
+     verbs: 
+     - add
+     - get
+     type: cmd
+     name: kpt
+     cmd: 
+     - /usr/local/bin/kpt
+```
+The verb corresponds to a go-plugin interface that the cmd must implement.
 
 ## Consequences
 
