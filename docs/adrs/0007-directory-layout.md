@@ -40,7 +40,7 @@ For this ADR, we are trying a new approach.  Instead of long prose describing th
     * kubernetes manifests
     * helm charts
     * other profiles.
-* **Version** an app or profile may append `@semver` to the name to indicate a new version.  Note: the use of versions is optional. Their use would likely only be used in environments where the list of applications is small and change infrequently.  See the FAQ below on using branches or tags to achieve a more traditional git experience.
+* **Version** an app or profile may append `@semver` to the name to indicate a new version.  Note: the use of versions is optional. Their use would likely only be used in environments where the list of applications is small and change infrequently.  See the FAQ below on using branches or tags to achieve a more traditional git experience. Appending this to a name of an application is considered a new application.  The syntax is a suggestion of one way to denote the application has changed.  
 
 ### FAQ
 **Q. I have a few manifests, what's the easiest way to deploy them?**
@@ -57,7 +57,7 @@ For this ADR, we are trying a new approach.  Instead of long prose describing th
 
 **Q. How do I have multiple releases of my app?**
 
-**A.** When adding your app using wego, append an `@` + your version to the name of your app (e.g. myapp@v0.2.0). After this, you can define environments and apply to clusters like all other apps.
+**A.** When adding your app using wego, append an `@` + your version to the name of your app (e.g. myapp@v0.2.0). After this, you can define environments and apply to clusters like all other apps. As mentioned in the glossary, this is considered another application.
 
 **Q. Do I have to have an environment to deploy my app to a cluster?**
 
@@ -156,11 +156,13 @@ Example CODEOWNERS file in GitHub
 
 **Q. I keep all my application manifests in a mono repo using tags for releases. How can I control what application version is deployed to what cluster?**
 
-**A.** Each application in the wego directory within the wego repo will have a git source and Kustomization where the git source will refer to your mono repo plus a repo ref (tag, branch).  Your clusters will have a git source and Kustomization pointing to the wego repo plus a ref (tag, branch).  You can have clusters pulling the same version of apps by tying them to the same ref.
+**A.** Each application in the wego directory within the wego repo will have a git source and Kustomization. The git source will refer to your mono repo plus a repo ref (commit sha, tag, branch).  The Kustomization file will refer to the path to your application manifests.  Your clusters will have a git source and Kustomization pointing to the wego repo and the path of the application.  
 
-When your app is ready to have a new version deployed, you can update the app in the wego repo and either update the ref the cluster(s) points at or if your ref is a branch, cherry-pick your application changes to the branch.
+When your app is ready to have a new version deployed, you will update repo ref (commit sha, tag, branch) in the wego application git source resource.
+ 
+By following this git-ref strategy, you can leverage git for operations like diffing changes between versions, cherry-picking changes, and controlling a group of applications and the set of clusters running them.
 
-By following this git-ref strategy, you can leverage git for operations like diffing changes between versions, cherry-picking changes, and easily controlling a group of applications and the set of clusters running them.
+See [versioning and promotion](#versinoing-and-promotion) later in the ADR 
 ## Decision
 
 Switch to the directory structure with three top-level entries (apps, clusters, profiles) with support for versions and environments. Leverage kustomize with environments containing overlays to specialize applications for clusters. Clusters have two levels of workloads: System used for cluster-wide and platform level services, and User used for applications. The GOAT(s) for System and User live in System. The GORT will be a profile in the System.
@@ -536,7 +538,10 @@ With the new structure, we will need to update existing installations:
 We will need something (wego update, separate script or binary) to update existing installations.
 
 **This ADR is only proposing a change to the directory structure.  It is not implying that a cluster can only have a single wego repository; that a git repository may only contain a single wego layout;  that we will no longer support storing the GOAT in an application configuration repo that results from using `wego app add .`.  However, these should be considered as this new structure handles these use cases, simplifying our implementation.**
+
 ## Complete example
+
+_NOTE: while the example below shows application manaifests under the billing application, we recommend the application manifests live outside the .weave-gitops structure._
 
 ```bash
 .weave-gitops/
@@ -620,6 +625,37 @@ We will need something (wego update, separate script or binary) to update existi
         ├── kustomization.yaml
         └── profile.yaml
 ```
+
+## Versioning and Promotion
+
+To this point, the ADR has assumed the wego repo would have a single branch main, and the user would version/revise the application via cut and paste, then update the cluster(s) Kustomization files to point at the new application directory.  This method has a couple of apparent drawbacks.  One, cut and pasting can be error-prone and introduces significant duplication.  Two, git tooling doesn't help the user discern changes between the application revisions.  Because of these issues, a user should consider using git references (commit sha or tags) or branches for the wego repo.
+
+### Git references 
+![Git references](./images/wego-git-references.jpg)
+
+Using git references within the git source resources offers several benefits:
+* simple promotion model - point at the commit/tag within the repo
+* explicit point in time reference
+* ability to manually deploy to a cluster(s)
+* several clusters can refer to the same tag making it easy to update multiple clusters by moving the tag on the repo
+* since there is no merging or cherry-picking of changes when promoting no fear of accidentally overriding configuration for specific environments.  E.g., token in dev gets promoted to stage and breaks the environment.
+
+The approach has a couple downsides:
+* since there is a single linear branch, when you move the git reference forward you can pick up unexpected application and profile changes, e.g., both the billing and hr applications get updated in separate commits. If you move to the latest commit you get the revisions to both applications.
+* diffing between two git references will, by default, show all changes in the repo not just the ones for a particular application or cluster.  This can be addressed with wego tooling.
+
+
+### Git Branches
+![Git branches](./images/wego-branches.jpg)
+
+Using git branches within the git source resources offers several benefits:
+* branching is a common, well known paradigm used with git
+* can replace the use of environments within applications as the changes can be made directly on branches
+
+The approach has downsides:
+* the branches will diverge, making it difficult to use git tooling (merging, cherry-picking) between environments
+since there is a single branch that is linear in time, when you move the git reference forward there is a chance to pick up unexpected application and profile changes.  E.g., both the billing and hr applications get updated in separate commits. If you move to the latest commit, you get the revisions to both applications.
+
 <!-- references -->
 [wep-dir]: https://github.com/weaveworks/weave-gitops-private/blob/main/docs/weps/WEP-001-Weave-gitops-core.md#wego-directory-structure
 [co-gitlab]:https://docs.gitlab.com/ee/user/project/code_owners.html
