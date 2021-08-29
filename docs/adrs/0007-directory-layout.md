@@ -31,13 +31,13 @@ For this ADR, we are trying a new approach.  Instead of long prose describing th
 
 ### Glossary
 * **Application** a collection of Kubernetes manifests. Stored in .weave-gitops/apps/&lt;app name&gt;.
-* **CAPI Cluster** a kubernetes cluster with lifecycle management controlled via Cluster API (CAPI).  The CAPI provider is either installed as a profile or added directly via `clusterctl`.  The templates for creating CAPI clusters are stored in .weave-gitops/apps/capi.  The rendered template for a cluster is stored in .weave-gitops/apps/capi/&lt;cluster name&gt;.yaml
-* **Cluster** a kubernetes cluster.  Stored in .weave-gitops/clusters/&lt;cluster name&gt;.
+* **CAPI Cluster** a Kubernetes cluster with lifecycle management controlled via Cluster API (CAPI).  The CAPI provider is either installed as a profile or added directly via `clusterctl`.  The templates for creating CAPI clusters are stored in .weave-gitops/apps/capi.  The rendered template for a cluster is stored in .weave-gitops/apps/capi/&lt;cluster name&gt;.yaml
+* **Cluster** a Kubernetes cluster.  Stored in .weave-gitops/clusters/&lt;cluster name&gt;.
 * **Environment** a configuration of an application that can be applied to one or more clusters.  Stored in .weave-gitops/apps/&lt;app name&gt;/env
 * **GOAT** GitOps AuTomation - representing the resources needed to drive the GitOps pipeline.  Specifically, Flux source resources (GitRepository, Bucket, etc.), Flux Kustomization resources, and potentially HelmReleases.
 * **GORT** GitOps RunTime - the CRDs, controllers, RBAC, service accounts, etc., necessary to operate the GOAT resources.
-* **Profile** a software package that is stored in .weave-gitops/profiles/&lt;profile name&gt; see https://profiles.dev/ for complete details.  Profiles can have versions and environments which follow the same pattern as apps.  Profiles are comprised of one or more of the following:
-    * kubernetes manifests
+* **Profile** a software package  stored in .weave-gitops/profiles/&lt;profile name&gt; see https://profiles.dev/ for complete details.  Profiles can have versions and environments which follow the same pattern as apps.  Profiles are comprised of one or more of the following:
+    * Kubernetes manifests
     * helm charts
     * other profiles.
 * **Version** an app or profile may append `@semver` to the name to indicate a new version.  Note: the use of versions is optional. Their use would likely only be used in environments where the list of applications is small and change infrequently.  See the FAQ below on using branches or tags to achieve a more traditional git experience. Appending this to a name of an application is considered a new application.  The syntax is a suggestion of one way to denote the application has changed.  
@@ -51,13 +51,13 @@ For this ADR, we are trying a new approach.  Instead of long prose describing th
 
 **A.** When adding your application, Weave GitOps will create a source and kustomize resource under the name of your app in /apps.
 
-**Q. I have environment kustomizations for my application manifests which live in a differnt repo?**
+**Q. I have environment kustomizations for my application manifests which live in a different repo?**
 
 **A.** Using wego, you will create a new environment under your application name.  This will contain a kustomize resource definition that refers to the path in your remote repo containing the kustomization.  You can then use this environment to deploy to a cluster(s)
 
 **Q. How do I have multiple releases of my app?**
 
-**A.** When adding your app using wego, append an `@` + your version to the name of your app (e.g. myapp@v0.2.0). After this, you can define environments and apply to clusters like all other apps. As mentioned in the glossary, this is considered another application.
+**A.** When adding your app using wego, append an `@` + your version to the name of your app (e.g., myapp@v0.2.0). After this, you can define environments and apply to clusters like all other apps. As mentioned in the glossary, this is considered another application.
 
 **Q. Do I have to have an environment to deploy my app to a cluster?**
 
@@ -89,7 +89,7 @@ For this ADR, we are trying a new approach.  Instead of long prose describing th
 
 **Q. When does this directory structure get created?**
 
-**A.** TBD.  One alternative is a new command `wego gitops init` which creates the directory structure and optionally the intiial cluster.
+**A.** TBD.  One alternative is a new command `wego gitops init` which creates the directory structure and optionally the initial cluster.
 
 **Q. Is `-hub` required for my management cluster?**
 
@@ -101,7 +101,7 @@ For this ADR, we are trying a new approach.  Instead of long prose describing th
 
 **Q. Can a cluster refer to more than one Weave GitOps repo?**
 
-**A.** Not currently, however, we do plan to support this.  We can envision a platform team building clusters for use by other teams.  That platform team would have their own Weave GitOps repo, provision the cluster, then make the cluster available to the team to use.  In this initial release the platform team would be responsible for system workloads and we recommend using the Code Owners facility to manage access.
+**A.** Not currently. However, we do plan to support this.  We can envision a platform team building clusters for use by other teams.  That platform team would have their own Weave GitOps repo, provision the cluster, then make the cluster available to the team to use.  In this initial release the platform team would be responsible for system workloads and we recommend using the Code Owners facility to manage access.
 
 **Q. If one of my apps is comprised of a helm chart, where should my values.yaml file live?**
 
@@ -121,7 +121,7 @@ For this ADR, we are trying a new approach.  Instead of long prose describing th
 
 **Q. Where are secrets stored in this layout**
 
-**A.** We are striving to keep secrets outside the git repository and therefore this structure.  However, we don't enforce that the user isn't using solutions like SOPS or sealed secrets with their application manifests.
+**A.** We are striving to keep secrets outside the git repository and, therefore this structure.  However, we don't enforce that the user uses solutions like SOPS or sealed secrets with their application manifests.
 
 **Q. With the Weave GitOps repo containing configuration for numerous clusters, it seems like it could be easy to cause a lot of damage in a single commit**
 
@@ -144,7 +144,7 @@ Example CODEOWNERS file in GitHub
 * add your cluster(s) that will have the same configuration to the branch
 * customize and deploy your applications
 * repeat for each environment/cluster
-* when your applications need updating, modify the main branch and merge into the branch or cherrypick changes to the branch
+* when your applications need updating, modify the main branch and merge into the branch or cherry-pick changes to the branch
 
 **Q. Are envs 1-1 for clusters?**
 
@@ -165,7 +165,7 @@ By following this git-ref strategy, you can leverage git for operations like dif
 See [versioning and promotion](#versinoing-and-promotion) later in the ADR 
 ## Decision
 
-Switch to the directory structure with three top-level entries (apps, clusters, profiles) with support for versions and environments. Leverage kustomize with environments containing overlays to specialize applications for clusters. Clusters have two levels of workloads: System used for cluster-wide and platform level services, and User used for applications. The GOAT(s) for System and User live in System. The GORT will be a profile in the System.
+Switch to the directory structure with three top-level entries (apps, clusters, profiles) with support for versions and environments. Leverage kustomize with environments containing overlays to specialize applications for clusters. Clusters have two levels of workloads: System used for cluster-wide and platform level services, and User used for applications. The GOAT(s) for System and User lives in System. The GORT will be a profile in the System.
 
 ```bash
 .weave-gitops/
@@ -416,7 +416,7 @@ Notes:
 * mv resource to workload
 * add profile under workload
 * show multi-version kustomization capability with billing app
-* show a profile in the dev-eu clusuter
+* show a profile in the dev-eu cluster
 
 ```bash
 .weave-gitops/
@@ -537,11 +537,11 @@ With the new structure, we will need to update existing installations:
 
 We will need something (wego update, separate script or binary) to update existing installations.
 
-**This ADR is only proposing a change to the directory structure.  It is not implying that a cluster can only have a single wego repository; that a git repository may only contain a single wego layout;  that we will no longer support storing the GOAT in an application configuration repo that results from using `wego app add .`.  However, these should be considered as this new structure handles these use cases, simplifying our implementation.**
+**This ADR is only proposing a change to the directory structure.  It is not implying a cluster can only have a single wego repository; a git repository may only contain a single wego layout;  that we will no longer support storing the GOAT in an application configuration repo that results from using `wego app add .`.  However, these should be considered as this new structure handles these use cases, simplifying our implementation.**
 
 ## Complete example
 
-_NOTE: while the example below shows application manaifests under the billing application, we recommend the application manifests live outside the .weave-gitops structure._
+_NOTE: while the example below shows application manifests under the billing application, we recommend the application manifests live outside the .weave-gitops structure._
 
 ```bash
 .weave-gitops/
@@ -640,7 +640,7 @@ Using git references within the git source resources offers several benefits:
 * several clusters can refer to the same tag making it easy to update multiple clusters by moving the tag on the repo
 * since there is no merging or cherry-picking of changes when promoting no fear of accidentally overriding configuration for specific environments.  E.g., token in dev gets promoted to stage and breaks the environment.
 
-The approach has a couple downsides:
+The approach has a couple of downsides:
 * since there is a single linear branch, when you move the git reference forward you can pick up unexpected application and profile changes, e.g., both the billing and hr applications get updated in separate commits. If you move to the latest commit you get the revisions to both applications.
 * diffing between two git references will, by default, show all changes in the repo not just the ones for a particular application or cluster.  This can be addressed with wego tooling.
 
@@ -649,12 +649,12 @@ The approach has a couple downsides:
 ![Git branches](./images/wego-branches.jpg)
 
 Using git branches within the git source resources offers several benefits:
-* branching is a common, well known paradigm used with git
+* branching is a common, well-known paradigm used with git
 * can replace the use of environments within applications as the changes can be made directly on branches
 
 The approach has downsides:
 * the branches will diverge, making it difficult to use git tooling (merging, cherry-picking) between environments
-since there is a single branch that is linear in time, when you move the git reference forward there is a chance to pick up unexpected application and profile changes.  E.g., both the billing and hr applications get updated in separate commits. If you move to the latest commit, you get the revisions to both applications.
+since there is a single branch that is linear in time. When you move the git reference forward there is a chance to pick up unexpected application and profile changes.  E.g., both the billing and hr applications get updated in separate commits. If you move to the latest commit, you get the revisions to both applications.
 
 <!-- references -->
 [wep-dir]: https://github.com/weaveworks/weave-gitops-private/blob/main/docs/weps/WEP-001-Weave-gitops-core.md#wego-directory-structure
