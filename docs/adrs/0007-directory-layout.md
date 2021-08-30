@@ -197,6 +197,9 @@ resources:
 - ../../../profiles/platform.wego.weave.works
 - ../../../profiles/prometheus@2.24.0
 - ../../../apps/capi
+- system-flux-kustomization-resource.yaml
+- user-flux-kustomization-resource.yaml
+- flux-source-resource-resource.yaml
 ```
 * CAPD - CAPI provider for Docker
 * CAPA - CAPI provider for Amazon
@@ -209,6 +212,9 @@ Another example kustomization file from the dev cluster.  This pulls in version 
 resources:
 - ../../../apps/billing@v2/env/dev-eu
 - ../../../apps/mynginx-with-remote-manifests
+# This is here to demonstrate that random files can be added to be deployed into this cluster.
+# This IS NOT A RECOMMENDED PRACTICE and could cause complications later!
+- my-random-deployment.yaml
 ```
 
 Manifests for the dev-eu-fcabbe8 cluster:
