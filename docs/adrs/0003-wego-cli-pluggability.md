@@ -8,43 +8,49 @@ Proposed
 
 ## Context
 
-Wego has two touch primary user touch points the wego UI and the wego CLI.  Both will need to support core or free users and provide enhanced capabilities for the enterprise customers.  Solving the WebUI is covered in another ADR.
+Wego has two primary user touch points - the wego UI and the wego CLI.  Both will need to support core or free users and provide enhanced capabilities for paying, aka enterprise customers. This ADR focuses solely on the CLI.
 
+The needs to have a consistent interface whether the user is using the free or enterprise tier of the product.  The enterprise features will require validation that the user is _entitled or licensed_ to use the features.  The product _may_ hide enterprise features from users lacking the proper permissions.
+
+This ADR proposes how we develop this capability.
+
+_NOTE: The details of entitlement and licensing enforcement are not explicitly covered here._
 ### Wego core built-in plugins/capabilities 
-* Profiles (pctl)
-* flux
+* Profiles (pctl) - covered in this proposal 
+* Flux - Ships as part of the CLI
 
-### Known addon plugins
+### Known enterprise plugins/capabilities
 * Enterprise (EE)
-  * workspaces (wk workspaces)
-  * cluster create (mccp)
+  * workspaces `wk workspaces`
+  * cluster create `mccp`
+* cluster reporting, aka mccp v1, TBD as it might move into the core
 
 ### Requirements
-1. Extending the CLI must not require code changes in core
-2. The core CLI won't know about the enterprise features (workspaces, clusters CAPI create)
-3. The core CLI will support flux and profiles
-4. The user has a single manual download for the core CLI
+1. The core CLI will support flux and profiles
+1. The user has a single manual download for the core CLI
     * The CLI can optionally download dependencies at runtime
-5. The wego enterprise CLI calls
+1. The wego enterprise CLI calls
     * wego cluster (create, update, delete, get) _actual flags TBD_
     * wego workspace (create, update, delete, get) _actual flags TBD_
-6. The core CLI will need to may have a `cluster` noun
-7. A Plugin can be used with multiple nouns 
+1. The core CLI will need to may have a `cluster` noun
+1. A Plugin can be used with multiple nouns 
     * `template` (for CAPI) calls into enterprise plugin
     * `cluster` calls into enterprise plugin
     * `workspace` calls into enterprise plugin
-8. A plugin must be able to add additional flags to core commands
-    * e.g., wego app add `--workspace foo`  --name blah --url 
-        * If the enterprise plugin is installed, then the flag is recognized 
 
 #### Future/stretch requirements
-* ability to call out to a plugin from a built-in noun
-  * e.g.,  wego app add --type pulmi --url --fobar ... calls the pulumi plugin to perform the app add
+1. ability to call out to a plugin from a built-in noun
+    * e.g.,  wego app add --type pulmi --URL --foobar ... calls the pulumi plugin to perform the app add
+1. A plugin must be able to add additional flags to core commands
+    * e.g., wego app add `--workspace foo`  --name blah --URL 
+        * If the enterprise plugin is installed, then the flag is recognized 
+1. Extending the CLI must not require code changes in the core software
+1. The core CLI won't know about the enterprise features (workspaces, clusters CAPI create)
 
 ## Alternatives
 
 ### Separate wego enterprise CLI
-* I.e. weave-gitops is an upstream project that is forked or vendored into wego-gitops-ee
+* I.e., weave-gitops is an upstream project that is forked or vendored into wego-gitops-ee
 * This approach is similar to the approach for the web UI
 
 #### Pros
@@ -60,7 +66,7 @@ Wego has two touch primary user touch points the wego UI and the wego CLI.  Both
 * Difficult for others to enhance wego CLI
 * Lack of an extension model means more difficult to add capabilities later
 * Additional build infrastructure 
-* Potential additional cognitive load for engineers due to switching between code bases
+* Potential additional cognitive load for engineers due to switching between codebases
 
 
 ### Add plugin model to wego core
@@ -80,12 +86,12 @@ Wego has two touch primary user touch points the wego UI and the wego CLI.  Both
 * Depending on the approach, it may not be possible to extend existing commands (kubectl calls  this out specifically)
 
 ### Hybrid approach
-If we can relax requirements 1 and 2 - we could add the commands for clusters, templates, and command flags but clearly indicate that they are enterprise-only features.  I've seen  many products have help strings with something similar to **(--enterprise only)**. The core CLI would be responsible for finding and calling the EE plugin.
+If we can relax requirements 1 and 2 - we could add the commands for clusters, templates, and command flags but clearly indicate that they are enterprise-only features.  I've seen many products have help strings with something similar to **(--enterprise only)**. The core CLI would be responsible for finding and calling the EE plugin.
 
-The EE plugin could provide all flags and commands so that they are only in the plugin.  Having the plugin provide and sub-commands and flags, loosens the coupling as core would only have a command `template` and the help would print **(available in Weave GitOps EE)**
+The EE plugin could provide all flags and commands so that they are only in the plugin.  Having the plugin provide and sub-commands and flags loosens the coupling as the core would only have a command `template`, and the help would print **(available in Weave GitOps EE)**
 
 #### Pros
-* Single core CLI code base
+* Single core CLI codebase
 * Built-in advertising that some options are available if you upgrade
 * Minimal changes to core CLI code base as the majority of the changes live in the EE plugin
 * CLI upgrade only requires the new EE plugin
