@@ -50,20 +50,22 @@ _NOTE: The details of entitlement and licensing enforcement are not explicitly c
 ## Alternatives
 
 ### Separate wego enterprise CLI
-* I.e., weave-gitops is an upstream project that is forked or vendored into wego-gitops-ee
+* I.e., weave-gitops is an upstream project that is forked or vendored (go modules) into wego-gitops-ee
 * This approach is similar to the approach for the web UI
 
 #### Pros
 * Similar to the approach we are taking with the web UI
 * Core and EE can move independently
 * Simple matter of coding to augment core calls
+  * It's a simple matter as there is a wegoee CLI _note: wegoee is an example name_
 * Minimal testing matrix
+  * Core version tests only core features.  Those tests should pass for the wegoee CLI
 
 #### Cons
 * Challenges with keeping EE up to date with core
-    * Git tool does help 
+    * Git tooling does provide some assistance 
 * User needs a new wego CLI 
-* Difficult for others to enhance wego CLI
+* Difficult for others to enhance wego CLI - they would follow a similar pattern
 * Lack of an extension model means more difficult to add capabilities later
 * Additional build infrastructure 
 * Potential additional cognitive load for engineers due to switching between codebases
@@ -72,10 +74,11 @@ _NOTE: The details of entitlement and licensing enforcement are not explicitly c
 ### Add plugin model to wego core
 * Add a facility, similar to how kubectl works, where plugins can be installed into a users path
     * Need the ability to associate one plugin with multiple nouns
-        * unless changing the commands so that they identify the plugin.  e.g., wego ee templates get, wego ee cluster get
+        * unless changing the commands so that they identify the plugin.  e.g., wego ee templates get, wego ee cluster get  (the `ee` is the noun and identifies the plugin)
 
 #### Pros
-* Single wego CLI codebase and binary
+* Single wego CLI codebase and binary - we don't need to build a `wegoee` CLI
+  * The enterprise functionality is still a separate binary
 * Defined plugin approach, which may increase adoption
 * Potential to isolate changes and issues
 * We don't have to spin a new wego CLI every time an issue is uncovered
@@ -83,12 +86,13 @@ _NOTE: The details of entitlement and licensing enforcement are not explicitly c
 #### Cons
 * Each DevOps engineer will need to install the plugins
 * Testing matrix can be difficult (core CLI * version) * (plugin + version)
-* Depending on the approach, it may not be possible to extend existing commands (kubectl calls  this out specifically)
+  * Weave GitOps core is only responsible for the plugin mechanism itself, and testing of the actual plugins would remain in the enterprise version
+* Depending on the approach, it may not be possible to extend existing commands (kubectl calls this out specifically)
 
 ### Hybrid approach
-If we can relax requirements 1 and 2 - we could add the commands for clusters, templates, and command flags but clearly indicate that they are enterprise-only features.  I've seen many products have help strings with something similar to **(--enterprise only)**. The core CLI would be responsible for finding and calling the EE plugin.
+If we can relax stretch requirements 1 and 2 - we could add the commands for clusters, templates, and command flags but clearly indicate that they are enterprise-only features.  Many products have help strings with something similar to **(--enterprise only)**. The core CLI would be responsible for finding and calling the EE plugin.
 
-The EE plugin could provide all flags and commands so that they are only in the plugin.  Having the plugin provide and sub-commands and flags loosens the coupling as the core would only have a command `template`, and the help would print **(available in Weave GitOps EE)**
+The EE plugin could provide all flags and commands so that they are only in the plugin.  Having the plugin provide any sub-commands and flags loosens the coupling as the core would only have a command `template`, and the help would print **(available in Weave GitOps EE)**
 
 #### Pros
 * Single core CLI codebase
@@ -100,6 +104,25 @@ The EE plugin could provide all flags and commands so that they are only in the 
 * Could upset users seeing commands they can't access
 * Additional coordination/coupling between core and EE
 
+
+### Tolkien approach
+If we can relax stretch requirements 1 and 2 - we could add the commands for clusters, templates, and command flags but clearly indicate that they are enterprise-only features.  Many products have help strings with something similar to **(--enterprise only)**. The commands will look for either an entitlement/license and/or the presence of backend APIs to know if the user has permissions to execute this command.
+
+The wego CLI will replace the Multi-cluster control plane CLI, `mccp`, and the workspace CLI, `wk workspace`.  The profiles CLI, `pctl` will remain a separate CLI.  However, Weave GitOps will provide equivalent commands into `wego`.
+#### Pros
+* Single **CLI** codebase
+* Single **CLI** for all Weave GitOps functionality 
+* Built-in advertising that some options are available if you upgrade
+* Easiest approach for development
+* No CLI upgrade required
+* Single set of documentation
+
+#### Cons
+* Could upset users seeing commands they can't access
+* Core CLI must maintain a certain level of backward capability
+* No plugin/extension mechanism
+* We will need to clearly indicate core vs. enterprise features in the documentation
+
 ### Plugin implementation options
 * eksctl approach [eksctl PR](https://github.com/weaveworks/eksctl-private/pull/309/files)
     * will need to add dynamic plugin lookup
@@ -108,56 +131,17 @@ The EE plugin could provide all flags and commands so that they are only in the 
 * golang [native plugins](https://pkg.go.dev/plugin)
 
 ## Decision
-We will support two types of plugins in a phased approach.  We will support the noun-based plugins initially and add support for the command-based plugins in the future.
-
-### Noun-based plugins
-Add a section to the wego config file that allows a user to add plugins.  The fields are
-* **noun** - The noun wego will use in the CLI, i.e., wego profile
-* **name** - The name of the plugin
-* **cmd** The executable plus optional parameters, similar to CMD in a Dockerfile
-* **type** The type of the plugin (noun, cmd)
-```yaml
-   plugins
-   - noun: workspace
-     type: noun
-     name: workspace
-     cmd: 
-     - /usr/local/bin/workspace
-   - noun: cluster
-     type: noun
-     name: cluster
-     cmd:
-     - /usr/local/bin/mccp
-     - cluster
-   - noun: template 
-     type: noun
-     name: template
-     cmd:
-     - /usr/local/bin/mccp
-     - template
-```
-The CLI will read the plugin configuration, and when encountering a noun from the plugins list, it will invoke the cmd with stdin, stdout, stderr, and environment mapped for the cmd.
-
-Noun-based plugins will utilize a mechanism similar to kubectl and eksctl.  
-
-### Command-based plugins
-These plugins augment existing noun-verb commands with additional capabilities.  For example, we can extend the `wego app add` command with a new flag `--plugin kpt`, which will leverage the KPT plugin via well-defined interfaces using the HashiCorp go-plugin mechanism.
-The config plugins section will add:
-* **verbs** the list of verbs to tie to this plugin
-
-```yaml
-   plugins
-   - moun: app
-     verbs: 
-     - add
-     - get
-     type: cmd
-     name: kpt
-     cmd: 
-     - /usr/local/bin/kpt
-```
-The verb corresponds to a go-plugin interface that the cmd must implement.
+We will take the Tolkien approach for the following reasons:
+* We want users and customers to have a single CLI to interact with
+* We want to remove barriers and friction on the internal development of the CLI
+* To simplify the Weave GitOps upgrade process for customers
+* To inform the user that they can unlock additional capabilities 
+* To reduce the documentation burden
+* To develop the CLI in the open
 
 ## Consequences
 
-Refer to the pros and cons listed with the alternatives
+* EOL'ing the `mccp` and `wk workspace` CLI
+* The CLI commands will be developed in the open using the wego-core public repository 
+* Enterprise-only changes will necessitate a new release of the Weave GitOps CLI - meaning core users will upgrade but receive no new capabilities
+* In addition to documentation, CLI release notes will need to clearly indicate changes between core and enterprise
