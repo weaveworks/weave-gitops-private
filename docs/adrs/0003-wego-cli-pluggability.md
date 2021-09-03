@@ -10,9 +10,9 @@ Proposed
 
 Wego has two primary user touch points - the wego UI and the wego CLI.  Both will need to support core or free users and provide enhanced capabilities for paying, aka enterprise customers. This ADR focuses solely on the CLI.
 
-The needs to have a consistent interface whether the user is using the free or enterprise tier of the product.  The enterprise features will require validation that the user is _entitled or licensed_ to use the features.  The product _may_ hide enterprise features from users lacking the proper permissions.
+The CLI needs to have a consistent interface whether the user is using the free or enterprise tier of the product.  The enterprise features will require validation that the user is _entitled or licensed_ to use the features.  The product _may_ hide enterprise features from users lacking the proper permissions.
 
-This ADR proposes how we develop this capability.
+This ADR proposes how we develop the Weave GitOps CLI to provide both core and enterprise capabilities.
 
 _NOTE: The details of entitlement and licensing enforcement are not explicitly covered here._
 ### Wego core built-in plugins/capabilities 
@@ -25,6 +25,8 @@ _NOTE: The details of entitlement and licensing enforcement are not explicitly c
   * cluster create `mccp`
 * cluster reporting, aka mccp v1, TBD as it might move into the core
 
+### CLI structure
+The CLI today is structured as noun-verb.  Meaning, the first word after `wego` is the object or noun that the action will be performed on.  For example, `wego gitops install` and `wego app add`.
 ### Requirements
 1. The core CLI will support flux and profiles
 1. The user has a single manual download for the core CLI
@@ -32,25 +34,25 @@ _NOTE: The details of entitlement and licensing enforcement are not explicitly c
 1. The wego enterprise CLI calls
     * wego cluster (create, update, delete, get) _actual flags TBD_
     * wego workspace (create, update, delete, get) _actual flags TBD_
-1. The core CLI will need to may have a `cluster` noun
-1. A Plugin can be used with multiple nouns 
+1. The core CLI may add a `cluster` noun
+1. A single "plugin" may be used with multiple nouns 
     * `template` (for CAPI) calls into enterprise plugin
     * `cluster` calls into enterprise plugin
     * `workspace` calls into enterprise plugin
 
 #### Future/stretch requirements
-1. ability to call out to a plugin from a built-in noun
+1. The ability to call out to a plugin from a built-in or core noun
     * e.g.,  wego app add --type pulmi --URL --foobar ... calls the pulumi plugin to perform the app add
-1. A plugin must be able to add additional flags to core commands
+1. A plugin should be able to add additional flags to core commands
     * e.g., wego app add `--workspace foo`  --name blah --URL 
         * If the enterprise plugin is installed, then the flag is recognized 
-1. Extending the CLI must not require code changes in the core software
-1. The core CLI won't know about the enterprise features (workspaces, clusters CAPI create)
+1. Extending the CLI shouldn't require code changes in the core software
+1. The core CLI shouldn't know about the enterprise features (workspaces, clusters CAPI create)
 
 ## Alternatives
 
 ### Separate wego enterprise CLI
-* I.e., weave-gitops is an upstream project that is forked or vendored (go modules) into wego-gitops-ee
+* I.e., weave-gitops is an upstream project that is forked or vendored (go modules) into Weave GitOps EE
 * This approach is similar to the approach for the web UI
 
 #### Pros
@@ -59,7 +61,7 @@ _NOTE: The details of entitlement and licensing enforcement are not explicitly c
 * Simple matter of coding to augment core calls
   * It's a simple matter as there is a wegoee CLI _note: wegoee is an example name_
 * Minimal testing matrix
-  * Core version tests only core features.  Those tests should pass for the wegoee CLI
+  * Core version tests only core features.  Core tests should pass for the wegoee CLI
 
 #### Cons
 * Challenges with keeping EE up to date with core
@@ -79,31 +81,30 @@ _NOTE: The details of entitlement and licensing enforcement are not explicitly c
 #### Pros
 * Single wego CLI codebase and binary - we don't need to build a `wegoee` CLI
   * The enterprise functionality is still a separate binary
-* Defined plugin approach, which may increase adoption
+* Defined plugin approach, which may increase adoption as it's easy to extend
 * Potential to isolate changes and issues
-* We don't have to spin a new wego CLI every time an issue is uncovered
+* A critical issue in core doesn't require a new version of EE and vice versa
 
 #### Cons
 * Each DevOps engineer will need to install the plugins
-* Testing matrix can be difficult (core CLI * version) * (plugin + version)
+* Testing matrix can be difficult (core CLI * version) * (plugin * version)
   * Weave GitOps core is only responsible for the plugin mechanism itself, and testing of the actual plugins would remain in the enterprise version
 * Depending on the approach, it may not be possible to extend existing commands (kubectl calls this out specifically)
 
 ### Hybrid approach
 If we can relax stretch requirements 1 and 2 - we could add the commands for clusters, templates, and command flags but clearly indicate that they are enterprise-only features.  Many products have help strings with something similar to **(--enterprise only)**. The core CLI would be responsible for finding and calling the EE plugin.
 
-The EE plugin could provide all flags and commands so that they are only in the plugin.  Having the plugin provide any sub-commands and flags loosens the coupling as the core would only have a command `template`, and the help would print **(available in Weave GitOps EE)**
+The EE plugin could provide all flags and commands so that they are only in the plugin.  Having the plugin provide any sub-commands and flags loosens the coupling as the core would only have a noun e.g., `template`, and the help would print **(available in Weave GitOps EE)**
 
 #### Pros
 * Single core CLI codebase
 * Built-in advertising that some options are available if you upgrade
 * Minimal changes to core CLI code base as the majority of the changes live in the EE plugin
-* CLI upgrade only requires the new EE plugin
+* CLI upgrade only requires a new EE plugin
 
 #### Cons
 * Could upset users seeing commands they can't access
 * Additional coordination/coupling between core and EE
-
 
 ### Tolkien approach
 If we can relax stretch requirements 1 and 2 - we could add the commands for clusters, templates, and command flags but clearly indicate that they are enterprise-only features.  Many products have help strings with something similar to **(--enterprise only)**. The commands will look for either an entitlement/license and/or the presence of backend APIs to know if the user has permissions to execute this command.
@@ -141,7 +142,7 @@ We will take the Tolkien approach for the following reasons:
 
 ## Consequences
 
-* EOL'ing the `mccp` and `wk workspace` CLI
+* EOL'ing/replacing the `mccp` and `wk workspace` CLI
 * The CLI commands will be developed in the open using the wego-core public repository 
 * Enterprise-only changes will necessitate a new release of the Weave GitOps CLI - meaning core users will upgrade but receive no new capabilities
 * In addition to documentation, CLI release notes will need to clearly indicate changes between core and enterprise
