@@ -78,6 +78,7 @@ Some of the solutions evaluate the flags on the server and some on the client.  
 * Service offering 
 
 ### Alternatives
+* DIY command line arguments - similar to Kubernetes feature gates 
 * LaunchDarkly https://launchdarkly.com/
 * dcdr (decider) https://github.com/vsco/dcdr
 * Unleash https://github.com/Unleash/unleash
@@ -86,12 +87,22 @@ Some of the solutions evaluate the flags on the server and some on the client.  
 * Petri https://github.com/wix-incubator/petri
 * Flipt.io https://github.com/markphelps/flipt 
 * ConfigCat https://configcat.com/
+#### DIY command line arguments
+##### Pricing
+* Free - processes and procedures will need to be developed to track and communicate the flags and their meaning.
 
+##### Offline mode
+* Yes.  No server required
+
+##### General
+* Doesn't support all of the requirements as there isn't a server component 
+* Simple
+* Patten developers and OSS k8s users are familiar with
 #### LaunchDarkly
 ##### Pricing
 * Separate server-side from client-side MAUs. 
 * Need a seat for each person interacting with the service
-  *  Start is $10 per seat (only 1k client side MAUs), $20 per seat gives us 10k client MAUs
+  *  Start is $10 per seat (only 1k client-side MAUs), $20 per seat gives us 10k client MAUs
   *  $200 a month, or $165 with an annual contract
 
 ##### Offline mode
@@ -160,7 +171,7 @@ Some of the solutions evaluate the flags on the server and some on the client.  
 
 #### Dcdr 
 ##### Pricing
-* Free
+* Free - self hosted
 
 ##### General
 * I like the design - the client makes the decisions
@@ -372,8 +383,16 @@ index d3363c1..5814cf9 100644
 
 ## Decision
 
-Use a feature management system, [ConfigCat](https://app.configcat.com/)
+Use a feature management platform -  [ConfigCat](https://app.configcat.com/)  for the following reasons
+* Supports all the use cases
+* Self-service solution - most of the others don't advertise prices and require interaction with sales
+* OSS clients
+* Priced based on product and flags, not solely on the number of users
+* Support for SSO and 2fa for all plans
+* Cost of self-hosting alternatives will quickly exceed the yearly price for the service
 
 ## Consequences
 
 Feature flags will enable us to add EE CLI options to the core CLI and expose them for our internal development and testing.  Thereby enabling us to release new versions of the CLI without concern for end-users interacting with the capabilities before we are ready.  Giving us a single CLI, released as frequently as we need.
+
+OSS users are more familiar with command line arguments and might take exception with using a configuration key.  However, we can create public configurations if and when this becomes an issue.
