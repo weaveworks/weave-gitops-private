@@ -8,9 +8,9 @@ Proposed
 
 ## Context
 
-As our organization grows, we will have more developers and more work in flight.  This can result is long-lived branches, complicated testing environments, and slower release cycles.  Using feature branches allows us to develop closer to the trunk and separate releasing from delivering software. In addition, feature flags can be used for beta testing new features without special builds, operational controls, for example kill switches, progressive and ring-based deployments, and in some cases features available by product tiers
+As our organization grows, we will have more developers and more work in flight.  Commonly, this results in long-lived branches, complicated testing environments, and slower release cycles.  Using feature branches allows us to develop closer to the trunk and separate releasing from delivering software. In addition, feature flags can be used for beta testing new features without special builds, operational controls, for example, kill switches, progressive and ring-based deployments, and in some cases, features available by product tiers.
 
-Feature flags can be simple environment variables passed into a program or a SaaS service used to define, serve, and check flags at runtime.
+Feature flags can be simple environment variables passed into a program, or a SaaS service used to define, serve, and check flags at runtime.
 
 ### Use cases
 
@@ -19,9 +19,9 @@ Feature flags can be simple environment variables passed into a program or a Saa
 1. Define feature flag and configuration to use 
 1. Create branch from main
 1. Write tests and in the test function check for the feature flag before executing the test<br/>Create a code block containing your functionality with a conditional checking for the feature flag
-1. Repeat previous step until getting to a decent state
-1. Rebase on main
-1. Commit; push; PR; merge with main
+1. Repeat the previous step until getting to a decent state
+1. Rebase on the main branch
+1. Commit; push; PR; merge with the main branch
 
 **Enable CI tests for new feature work**
 <br/>Success Scenario 
@@ -31,49 +31,49 @@ Feature flags can be simple environment variables passed into a program or a Saa
 **Enable others to test with your feature**
 <br/>Success Scenario 
 1. Update shared development configuration with your feature flag
-1. Have others download main build
+1. Have others download the build from the main branch with your changes
 1. Set development configuration key in the environment
 1. Interact with your new feature
 
 Alternate scenario 
-1. Have other engineer add your feature flag to their configuration
+1. Have other engineers add your feature flag to their configuration
 
 **Enable subset of customers to try new feature**
 <br/>Success Scenario 
 1. Update customer configuration with your feature flag
 1. Define targeting rules for customers
-1. Have customers download main build
+1. Have customers download the latest build containing your changes
 1. Customers uses existing configuration key in the environment
 1. Customer interacts with your new feature
 
-**A/B testing with end users**
+**A/B testing with end-users**
 <br/>Success Scenario 
 1. Create alternate implementations following the first use case
 1. Either create multiple configurations or targeting rules within a feature flag configuration
-1. Have customers download main build
-1. Give customer new configuration key or have them use existing configuration with targeting rules
+1. Have customers download the latest build containing your changes
+1. Give customers a new configuration key or have them use existing configuration with targeting rules
 1. Customer interacts with version A or B
 
 ### Goals
 Provide feature flags to hid functionality in CLIs, Web UIs, Kubernetes components (controllers, services). Separate deploy from release. Enable trunk-based development where possible to deliver more frequently.
 
 ### General info
-Some of the solutions evaluate the flags on the server and some on the client.  Benefit of the server is we can track usage of the flags and this will enable us to determine obsolete flags, and track user data for a/b testing.  However, problems with checking them on the serve is data leaves the users environment and server-side checking can make it more difficult to support air-gapped environments.
+Some of the solutions evaluate the flags on the server and some on the client.  The benefit of the server is we can track usage of the flags, and this will enable us to determine obsolete flags and track user data for a/b testing.  However, problems with checking flags on the server are that data leaves the users' environment, and server-side checking can make it more difficult to support air-gapped environments.
 
 ### Requirements
 * Golang client lib
 * javascript/typescript lib
-* Work in air gapped environments
+* Work in air-gapped environments
 * Boolean flags
 * Scalar data types
-* Ability for end user to disable checks
+* Ability for end-user to disable checks
 * Target features to users
 * Progressive rollout
 
 #### Nice to have 
-* server-less option - i.e., passing commandline or environment settings
+* server-less option - i.e., passing command line or environment settings
 * Replace checkpoint system with more detailed telemetry metrics
-* Ability to target features to certain users and goups of users
+* Ability to target features to certain users and groups of users
 * Scheduled rollout of new features. e.g., on Friday at 0800, enable feature X
 * Service offering 
 
@@ -85,7 +85,7 @@ Some of the solutions evaluate the flags on the server and some on the client.  
 * split.io https://www.split.io
 * Petri https://github.com/wix-incubator/petri
 * Flipt.io https://github.com/markphelps/flipt 
-* Configcat https://configcat.com/
+* ConfigCat https://configcat.com/
 
 #### LaunchDarkly
 ##### Pricing
@@ -96,15 +96,15 @@ Some of the solutions evaluate the flags on the server and some on the client.  
 
 ##### Offline mode
 * with the enterprise version, we can have a relay proxy that loads all the feature flag information from a local file
-* Not technicall offline as the relay runs localy in the environment
+* Not technically offline as the relay runs locally in the environment
 
 ##### General
 * Doesn't appear to have an eventing system to replace checkpoint
-* Pushes feature changes to the SDK meaning kill switches can be seen almost immediately 
+* Pushes feature changes to the SDK, meaning kill switches can be seen almost immediately 
 
 #### Unleash
 ##### Pricing
-* Opeen source, self host free
+* Open source, self-host free
 * www.getunleash.io - pro $80 (5 team members) $15 each additional team member - $155
   *  Max of 20 team members
 ##### Offline mode
@@ -113,13 +113,13 @@ Some of the solutions evaluate the flags on the server and some on the client.  
 * GitLab offers feature flags using this tech - but don't use it internally
 * Don't see an eventing solution for track experiments and replacing checkpoint
 * Unless you use the proxy, the toggles are evaluated on the server.  Meaning client data is sent from the application
-* In my testing (docker DB, Docker Unleash) my application didn't see when the toggle switched from enabled to disabled.
-   * adding a call to wait for the client to be ready solved this issue.
+* In my testing (docker DB, Docker Unleash), my application didn't see when the toggle switched from enabled to disabled.
+   * having the client wait to be ready before checking the flag solved the issue.  It turned out the client didn't have the flag data, so it returned the default value, which in my case, was false.
 * Confusing application concept
 
 #### Split
 ##### Pricing
-* Priced by MTK (Monthly Tracked Keys) + User Seats (how we identify clustomers)
+* Priced by MTK (Monthly Tracked Keys) + User Seats (how we identify customers)
 * Free tier 10 seats
 * Platform tier (no prices on the web)
 ##### General
@@ -133,7 +133,7 @@ Some of the solutions evaluate the flags on the server and some on the client.  
 ##### General
 * Has events for tracking experiments - might be use to replace checkpoint
 
-#### Configcat
+#### ConfigCat
 ##### Pricing
 * easiest to understand
 * Not user or team sized pricing
@@ -143,7 +143,7 @@ Some of the solutions evaluate the flags on the server and some on the client.  
 ##### General
 * Evaluated client-side - user's data doesn't leave the system
 * No option to replace checkpoint
-* Poll based - can have web hooks for push.  Limited number.
+* Poll-based.  It also supports webhooks.  A limited number of requests depending on the plan.
 ##### Questions
 * Air gapped solution - yes, you can distribute the config.json file and have it used locally
 
@@ -153,17 +153,17 @@ Some of the solutions evaluate the flags on the server and some on the client.  
 
 ##### General
 * active project
-* built in go
-* supports both gRPC and http integratioon
+* built-in go
+* supports both gRPC and HTTP integration
 * License is GPL-3
-* Server component that performs the evaluation which means some customer data is sent outside the env
+* Server component that performs the evaluation, which means some customer data is sent outside the env
 
 #### Dcdr 
 ##### Pricing
 * Free
 
 ##### General
-* I like the design - client makes the decisions
+* I like the design - the client makes the decisions
 * built for distributed use - consul, etcd are the primary datastores
 * license is MIT
 * project seems stale - no recent releases
@@ -171,7 +171,7 @@ Some of the solutions evaluate the flags on the server and some on the client.  
 ## Shortlist
 * ConfigCat - simple pricing model, lots of OSS clients
 * flipt - OSS we generate the clients via protobuf, easy to get up and running
-* unleash - OSS but I did have issues when testing
+* unleash - OSS, but I did have issues when testing
 
 ### Exmple code
 
@@ -376,4 +376,4 @@ Use a feature management system, [ConfigCat](https://app.configcat.com/)
 
 ## Consequences
 
-Feature flags will enable us to add EE CLI options to the core CLI and expose them for our internal development and testing.  Enabling us to release new versions of the CLI without concern for end users interacting with the capabilities before we are ready.  Giving us a single CLI, released as frequently as we need.
+Feature flags will enable us to add EE CLI options to the core CLI and expose them for our internal development and testing.  Thereby enabling us to release new versions of the CLI without concern for end-users interacting with the capabilities before we are ready.  Giving us a single CLI, released as frequently as we need.
