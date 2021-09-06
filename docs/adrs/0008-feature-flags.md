@@ -12,8 +12,50 @@ As our organization grows, we will have more developers and more work in flight.
 
 Feature flags can be simple environment variables passed into a program or a SaaS service used to define, serve, and check flags at runtime.
 
+### Use cases
+
+**Merge new feature work into main without breaking existing functionality**
+<br/>Success Scenario
+1. Define feature flag and configuration to use 
+1. Create branch from main
+1. Write tests and in the test function check for the feature flag before executing the test<br/>Create a code block containing your functionality with a conditional checking for the feature flag
+1. Repeat previous step until getting to a decent state
+1. Rebase on main
+1. Commit; push; PR; merge with main
+
+**Enable CI tests for new feature work**
+<br/>Success Scenario 
+1. Update the CI test config to enable your feature flag
+1. Run CI
+
+**Enable others to test with your feature**
+<br/>Success Scenario 
+1. Update shared development configuration with your feature flag
+1. Have others download main build
+1. Set development configuration key in the environment
+1. Interact with your new feature
+
+Alternate scenario 
+1. Have other engineer add your feature flag to their configuration
+
+**Enable subset of customers to try new feature**
+<br/>Success Scenario 
+1. Update customer configuration with your feature flag
+1. Define targeting rules for customers
+1. Have customers download main build
+1. Customers uses existing configuration key in the environment
+1. Customer interacts with your new feature
+
+**A/B testing with end users**
+<br/>Success Scenario 
+1. Create alternate implementations following the first use case
+1. Either create multiple configurations or targeting rules within a feature flag configuration
+1. Have customers download main build
+1. Give customer new configuration key or have them use existing configuration with targeting rules
+1. Customer interacts with version A or B
+
 ### Goals
-Provide feature flags to hid functionality in CLIs, Web UIs, Kubernetes components (controllers, services). Separate deploy from release. Enable trunk-based dev.  
+Provide feature flags to hid functionality in CLIs, Web UIs, Kubernetes components (controllers, services). Separate deploy from release. Enable trunk-based development where possible to deliver more frequently.
 
 ### General info
 Some of the solutions evaluate the flags on the server and some on the client.  Benefit of the server is we can track usage of the flags and this will enable us to determine obsolete flags, and track user data for a/b testing.  However, problems with checking them on the serve is data leaves the users environment and server-side checking can make it more difficult to support air-gapped environments.
