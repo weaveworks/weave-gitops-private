@@ -8,7 +8,7 @@ Proposed
 
 ## Context
 
-As our organization grows, we will have more developers and more work in flight.  Commonly, this results in long-lived branches, complicated testing environments, and slower release cycles.  Using feature branches allows us to develop closer to the trunk and separate releasing from delivering software. In addition, feature flags can be used for beta testing new features without special builds, operational controls, for example, kill switches, progressive and ring-based deployments, and in some cases, features available by product tiers.
+As our organization grows, we will have more developers and more work in flight.  Commonly, this results in long-lived branches, complicated testing environments, and slower release cycles.  Using feature falgs allows us to develop closer to the trunk and separate releasing from delivering software. In addition, feature flags can be used for beta testing new features without special builds, operational controls, for example, kill switches, progressive and ring-based deployments, and in some cases, features available by product tiers.
 
 Feature flags can be simple environment variables passed into a program, or a SaaS service used to define, serve, and check flags at runtime.
 
@@ -55,10 +55,10 @@ Alternate scenario
 1. Customer interacts with version A or B
 
 ### Goals
-Provide feature flags to hid functionality in CLIs, Web UIs, Kubernetes components (controllers, services). Separate deploy from release. Enable trunk-based development where possible to deliver more frequently.
+Provide feature flags to hide functionality in CLIs, Web UIs, Kubernetes components (controllers, services). Separate deploy from release. Enable trunk-based development where possible to deliver more frequently.
 
 ### General info
-Some of the solutions evaluate the flags on the server and some on the client.  The benefit of the server is we can track usage of the flags, and this will enable us to determine obsolete flags and track user data for a/b testing.  However, problems with checking flags on the server are that data leaves the users' environment, and server-side checking can make it more difficult to support air-gapped environments.
+Some of the solutions evaluate the flags on the server and some on the client.  The benefit of the server is we can track usage of the flags, and this will enable us to determine obsolete flags and track user data for a/b testing.  However, checking flags on the server can become an issue as data leaves the users' environment.  Additionally, server-side checking can make it more difficult to support air-gapped environments.
 
 ### Requirements
 * Golang client lib
@@ -383,9 +383,10 @@ index d3363c1..5814cf9 100644
 
 ## Decision
 
-Use a feature management platform -  [ConfigCat](https://app.configcat.com/)  for the following reasons
+Use a feature management platform -  [ConfigCat](https://app.configcat.com/)  for the following reasons :
 * Supports all the use cases
-* Self-service solution - most of the others don't advertise prices and require interaction with sales
+* Satisifies all the requirements
+* Self-service solution - most of the others don't advertise prices and require interaction with sales poeple 
 * OSS clients
 * Priced based on product and flags, not solely on the number of users
 * Support for SSO and 2fa for all plans
