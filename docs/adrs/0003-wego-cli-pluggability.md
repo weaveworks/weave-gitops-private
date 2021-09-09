@@ -110,8 +110,9 @@ The EE plugin could provide all flags and commands so that they are only in the 
 If we can relax stretch requirements 1 and 2 - we could add the commands for clusters, templates, and command flags but clearly indicate that they are enterprise-only features.  Many products have help strings with something similar to **(--enterprise only)**. The commands will look for either an entitlement/license and/or the presence of backend APIs to know if the user has permissions to execute this command.
 
 The wego CLI will replace the Multi-cluster control plane CLI, `mccp`, and the workspace CLI, `wk workspace`.  The profiles CLI, `pctl` will remain a separate CLI.  However, Weave GitOps will provide equivalent commands into `wego`.
+
 #### Pros
-* Single **CLI** codebase
+* Single **CLI** codebase _Refer to the sample code below on integrating profiles._
 * Single **CLI** for all Weave GitOps functionality 
 * Built-in advertising that some options are available if you upgrade
 * Easiest approach for development
@@ -146,3 +147,247 @@ We will take the Tolkien approach for the following reasons:
 * The CLI commands will be developed in the open using the wego-core public repository 
 * Enterprise-only changes will necessitate a new release of the Weave GitOps CLI - meaning core users will upgrade but receive no new capabilities
 * In addition to documentation, CLI release notes will need to clearly indicate changes between core and enterprise
+
+## Sample code
+Adding a `profile` command to wego would be similar to the following.  
+``` diff
+diff --git a/cmd/wego/main.go b/cmd/wego/main.go
+index e9918a5..f46036f 100644
+--- a/cmd/wego/main.go
++++ b/cmd/wego/main.go
+@@ -9,6 +9,7 @@ import (
+ 	"github.com/weaveworks/weave-gitops/cmd/wego/app"
+ 	"github.com/weaveworks/weave-gitops/cmd/wego/flux"
+ 	"github.com/weaveworks/weave-gitops/cmd/wego/gitops"
++	"github.com/weaveworks/weave-gitops/cmd/wego/profile"
+ 	"github.com/weaveworks/weave-gitops/cmd/wego/ui"
+ 	"github.com/weaveworks/weave-gitops/cmd/wego/version"
+ 	fluxBin "github.com/weaveworks/weave-gitops/pkg/flux"
+@@ -100,6 +101,7 @@ func main() {
+ 	rootCmd.AddCommand(ui.Cmd)
+ 
+ 	rootCmd.AddCommand(app.ApplicationCmd)
++	rootCmd.AddCommand(profile.RootCmd)
+ 
+ 	if err := rootCmd.Execute(); err != nil {
+ 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+diff --git a/cmd/wego/profile/add.go b/cmd/wego/profile/add.go
+new file mode 100644
+index 0000000..1af7448
+--- /dev/null
++++ b/cmd/wego/profile/add.go
+@@ -0,0 +1,40 @@
++/*
++Copyright © 2021 Weaveworks <support@weave.works>
++This file is part of CLI application wego.
++*/
++package profile
++
++import (
++	"fmt"
++
++	"github.com/spf13/cobra"
++)
++
++// addCmd represents the add command
++var addCmd = &cobra.Command{
++	Use:   "add",
++	Short: "A brief description of your command",
++	Long: `A longer description that spans multiple lines and likely contains examples
++and usage of using your command. For example:
++
++Cobra is a CLI library for Go that empowers applications.
++This application is a tool to generate the needed files
++to quickly create a Cobra application.`,
++	Run: func(cmd *cobra.Command, args []string) {
++		fmt.Println("add called")
++	},
++}
++
++func init() {
++	RootCmd.AddCommand(addCmd)
++
++	// Here you will define your flags and configuration settings.
++
++	// Cobra supports Persistent Flags which will work for this command
++	// and all subcommands, e.g.:
++	// addCmd.PersistentFlags().String("foo", "", "A help for foo")
++
++	// Cobra supports local flags which will only run when this command
++	// is called directly, e.g.:
++	// addCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
++}
+diff --git a/cmd/wego/profile/delete.go b/cmd/wego/profile/delete.go
+new file mode 100644
+index 0000000..2339371
+--- /dev/null
++++ b/cmd/wego/profile/delete.go
+@@ -0,0 +1,40 @@
++/*
++Copyright © 2021 Weaveworks <support@weave.works>
++This file is part of CLI application wego.
++*/
++package profile
++
++import (
++	"fmt"
++
++	"github.com/spf13/cobra"
++)
++
++// deleteCmd represents the delete command
++var deleteCmd = &cobra.Command{
++	Use:   "delete",
++	Short: "A brief description of your command",
++	Long: `A longer description that spans multiple lines and likely contains examples
++and usage of using your command. For example:
++
++Cobra is a CLI library for Go that empowers applications.
++This application is a tool to generate the needed files
++to quickly create a Cobra application.`,
++	Run: func(cmd *cobra.Command, args []string) {
++		fmt.Println("delete called")
++	},
++}
++
++func init() {
++	RootCmd.AddCommand(deleteCmd)
++
++	// Here you will define your flags and configuration settings.
++
++	// Cobra supports Persistent Flags which will work for this command
++	// and all subcommands, e.g.:
++	// deleteCmd.PersistentFlags().String("foo", "", "A help for foo")
++
++	// Cobra supports local flags which will only run when this command
++	// is called directly, e.g.:
++	// deleteCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
++}
+diff --git a/cmd/wego/profile/get.go b/cmd/wego/profile/get.go
+new file mode 100644
+index 0000000..1757d84
+--- /dev/null
++++ b/cmd/wego/profile/get.go
+@@ -0,0 +1,40 @@
++/*
++Copyright © 2021 Weaveworks <support@weave.works>
++This file is part of CLI application wego.
++*/
++package profile
++
++import (
++	"fmt"
++
++	"github.com/spf13/cobra"
++)
++
++// getCmd represents the get command
++var getCmd = &cobra.Command{
++	Use:   "get",
++	Short: "A brief description of your command",
++	Long: `A longer description that spans multiple lines and likely contains examples
++and usage of using your command. For example:
++
++Cobra is a CLI library for Go that empowers applications.
++This application is a tool to generate the needed files
++to quickly create a Cobra application.`,
++	Run: func(cmd *cobra.Command, args []string) {
++		fmt.Println("get called")
++	},
++}
++
++func init() {
++	RootCmd.AddCommand(getCmd)
++
++	// Here you will define your flags and configuration settings.
++
++	// Cobra supports Persistent Flags which will work for this command
++	// and all subcommands, e.g.:
++	// getCmd.PersistentFlags().String("foo", "", "A help for foo")
++
++	// Cobra supports local flags which will only run when this command
++	// is called directly, e.g.:
++	// getCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
++}
+diff --git a/cmd/wego/profile/root.go b/cmd/wego/profile/root.go
+new file mode 100644
+index 0000000..4268908
+--- /dev/null
++++ b/cmd/wego/profile/root.go
+@@ -0,0 +1,75 @@
++/*
++Copyright © 2021 Weaveworks <support@weave.works>
++This file is part of CLI application wego.
++*/
++package profile
++
++import (
++	"fmt"
++	"os"
++
++	"github.com/spf13/cobra"
++
++	"github.com/spf13/viper"
++)
++
++var cfgFile string
++
++// RootCmd represents the base command when called without any subcommands
++var RootCmd = &cobra.Command{
++	Use:   "profile",
++	Short: "A brief description of your application",
++	Long: `A longer description that spans multiple lines and likely contains
++examples and usage of using your application. For example:
++
++Cobra is a CLI library for Go that empowers applications.
++This application is a tool to generate the needed files
++to quickly create a Cobra application.`,
++	// Uncomment the following line if your bare application
++	// has an action associated with it:
++	// Run: func(cmd *cobra.Command, args []string) { },
++}
++
++// Execute adds all child commands to the root command and sets flags appropriately.
++// This is called by main.main(). It only needs to happen once to the RootCmd.
++func Execute() {
++	cobra.CheckErr(RootCmd.Execute())
++}
++
++func init() {
++	cobra.OnInitialize(initConfig)
++
++	// Here you will define your flags and configuration settings.
++	// Cobra supports persistent flags, which, if defined here,
++	// will be global for your application.
++
++	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.profile.yaml)")
++
++	// Cobra also supports local flags, which will only run
++	// when this action is called directly.
++	RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
++}
++
++// initConfig reads in config file and ENV variables if set.
++func initConfig() {
++	if cfgFile != "" {
++		// Use config file from the flag.
++		viper.SetConfigFile(cfgFile)
++	} else {
++		// Find home directory.
++		home, err := os.UserHomeDir()
++		cobra.CheckErr(err)
++
++		// Search config in home directory with name ".profile" (without extension).
++		viper.AddConfigPath(home)
++		viper.SetConfigType("yaml")
++		viper.SetConfigName(".profile")
++	}
++
++	viper.AutomaticEnv() // read in environment variables that match
++
++	// If a config file is found, read it in.
++	if err := viper.ReadInConfig(); err == nil {
++		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
++	}
++}
+```
