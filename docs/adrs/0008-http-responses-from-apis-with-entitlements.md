@@ -23,10 +23,18 @@ For the purposes of discussion here, "valid" entitlements mean that the signed
 JWT that contains the entitlement is considered valid by the JWT signature
 mechanism.
 
+To do this, the `exp` claim should not be used as the `licenced until` date,
+otherwise anything that parses the entitlement after it has expired (but while
+we continue to allow it to work), has to explicitly ignore the "expired" error
+when validating, this also means that we can set an `exp` date on an entitlement
+if we want to, and not alter the error handling for projects.
+
+## API call responses
+
 There are four possible entitlement states when an API is processing a request:
 
  * Entitlement is valid, and has not expired, and the feature is "entitled"
- * Entitlement is valid, but has expired, and the the feature is "entitled"
+ * Entitlement is valid, but has expired, and the feature is "entitled"
  * Entitlement is valid, and has not expired, but the feature is not "entitled"
  * Entitlement is "invalid", perhaps the secret is corrupted in the cluster
 
@@ -65,3 +73,13 @@ to minimise the cost of the checks.
    pre-existing entitlement
  * If the organisation tampers with the validation, then the components will
    break
+
+## Alternatives considered
+
+ * We could rely on the `exp` claim, but this means that code that handles
+   validation would always have to have a check for an expired entitlement
+   error, and ignore it.
+ * We could provide standard functions, similar to
+   [`http.Error`](https://pkg.go.dev/net/http#Error) and move the
+   rejection/header setting into the individual HTTP handlers, this increases
+   the cost, and the approach outlined above _does not_ preclude this.
