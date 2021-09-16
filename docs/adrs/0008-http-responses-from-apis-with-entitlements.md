@@ -38,7 +38,7 @@ There are four possible entitlement states when an API is processing a request:
  * Entitlement is valid, and has not expired, but the feature is not "entitled"
  * Entitlement is "invalid", perhaps the secret is corrupted in the cluster
 
-APIs that require "entitlement" should should validate the entitlement token and
+APIs that require "entitlement" should validate the entitlement token and
 respond as follows:
 
 ### Entitlement is valid, and has not expired, and the feature is "entitled"
