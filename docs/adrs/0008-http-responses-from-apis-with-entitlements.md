@@ -17,6 +17,9 @@ period of time.
 Currently, it's expected that even after an entitlement has expired, we should
 not terminate the functionality that it provided.
 
+Specifically, this document is only concerned with server-side behaviour in APIs
+that require entitlements, there is nothing a client can do to influence this.
+
 ## Decision
 
 For the purposes of discussion here, "valid" entitlements mean that the signed
@@ -31,12 +34,15 @@ if we want to, and not alter the error handling for projects.
 
 ## API call responses
 
-There are four possible entitlement states when an API is processing a request:
+There are six possible entitlement states when an API is processing a request:
 
  * Entitlement is valid, and has not expired, and the feature is "entitled"
  * Entitlement is valid, but has expired, and the feature is "entitled"
  * Entitlement is valid, and has not expired, but the feature is not "entitled"
  * Entitlement is "invalid", perhaps the secret is corrupted in the cluster
+ * Entitlement is missing, and the API being accessed requires an entitlement
+ * Entitlement is missing, and the API being access does not require an
+   entitlement
 
 APIs that require "entitlement" should validate the entitlement token and
 respond as follows:
@@ -51,12 +57,22 @@ appropriate message indicating that the entitlement has expired e.g. _Your
 entitlement has expired, please contact Weave Works_.
 
 ### Entitlement is valid, and has not expired, but the feature is not "entitled"
-This should be a 401 response, the request is not authorised, and we should log
+This should be a 403 response, the request is not authorised, and we should log
 out details of the missing entitlement.
 
 ###  Entitlement is "invalid", perhaps the secret is corrupted in the cluster
 This should be a 500 response, with an appropriate message logged out by the
 component.
+
+
+### Entitlement is missing, and the API being accessed requires an entitlement
+This should be a 403 response because the definition for the 403 response is:
+
+> The request contained valid data and was understood by the server, but the
+> server is refusing action.
+
+### Entitlement is missing, and the API being access does not require an entitlement
+This should be passed through normally.
 
 It's expected that we'll provide standard HTTP middlewares to handle most of
 this, and further that the loaded entitlements will be cached at process startup
