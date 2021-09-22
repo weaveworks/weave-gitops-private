@@ -18,7 +18,7 @@ The designers realized early on in the discussions that including the automation
 As a result of the requirements mentioned above, we implemented a model in which a user provides an `app-config-url` when deploying an application. This URL flag indicates where the automation should reside:
 - app-config-url=NONE (only in the cluster, not stored in any repository)
 - app-config-url="" (the default, stored in a `.wego` directory within an application repository)
-- app-config-url=<URL> (stored in a separate automation repository)
+- app-config-url=&lt;URL> (stored in a separate automation repository)
 
 We do not currently store the automation for Weave GitOps itself outside of the cluster as we planned to store it in the platform repository once we had one. We don't store the automation for a particular application's automation outside the cluster either (we have automation _for an application's automation_ because we want to manage the application's automation itself via GitOps allowing upgrade via pull requests, etc.). We currently have an issue with `gitops app remove` because that meta-automation resides only in the cluster. This prevents us from removing the application automation and _its_ automation together with a pull request. We have to remove the meta-automation directly from the cluster. This presents a chicken-and-egg problem. If we remove the meta-automation at the time we call `gitops app remove`, the associated pull request might remain unmerged for an arbitrarily long time leaving the system in a broken state. Alternatively, if we wait until a user merges the pull request, we have no way of knowing that we should then remove the meta-automation (without implementing a controller to track the relationship).
 
