@@ -8,7 +8,7 @@ Accepted
 
 ## Context
 
-Currently, there is ambiguity around the GitOps repository and whether users can, or should, have multiple GitOps repositories referenced from a single cluster.  Supporting multiple GitOps repositories for a single cluster complicates the customers' environment and complicates the APIs, CLIs, and WebUI for Weave GitOps.  Here are some questions/issues that will need to address if we are to support multiple GitOps repositories in a single cluster: 
+Currently, there is ambiguity around the GitOps repository and whether users can, or should, have multiple GitOps repositories referenced from a single cluster.  Supporting multiple GitOps repositories for a single cluster complicates the customers' environment and complicates the APIs, CLIs, and WebUI for Weave GitOps.  Here are some questions/issues that we will need to address if we are to support multiple GitOps repositories in a single cluster: 
   * Which repository contains the GitOps Runtime
   * When creating a cluster, which GitOps repository should own it
   * When adding a profile or application, which repository should it go into
