@@ -36,10 +36,6 @@ For this ADR, we are trying a new approach.  Instead of long prose describing th
 * **Environment** a collection of manifests that adapt an application's manifests for one or more clusters.  For example, you might be running the same image, different SQS, and different replicas across clusters. The production-eu and production-us environments run my-org/my-service-image:v0.1.1, but production-us uses another ARN for the SQS queue and increases the number of replicas.  Environment manifests are stored in .weave-gitops/apps/&lt;app name&gt;/env/&lt;environment name&gt;/
 * **GOAT** GitOps AuTomation - representing the resources needed to drive the GitOps pipeline.  Specifically, Flux source resources (GitRepository, Bucket, etc.), Flux Kustomization resources, and potentially HelmReleases.
 * **GORT** GitOps RunTime - the CRDs, controllers, RBAC, service accounts, etc., necessary to operate the GOAT resources.
-* **Profile** a software package  stored in .weave-gitops/profiles/&lt;profile name&gt; see https://profiles.dev/ for complete details.  Profiles can have versions and environments which follow the same pattern as apps.  Profiles are comprised of one or more of the following:
-    * Kubernetes manifests
-    * helm charts
-    * other profiles.
 * **Version** an app or profile may append `@semver` to the name to indicate a new version.  Note: the use of versions is optional. Their use would likely only be used in environments where the list of applications is small and change infrequently.  See the FAQ below on using branches or tags to achieve a more traditional git experience. Appending this to a name of an application is considered a new application.  The syntax is a suggestion of one way to denote the application has changed.  
 
 ### FAQ
@@ -152,8 +148,6 @@ Example CODEOWNERS file in GitHub
 
 **Q. What is the difference between apps and profiles?**
 
-**A.** [Profiles][profiles] provide a standard way to package, find, install, define and resolve dependencies, upgrade, version, and configure Kubernetes workloads. They can be composed of yaml manifests, helm charts, and other profiles. Profiles generally are system-level workloads and are primarily referenced from the `system` directory.  Apps are a collection of yaml manifests or a helm chart. Apps are typically user workloads deployed to clusters and primarily referenced from the `user` directory. Another way to think about them is `system` is similar to `/usr/bin` while `user` is similar to `/usr/local/bin`.
-
 **Q. I keep all my application manifests in a mono repo using tags for releases. How can I control what application version is deployed to what cluster?**
 
 **A.** Each application in the wego directory within the wego repo will have a git source and Kustomization. The git source will refer to your mono repo plus a repo ref (commit sha, tag, branch).  The Kustomization file will refer to the path to your application manifests.  Your clusters will have a git source and Kustomization pointing to the wego repo and the path of the application.  
@@ -165,7 +159,7 @@ By following this git-ref strategy, you can leverage git for operations like dif
 See [versioning and promotion](#versinoing-and-promotion) later in the ADR 
 ## Decision
 
-Switch to the directory structure with three top-level entries (apps, clusters, profiles) with support for versions and environments. Leverage kustomize with environments containing overlays to specialize applications for clusters. Clusters have two levels of workloads: System used for cluster-wide and platform level services, and User used for applications. The GOAT(s) for System and User lives in System. The GORT will be a profile in the System.
+Switch to the directory structure with three top-level entries (apps, clusters) with support for versions and environments. Leverage kustomize with environments containing overlays to specialize applications for clusters. Clusters have two levels of workloads: System used for cluster-wide and platform level services, and User used for applications. The GOAT(s) for System and User lives in System. The GORT will be a profile in the System.
 
 ```bash
 .weave-gitops/
@@ -175,16 +169,13 @@ Switch to the directory structure with three top-level entries (apps, clusters, 
 │   │       ├── dev
 │   │       └── dev-eu
 │   └── capi
-├── clusters
-│   ├── dev-eu-fcabbe8
-│   │   ├── system
-│   │   └── user
-│   └── management-hub
-│       ├── system
-│       └── user
-└── profiles
-    ├── loki
-    └── platform.wego.weave.works
+└── clusters
+    ├── dev-eu-fcabbe8
+    │   ├── system
+    │   └── user
+    └── management-hub
+        ├── system
+        └── user
 ```
 See below for a complete example.
 
