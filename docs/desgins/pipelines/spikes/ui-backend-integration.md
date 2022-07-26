@@ -40,12 +40,84 @@ In order the UI to follow a pipeline execution, the following three alternatives
 
 ![CRD Alternative](imgs/ui-integration-alternative-1.png)
 
+the api endpoint could look like
+
+```json
+ "/v1/pipelines/{name}/executions": {
+      "get": {
+        "operationId": "Pipelines_GetPipelineExecutions",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/GetPipelineExecutionResponse"
+            }
+          },
+        },
+        "parameters": [
+        // search filters
+        ],
+      }
+    },
+``` 
+
+```protobuf
+message GetPipelineExecutionResponse {
+  ...
+  PipelineExecution pipelineExecution;
+  ...
+}
+```
+
+```yaml
+apiVersion: gitops.weave.works/v1alpha1
+kind: PipelineExecution
+metadata:
+  name: my-hello-pipeline-execution-abc123
+  ...
+spec:
+  params:
+  - name: HELLO
+    value: Hello World!
+  trigger:
+    # info about the trigger
+  pipelineRef:
+    name: my-hello-pipeline
+    namespace: hello-world
+status:
+  conditions:
+  - lastTransitionTime: "2022-04-07T12:34:58Z"
+    message: 'Environment Completed: 3 (Failed: 0, Canceled 0), Skipped: 0'
+    reason: Succeeded
+    status: "True"
+    type: Succeeded
+  environments:
+  - name: dev 
+    order: 0 
+    status:
+      # status field info with for example
+      type: Succeeded
+      time: now - 2 
+  - name: test
+    order: 1
+    statusInfo: 
+      # status field info with for example
+      type: Succeeded
+      time: now - 1 
+```
+
 **Pro** 
 - Single document to represent the execution of a pipeline 
-- CRD so out of the box CRD benefits like versioning or validation //TODO: review  
+- CRD so out of the box CRD benefits like versioning or validation 
+//TODO: review  
 
 **Cons**
 - TBA
+
+This concept is being for example explored within 
+
+- [Tekton](https://tekton.dev/docs/pipelines/pipelineruns/#overview)
+
 
 ### To consume flux/deployment events and do the orchestration logic within the UI.
 
@@ -59,10 +131,58 @@ In order the UI to follow a pipeline execution, the following three alternatives
   - exposing our business logic means to potentially expose our competitive advantage
   - limits extensibility as we cannot integrate with other experience layers or via duplicating effort 
 
+This solution is not viable so no longer explored. 
 
 ### To gather the pipeline execution logic within a configmap. UI to consume these configmaps.
 
 ![ConfigMap Alternative](imgs/ui-integration-alternative-3.png)
+
+the api endpoint could look like
+
+```json
+ "/v1/pipelines/{name}/executions": {
+      "get": {
+        "operationId": "Pipelines_GetPipelineExecutions",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/GetPipelineExecutionResponse"
+            }
+          },
+        },
+        "parameters": [
+        // search filters
+        ],
+      }
+    },
+``` 
+
+```protobuf
+message GetPipelineExecutionResponse {
+  ...
+  ConfigMap pipelineExecution;
+  ...
+}
+```
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-hello-world-pipeline-execution
+data:
+  #metadata could be also annotations or similar
+  #pipeline ref properties
+  pipeline_name: "my-hello-pipeline"
+  pipeline_namespace: "hello-world"
+  #status examples
+  environment_0_name: "dev"
+  environment_0_status: "succeded"
+  environment_1_name: "test"
+  environment_1_status: "succeded"
+  
+```
 
 **Pro**
 - Configmaps are first-class kube citizens so reduces maintenance solution effort.  
@@ -72,21 +192,14 @@ In order the UI to follow a pipeline execution, the following three alternatives
 - Validation not out of the box
 - They are namespaced so might impose constraints on the access patterns    
 
+## Recommendation (with limitations) 
+- To be added once draft is completed
 
-## Alternatives evaluation summary  
+## Path
+- Resolve limitations and assumptions section to align and complete this section
 
-- Pipeline Execution 
-- UI Orchestration: discarded as not viable solution. 
-- Configmap
-- 
-
-
-
-## More info needed
-
-- Define roles and responsibilities for execution entities by role
-
-
+## Metadata
+- Status: Draft in progress. Depends on previous spikes.
 
 ## References
 
