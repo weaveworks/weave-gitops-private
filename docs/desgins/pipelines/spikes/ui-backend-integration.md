@@ -22,9 +22,10 @@ This includes the context assumptions or dependencies we need to make in order t
 
 - A [pipeline definition](https://github.com/weaveworks/weave-gitops-enterprise/issues/1076) exists from a previous spike
 - A `pipeline execution` is the entity/contract between 
-  - this spike reads the execution entity  
-  - https://github.com/weaveworks/weave-gitops-enterprise/issues/1084 writes the execution entity
-  - we could resolve `pipelines` from `pipeline executions`
+  - this spike reads the execution entity and 
+  - https://github.com/weaveworks/weave-gitops-enterprise/issues/1083 that might create it
+  - https://github.com/weaveworks/weave-gitops-enterprise/issues/1084 that might update it
+  - we could resolve `pipelines` from `pipeline executions` 
 
 ## Alternatives
 
