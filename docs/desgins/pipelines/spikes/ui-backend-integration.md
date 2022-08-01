@@ -27,15 +27,73 @@ This includes the context assumptions or dependencies we need to make in order t
   - https://github.com/weaveworks/weave-gitops-enterprise/issues/1084 that might update it
   - we could resolve `pipelines` from `pipeline executions` 
 
+### Pipelines by label approach
+
+https://github.com/weaveworks/weave-gitops-private/pull/54/files
+
+- Pipeline definition as `HelmRelease` with labels `pipelines.wego.weave.works/name` and `pipelines.wego.weave.works/stage`
+- Pipeline status as  `HelmRelease` status from flux
+```sh
+$$ kubectl get hr -A -o jsonpath='{range .items[*]}{.metadata.name}/{.metadata.labels.pipelines\.weave\.works/stage}/{.status.lastAppliedRevision}: {@.status.conditions[?(@.type=="Ready")].status}{"\n"}{end}' -l pipelines.weave.works/name=podinfo
+podinfo/0/6.1.6: True
+podinfo/1/6.1.0: True
+```
+
+
 ## Alternatives
 
 In order the UI to follow a pipeline execution, the following three alternatives has been identified 
 
-1. To create an api endpoint that serves `pipeline execution` resources (CRD). 
+1. To create an api endpoint that serves `pipeline execution` from CRD  
 2. To consume flux/deployment events and do the orchestration logic within the UI.
 3. To gather the pipeline execution logic within a configmap. UI to consume these configmaps.  
+4. To create an api endpoint that serves `pipeline execution` from labels.
 
-//TODO diagrams https://github.com/mermaid-js/mermaid#readme
+
+### To create an api endpoint that serves `pipeline execution` from labels.
+
+```json
+ "/v1/pipelines/{name}/executions": {
+      "get": {
+        "operationId": "Pipelines_GetPipelineExecutions",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/GetPipelineExecutionResponse"
+            }
+          },
+        },
+        "parameters": [
+        // search filters
+        ],
+      }
+    },
+``` 
+
+```protobuf
+message GetPipelineExecutionResponse {
+  PipelineExecution pipelineExecution;
+}
+
+//discover pipeline by labels pipelines.wego.weave.works/name
+message PipelineExecution {
+  string name; 
+  string application;
+  PipelineEnvironment environments;
+}
+
+//discover pipeline stages by labels pipelines.wego.weave.works/stage
+//this information comes from HelmRelease status 
+message PipelineEnvironment {
+  string name;
+  string status;
+  string version;
+  string message;
+  // other options
+}
+```
+
 
 ### To create an api endpoint that serves `pipeline execution` resources (CRD).
 
