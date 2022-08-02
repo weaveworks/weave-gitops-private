@@ -4,34 +4,23 @@ about: Create a report to help us improve
 title: ''
 labels: cve
 assignees: ''
-
 ---
-Investigation done in https://github.com/weaveworks/weave-gitops-enterprise/issues/1115#issuecomment-1190135214
 
-[CVE Handling process
-](https://docs.google.com/document/d/15vsta8H4gXQkpSjRVTQH1o3KrwgOY5H4c8ydNgrHt-I/edit)
+## CVE Handling 
 
-- [x] Weaveworks team receives a notification about a security vulnerability, acknowledges it, and creates a private issue to track its progress.
-    - Kevin raised concerns after reading https://blog.argoproj.io/2022-argo-external-security-audit-lessons-learned-951f80e0450d
-- [x] The vulnerability is treated as highest priority and directed to the respective product or services team.
-- [x] The product or services team evaluates the vulnerability with help from the Weaveworks security team.
-- [x] ~If the vulnerability does not pose a threat to the product or service, Weaveworks responds back with proper reasoning.~ It does.
-- [x] ~If the reported vulnerability is an actual threat, Weaveworks responds back, accepting the issue.~ Internally discovered
-- [x] The product team provides a workaround, if available to the reporter.
-- [x] The product team works to identify a fix and produce a time estimation (ETA) to create the patch for the product or service.
-    - We just tried to fix it as asap. It took us about ~1week to release rc versions of both core/ee that had a fix.
-- [x] Weaveworks add a 1-month buffer to the ETA to come up with a proposed public announcement date.
-    - To make it public August 27th 2022
-- [x] ~According to Weaveworks responsible disclosure ethics, we inform the public announcement date to the issue reporter first. If the reporter agrees to making the vulnerability information public, then the information will be announced after the previously set public announcement date.~
-    - Discovered internally.
+- [ ] Weaveworks team receives a notification about a security vulnerability, acknowledges it, and creates a private issue to track its progress.
+- [ ] The vulnerability is treated as highest priority and directed to the respective product or services team.
+- [ ] The product or services team evaluates the vulnerability with help from the Weaveworks security team.
+- [ ] If the vulnerability does not pose a threat to the product or service, Weaveworks responds back with proper reasoning.
+- [ ] If the reported vulnerability is an actual threat, Weaveworks responds back, accepting the issue.
+- [ ] The product team provides a workaround, if available to the reporter.
+- [ ] The product team works to identify a fix and produce a time estimation (ETA) to create the patch for the product or service.
+- [ ] Weaveworks add a 1-month buffer to the ETA to come up with a proposed public announcement date.
+- [ ] According to Weaveworks responsible disclosure ethics, we inform the public announcement date to the issue reporter first. If the reporter agrees to making the vulnerability information public, then the information will be announced after the previously set public announcement date.
 - [ ] Initiate the patch creation process.
-    - ? Describe steps to apply the fix to a deployment ? (probably upgrading to a new release, but perhaps not always).
 - [ ] Create a Security Advisory for the vulnerability, informing its impact and the mitigation steps.
-    - Started [CVE-1126](https://docs.google.com/document/d/1rXGLZKXus9DnmToMBiDZ7sTMkG-luW9AutLLoffrwjQ)
 - [ ] The patch/update is provided to the reporter and all affected customers.
-    - Create a list of effected customers etc, who owns this? Maybe CX.
 - [ ] A public security advisory will be issued after all the patches are issued to the customers and the buffer period is exceeded.
-    - Where does this go? On a blog? website? Talk to marketing about timing / wording?
 
 ## Details
 
