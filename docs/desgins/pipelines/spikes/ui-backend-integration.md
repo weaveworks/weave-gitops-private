@@ -4,28 +4,33 @@ It aims to document the spike done in the context of cd pipelines about integrat
 ## Glossary 
 
 - Pipeline: define application deployment across environment 
-- Pipeline Execution: an instance of a pipeline being executed so application being deployed through environments.
+- Pipeline Status: an instance of a pipeline being executed so application being deployed through environments.
+- Pipeline History: a list of pipeline 
 
 ## Problem statement 
-Two main user stories could be considered within this integration 
+Two main user stories to be considered in this spike for this version 0.1 is 
 
-1. As gitops user I want to discover pipelines or list pipelines. 
-2. As gitops user I want to discover pipeline executions or list pipeline execution.
-3. As gitops user I want to follow a pipeline execution or pipeline execution details.
+- As gitops user with an application and a pipeline defined for that application. I want to be able to follow how an application 
+change gets delivered to different environments.
 
-This document focuses on entity pipeline execution so 2) and 3) while 1) should be addressed in the context of [pipeline 
-definition spike](https://github.com/weaveworks/weave-gitops-enterprise/issues/1076)
+This spike works out solutions for enabling the user experience to provide that information to the user.
 
-## Assumptions and Dependencies 
+## Assumptions and Dependencies and out of scope
 
+**Out of the scope**
+- Any pipeline capability which is not making visible the delivery of the last change to an app. For example, pipeline history.
+
+**Assumptions**
 This includes the context assumptions or dependencies we need to make in order to complete the picture
 
-- A [pipeline definition](https://github.com/weaveworks/weave-gitops-enterprise/issues/1076) exists from a previous spike
+- A [pipeline definition](https://github.com/weaveworks/weave-gitops-enterprise/issues/1076) exists from a previous spike. 
 - A `pipeline execution` is the entity/contract between 
   - this spike reads the execution entity and 
   - https://github.com/weaveworks/weave-gitops-enterprise/issues/1083 that might create it
   - https://github.com/weaveworks/weave-gitops-enterprise/issues/1084 that might update it
   - we could resolve `pipelines` from `pipeline executions` 
+
+Alternatives used are shown below 
 
 ### Pipelines by label approach
 
@@ -38,29 +43,129 @@ $$ kubectl get hr -A -o jsonpath='{range .items[*]}{.metadata.name}/{.metadata.l
 podinfo/0/6.1.6: True
 podinfo/1/6.1.0: True
 ```
+### Pipelines by CRD approach
 
+From https://github.com/rparmer/pipelines
+As simplification for this spike we are just considering [full crd approach](https://github.com/rparmer/pipelines#full-crd-approach)
+
+- Pipeline definition as `HelmRelease` with labels `pipelines.wego.weave.works/name` and `pipelines.wego.weave.works/stage`
+```yaml
+apiVersion: wego.weave.works/v1alpha2
+kind: Pipeline
+metadata:
+  name: example-pipeline
+  namespace: flux-system
+spec:
+  stages:
+    - name: dev
+      namespace: dev
+      order: 1
+      releaseRefs: # list of `Kustomization` or `HelmRelease` objects. They MUST be in the defined stage namespace
+        - name: podinfo-pipeline-helm
+          kind: HelmRelease
+        - name: dev # name of kustomization object (doesn't have to match stage name)
+          kind: Kustomization
+    - name: staging
+      namespace: staging
+      order: 2
+      releaseRefs:
+        - name: podinfo-pipeline-helm
+          kind: HelmRelease
+        - name: staging
+          kind: Kustomization
+    - name: prod
+      namespace: prod
+      order: 3
+      releaseRefs:
+        - name: podinfo-pipeline-helm
+          kind: HelmRelease
+        - name: prod
+          kind: Kustomization
+```
+- Pipeline status not identified. Assuming a similar approach to `labels` alternative where we could check the status of the execution 
+
+```yaml
+apiVersion: wego.weave.works/v1alpha2
+kind: Pipeline
+metadata:
+  name: example-pipeline
+  namespace: flux-system
+spec:
+  stages:
+    - name: dev
+      namespace: dev
+      order: 1
+      releaseRefs: # list of `Kustomization` or `HelmRelease` objects. They MUST be in the defined stage namespace
+        - name: podinfo-pipeline-helm
+          kind: HelmRelease
+        - name: dev # name of kustomization object (doesn't have to match stage name)
+          kind: Kustomization
+    - name: staging
+      namespace: staging
+      order: 2
+      releaseRefs:
+        - name: podinfo-pipeline-helm
+          kind: HelmRelease
+        - name: staging
+          kind: Kustomization
+    - name: prod
+      namespace: prod
+      order: 3
+      releaseRefs:
+        - name: podinfo-pipeline-helm
+          kind: HelmRelease
+        - name: prod
+          kind: Kustomization
+status:
+  conditions:
+    - lastTransitionTime: "2022-04-07T12:34:58Z"
+      message: 'Environment Completed: 3 (Failed: 0, Canceled 0), Skipped: 0'
+      reason: Succeeded
+      status: "True"
+      type: Succeeded
+  environments:
+    - name: dev
+      order: 0
+      status:
+        # status field info with for example
+        type: Succeeded
+        time: now - 2
+    - name: staging
+      order: 1
+      statusInfo:
+        # status field info with for example
+        type: Succeeded
+        time: now - 1
+    - name: prod
+      order: 1
+      statusInfo:
+        # status field info with for example
+        type: Succeeded
+        time: now
+```
 
 ## Alternatives
 
 In order the UI to follow a pipeline execution, the following three alternatives has been identified 
 
-1. To create an api endpoint that serves `pipeline execution` from CRD  
-2. To consume flux/deployment events and do the orchestration logic within the UI.
-3. To gather the pipeline execution logic within a configmap. UI to consume these configmaps.  
-4. To create an api endpoint that serves `pipeline execution` from labels.
+1. To create an api endpoint that serves `pipeline` from labels.
+2. To create an api endpoint that serves `pipeline` from CRD.
+3. To create an api endpoint that serves `pipeline execution` from CRD  
+4. To consume flux/deployment events and do the orchestration logic within the UI.
+5. To gather the pipeline execution logic within a configmap. UI to consume these configmaps.  
 
 
 ### To create an api endpoint that serves `pipeline execution` from labels.
 
 ```json
- "/v1/pipelines/{name}/executions": {
+ "/v1/pipelines/{name}": {
       "get": {
-        "operationId": "Pipelines_GetPipelineExecutions",
+        "operationId": "Pipelines_GetPipeline",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/GetPipelineExecutionResponse"
+              "$ref": "#/definitions/GetPipelinenResponse"
             }
           },
         },
@@ -72,20 +177,20 @@ In order the UI to follow a pipeline execution, the following three alternatives
 ``` 
 
 ```protobuf
-message GetPipelineExecutionResponse {
-  PipelineExecution pipelineExecution;
+message GetPipelineResponse {
+  Pipeline pipeline;
 }
 
 //discover pipeline by labels pipelines.wego.weave.works/name
-message PipelineExecution {
+message Pipeline {
   string name; 
   string application;
-  PipelineEnvironment environments;
+  PipelineEnvironmentStatus environments;
 }
 
 //discover pipeline stages by labels pipelines.wego.weave.works/stage
 //this information comes from HelmRelease status 
-message PipelineEnvironment {
+message PipelineEnvironmentStatus {
   string name;
   string status;
   string version;
@@ -94,6 +199,95 @@ message PipelineEnvironment {
 }
 ```
 
+### To create an api endpoint that serves `pipeline` from CRD.
+
+Same as previous alternative but instead of constructing an entity, we just return the pipeline entity that already 
+exists in the API 
+
+```json
+ "/v1/pipelines/{name}": {
+      "get": {
+        "operationId": "Pipelines_GetPipeline",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/GetPipelinenResponse"
+            }
+          },
+        },
+        "parameters": [
+        // search filters
+        ],
+      }
+    },
+``` 
+
+```protobuf
+message GetPipelineResponse {
+  Pipeline pipeline;
+}
+```
+
+```yaml
+apiVersion: wego.weave.works/v1alpha2
+kind: Pipeline
+metadata:
+  name: example-pipeline
+  namespace: flux-system
+spec:
+  stages:
+    - name: dev
+      namespace: dev
+      order: 1
+      releaseRefs: # list of `Kustomization` or `HelmRelease` objects. They MUST be in the defined stage namespace
+        - name: podinfo-pipeline-helm
+          kind: HelmRelease
+        - name: dev # name of kustomization object (doesn't have to match stage name)
+          kind: Kustomization
+    - name: staging
+      namespace: staging
+      order: 2
+      releaseRefs:
+        - name: podinfo-pipeline-helm
+          kind: HelmRelease
+        - name: staging
+          kind: Kustomization
+    - name: prod
+      namespace: prod
+      order: 3
+      releaseRefs:
+        - name: podinfo-pipeline-helm
+          kind: HelmRelease
+        - name: prod
+          kind: Kustomization
+status:
+  conditions:
+    - lastTransitionTime: "2022-04-07T12:34:58Z"
+      message: 'Environment Completed: 3 (Failed: 0, Canceled 0), Skipped: 0'
+      reason: Succeeded
+      status: "True"
+      type: Succeeded
+  environments:
+    - name: dev
+      order: 0
+      status:
+        # status field info with for example
+        type: Succeeded
+        time: now - 2
+    - name: staging
+      order: 1
+      statusInfo:
+        # status field info with for example
+        type: Succeeded
+        time: now - 1
+    - name: prod
+      order: 1
+      statusInfo:
+        # status field info with for example
+        type: Succeeded
+        time: now
+```
 
 ### To create an api endpoint that serves `pipeline execution` resources (CRD).
 
