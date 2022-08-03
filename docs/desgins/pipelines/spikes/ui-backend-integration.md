@@ -43,6 +43,10 @@ $$ kubectl get hr -A -o jsonpath='{range .items[*]}{.metadata.name}/{.metadata.l
 podinfo/0/6.1.6: True
 podinfo/1/6.1.0: True
 ```
+
+
+
+does not have a consolidated pipeline state view, to be created in the pipeline api integration, shoulds too haeav
 ### Pipelines by CRD approach
 
 From https://github.com/rparmer/pipelines
@@ -155,7 +159,7 @@ In order the UI to follow a pipeline execution, the following three alternatives
 5. To gather the pipeline execution logic within a configmap. UI to consume these configmaps.  
 
 
-### To create an api endpoint that serves `pipeline execution` from labels.
+### To create an api endpoint that serves `pipeline` from labels.
 
 ```json
  "/v1/pipelines/{name}": {
@@ -198,6 +202,15 @@ message PipelineEnvironmentStatus {
   // other options
 }
 ```
+
+**Pro**
+- It would address our scenario 
+
+**Cons**
+- Needed a service layer to calculate a pipeline state view. 
+- To have this responsibility within the api / integration layer sounds expensive 
+  if calculated at each request or complex in case that requires some caching mechanism.  
+
 
 ### To create an api endpoint that serves `pipeline` from CRD.
 
@@ -289,6 +302,14 @@ status:
         time: now
 ```
 
+**Pro**
+- It would address our need.
+- Integration layer does not need to create a pipeline view.
+
+**Cons**
+- Not defined who would be updating the status in a pipeline resource. 
+
+
 ### To create an api endpoint that serves `pipeline execution` resources (CRD).
 
 ![CRD Alternative](imgs/ui-integration-alternative-1.png)
@@ -365,7 +386,8 @@ status:
 //TODO: review  
 
 **Cons**
-- TBA
+- Given there is already a pipeline resource directly or indirectly been referenced, and it supports the use story we are 
+aiming at this iteration. to add a new entity it would only add complexity and overhead. 
 
 This concept is being for example explored within 
 
@@ -442,14 +464,29 @@ data:
 - No controller needed
 
 **Cons**
+- Given there is already a pipeline resource directly or indirectly been referenced, and it supports the use story we are
+  aiming at this iteration. to add a new entity it would only add complexity and overhead.
 - Validation not out of the box
 - They are namespaced so might impose constraints on the access patterns    
 
-## Recommendation (with limitations) 
-- To be added once draft is completed
+## Recommendation (with limitations)
+
+It is recommended to align to the pipeline definition so considering as potential alternatives
+
+- Pipelines based on labels 
+- Pipelines based on CRDs
+
+So solutions not based on existing pipeline definitions are not recommended. 
+
+From these two alternatives, we find the same limitation, not answered how a pipeline state view is created in the backend.
+This is a dependency on other spikes not yet completed
+- https://github.com/weaveworks/weave-gitops-enterprise/issues/1083 that might create it
+- https://github.com/weaveworks/weave-gitops-enterprise/issues/1084 that might update it
+
+Beyond that limitation, to create a view out of the labels would be an O(n) or O(n log n) while out of CRD would be O(1)
 
 ## Path
-- Resolve limitations and assumptions section to align and complete this section
+- Resolve limitations with team on the pipeline state creation.
 
 ## Metadata
 - Status: Draft in progress. Depends on previous spikes.
