@@ -1,5 +1,5 @@
 # UI Backend integration spike 
-It aims to document the spike done in the context of cd pipelines about integrating pipelines ui and backend. 
+It aims to document the spike done in the context of cd pipelines about integrating pipelines ui and backend.
 
 ## Glossary 
 
@@ -13,9 +13,14 @@ Two main user stories to be considered in this spike for this version 0.1 is
 - As gitops user with an application and a pipeline defined for that application. I want to be able to follow how an application 
 change gets delivered to different environments.
 
-This spike works out solutions for enabling the user experience to provide that information to the user.
+This spike works out solutions for enabling the user experience to provide that information to the user. 
 
 ## Assumptions and Dependencies and out of scope
+
+**Notes**
+- The solutions in this document are not meant to be prescriptive but the building blocks for the solution. The aim
+of the spike is to discover the solution but the concrete design of it should be done over the one agreed by the team in their proper
+stories.
 
 **Out of the scope**
 - Any pipeline capability which is not making visible the delivery of the last change to an app. For example, pipeline history.
