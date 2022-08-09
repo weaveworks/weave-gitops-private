@@ -43,7 +43,8 @@ At the back of our needs OSS / Enterprise, it was decided to have two code bases
 **Approval Date**
 **Authors**
 - Eneko
-- Kevin/ Steve / Mazz / James / Liz / Alexis?
+- Kevin/ Richard / Steve / Mazz / James / Liz / Alexis 
+- Who else might have the context?
 
 ## References
 
