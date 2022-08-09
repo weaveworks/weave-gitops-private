@@ -37,13 +37,12 @@ To have an enterprise-first approach reduces risk to deliver against our main en
 [OKR#2: Add features that drive Weave GitOps enterprise customer conversion](https://docs.google.com/presentation/d/104b4ThKT78rznucxw6kMsrRY0OnEn6XanSvb039TA-g/edit#slide=id.gd1cb39726e_19_8)
 
 
-## Monitor
-// identify at the back of the consequences, how to evaluate over the fi
-
 ## Metadata
 
-**Date** 2022-0-09
-**Approval Date**
+**Date** 2022-08-09
+
+**Approval Date** 2022-08-1x
+
 **Authors**
 
 - Ahmed
@@ -56,11 +55,6 @@ To have an enterprise-first approach reduces risk to deliver against our main en
 - Russell
 - Yiannis
 
-## References
 
-Example of conversations that motivated the ADR
-- https://weaveworks.slack.com/archives/C03QNK53W68/p1659690135054569
-- https://weaveworks.slack.com/archives/CMDJFD3P0/p1659693285668129
-- https://weaveworks.slack.com/archives/CGRMRRJCC/p1659717410323449
 
 
