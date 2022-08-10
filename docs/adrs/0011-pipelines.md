@@ -19,7 +19,7 @@ and tradeoffs done for that decision.
 ## Decision
 
 Pipelines implementation will start by using the `hybrid` solution and evolve the solution accordingly to emerging requirements
-(if needed). This solution offers has been decided as it offers a balanced approach in terms of 
+(if needed). This solution has been decided as it offers a balanced approach in terms of 
 - simplicity: to start shipping towards 0.1 without the complexity that other solutions like `full crd` could impose in terms of machinery.   
 - performance: provides a better query path experience than solutions like purely `label` alternative.
 - flexible for the unknowns: it is flexible enough to reduce risks towards 1.0. 
