@@ -10,7 +10,7 @@ As part of Weave GitOps, the Sunglow team is working on delivering Continuous De
 
 The past week has been used for doing discovery on designing a solution that could help us working in the context
 of the two main milestones named as (0.1) and (1.0). The design work has been documented in 
-[the following RFC](/Users/enekofb/projects/github.com/weaveworks/weave-gitops-private/docs/rfcs/0001-pipelines/README.md)
+[this RFC](/Users/enekofb/projects/github.com/weaveworks/weave-gitops-private/docs/rfcs/0001-pipelines/README.md).
 
 This ADR writes down the decision taken by the team regarding which alternative to start with and the consequences 
 and tradeoffs done for that decision. 
