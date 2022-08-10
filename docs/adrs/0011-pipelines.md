@@ -6,8 +6,7 @@ Proposed
 
 ## Context
 
-As part of Weave GitOps, Sunglow team is working on delivering Continuous Delivery Pipelines based in the following 
-[initiative](https://www.notion.so/weaveworks/CD-Pipeline-39a6df44798c4b9fbd140f9d0df1212a)
+As part of Weave GitOps, the Sunglow team is working on delivering Continuous Delivery Pipelines based on [this initiative](https://www.notion.so/weaveworks/CD-Pipeline-39a6df44798c4b9fbd140f9d0df1212a).
 
 The past week has been used for doing discovery on designing a solution that could help us working in the context
 of the two main milestones named as (0.1) and (1.0). The design work has been documented in 
