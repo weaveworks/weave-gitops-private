@@ -13,7 +13,7 @@ The past week has been used for doing discovery on designing a solution that cou
 of the two main milestones named as (0.1) and (1.0). The design work has been documented in 
 [the following RFC](/Users/enekofb/projects/github.com/weaveworks/weave-gitops-private/docs/rfcs/0001-pipelines/README.md)
 
-This ADR writes down the decision take by the team regarding which alternative to start with and the consequences 
+This ADR writes down the decision taken by the team regarding which alternative to start with and the consequences 
 and tradeoffs done for that decision. 
 
 ## Decision
