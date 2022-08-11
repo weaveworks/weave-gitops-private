@@ -14,9 +14,9 @@ of the two main milestones named as (0.1) and (1.0).
 
 The following three alternatives were defined and evaluated through [the following RFC](../rfcs/0001-pipelines/README.md) 
 
-- [Pure label-based pipelines](https://github.com/weaveworks/weave-gitops-private/commit/92d7fbf6c9fe9eeeb25aa9c837c1a2f0a7a02516#diff-035f229eb29ed250812d64772fecb81c711793d846b28234c612bb5e78da2afbR294)
-- [Full CDR pipelines](https://github.com/weaveworks/weave-gitops-private/commit/92d7fbf6c9fe9eeeb25aa9c837c1a2f0a7a02516#diff-035f229eb29ed250812d64772fecb81c711793d846b28234c612bb5e78da2afbR309)
-- [Hybrid](https://github.com/weaveworks/weave-gitops-private/commit/92d7fbf6c9fe9eeeb25aa9c837c1a2f0a7a02516#diff-035f229eb29ed250812d64772fecb81c711793d846b28234c612bb5e78da2afbR77)
+- [Pure label-based pipelines](https://github.com/weaveworks/weave-gitops-private/tree/737a2ec0181eaf52f9c0d6ea50b4915b9dd7844e/docs/rfcs/0001-pipelines#pure-label-based-pipelines)
+- [Full CDR pipelines](https://github.com/weaveworks/weave-gitops-private/tree/737a2ec0181eaf52f9c0d6ea50b4915b9dd7844e/docs/rfcs/0001-pipelines#full-crd-based-pipelines)
+- [Hybrid](https://github.com/weaveworks/weave-gitops-private/tree/737a2ec0181eaf52f9c0d6ea50b4915b9dd7844e/docs/rfcs/0001-pipelines#proposal)
 
 And discussion was held [in-person and offline](https://github.com/weaveworks/weave-gitops-private/pull/54)  
 
