@@ -10,11 +10,15 @@ As part of weave gitops, Sunglow team is working on deliverying Continuous Deliv
 [initiative](https://www.notion.so/weaveworks/CD-Pipeline-39a6df44798c4b9fbd140f9d0df1212a)
 
 The past week has been used for doing discovery on designing a solution that could help us working in the context
-of the two main milestones named as (0.1) and (1.0). The design work has been documented in 
-[the following RFC](../rfcs/0001-pipelines/README.md)
+of the two main milestones named as (0.1) and (1.0). 
 
-This ADR writes down the decision take by the team regarding which alternative to start with and the consequences 
-and tradeoffs done for that decision. 
+The following three alternatives were defined and evaluated through [the following RFC](../rfcs/0001-pipelines/README.md) 
+
+- [Pure label-based pipelines](https://github.com/weaveworks/weave-gitops-private/pull/54/files#diff-035f229eb29ed250812d64772fecb81c711793d846b28234c612bb5e78da2afbR294)
+- [Full CDR pipelines](https://github.com/weaveworks/weave-gitops-private/pull/54/files#diff-035f229eb29ed250812d64772fecb81c711793d846b28234c612bb5e78da2afbR309)
+- [Hybrid](https://github.com/weaveworks/weave-gitops-private/pull/54/files#diff-035f229eb29ed250812d64772fecb81c711793d846b28234c612bb5e78da2afbR65)
+
+And discussion was held [in-person and offline](https://github.com/weaveworks/weave-gitops-private/pull/54)  
 
 ## Decision
 
