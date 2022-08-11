@@ -30,8 +30,9 @@ Pipelines implementation will start by using the `hybrid` solution and evolve th
 
 We will be taking an enterprise-first strategy where first iteration will be 
 on [weave gitops enterprise](https://github.com/weaveworks/weave-gitops-enterprise) for then upstream it to 
-[weave gitops OSS](https://github.com/weaveworks/weave-gitops). We have decided to go in this direction due the 
-impediments that our architecture has for doing the other way around OSS first then Enterprise.
+[weave gitops OSS](https://github.com/weaveworks/weave-gitops). We have decided to go in this direction to optimise 
+for speed of delivery and availability of the capability for our users. Currently, existing architectural dependencies
+between OSS and Enterprise translate in a sensible impact on the lead time when delivering via OSS.
 
 ## Consequences
 
