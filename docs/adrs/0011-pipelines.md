@@ -39,26 +39,3 @@ To have an enterprise-first approach, has an impact on OSS users that won't see 
 
 To have an enterprise-first approach reduces risk to deliver against our main engineering objective of
 [OKR#2: Add features that drive Weave GitOps enterprise customer conversion](https://docs.google.com/presentation/d/104b4ThKT78rznucxw6kMsrRY0OnEn6XanSvb039TA-g/edit#slide=id.gd1cb39726e_19_8)
-
-
-## Metadata
-
-**Date** 2022-08-09
-
-**Approval Date** 2022-08-1x
-
-**Authors**
-
-- Ahmed
-- Antony
-- David
-- Eneko
-- Jordan
-- Luiz
-- Max
-- Russell
-- Yiannis
-
-
-
-
