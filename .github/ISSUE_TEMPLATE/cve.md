@@ -7,7 +7,7 @@ assignees: ''
 ---
 ## Report
 
-This section to be completed when you want to report a potential vulnerability to w managed by Vulnerability Manager
+This section to be completed when you want to report a potential vulnerability to be managed by Vulnerability Manager
 
 **Describe**
 
