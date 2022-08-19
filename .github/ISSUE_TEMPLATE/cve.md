@@ -7,11 +7,11 @@ assignees: ''
 ---
 ## Report
 
-This section to be completed when you want to report a potential vulnerability to be managed by Vulnerability Manager
+This section to be completed to report a potential vulnerability.
 
 **Describe**
 
-Add a description of the potential vulnerability.
+Add a description about the potential vulnerability.
 
 **References**
 
@@ -20,7 +20,8 @@ Add other references that might be required to help understand the potential vul
 
 ## Handling 
 
-This section to be managed by Vulnerability Manager
+If you are reporting a potential vulnerability, you could ignore this section. It is intended to be managed by 
+a [Vulnerability Manager](https://docs.google.com/document/d/15vsta8H4gXQkpSjRVTQH1o3KrwgOY5H4c8ydNgrHt-I)
 
 - [ ] Reporter notifies Weaveworks team (Receiver) about a potential vulnerability via any of the Security Vulnerability Sources. Receiver acknowledges it. If likely to be a legitimate request,  Receiver creates a private issue of type CVE in https://github.com/weaveworks/weave-gitops-private to start the formal intake.
 - [ ] Vulnerability Manager triages the request to either accept or rejects it:
