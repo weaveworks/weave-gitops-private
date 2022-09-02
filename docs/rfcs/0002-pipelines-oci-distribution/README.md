@@ -78,7 +78,7 @@ Any potentially changed CRDs that are part of pipeline-controller are automatica
 
 ### Benefits
 
-1. **Simple relese process**: Distributing pipeline-controller as an OCI artifact leads to a much slimmer release process (see above) compared to alternatives such as using Helm charts where a Helm repository would have to be maintained.
+1. **Simple release process**: Distributing pipeline-controller as an OCI artifact leads to a much slimmer release process (see above) compared to alternatives such as using Helm charts where a Helm repository would have to be maintained.
 1.  **More reliable artifacts**: We do already use kustomize in the pipeline-controller repository to deploy it locally during development (that's a kubebuilder default). As an effect the tooling and manifests are very well tested because every engineer makes use of them during daily development. Any separate way of distributing pipeline-controller would have to be augmented with similar testing and tooling which comes with more overhead.
 
 ### Implications
