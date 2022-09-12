@@ -8,7 +8,7 @@ Accepted
 
 ## Context
 
-There is no clear way to manage the release of the policy agent. As it stands now the agent is considered to be released when it pushes to the latest tag. This creates a problem with the charts and profiles that make use of the agents, since they would be used a non firepositoryxed version that would change depending on the time the agent was deployed. In addition to that the agent itself depends on policies to be able to perform its operation. This usually comes from a policy library which is also currently not versioned with no clear way how it will work with the different CRD schemas versions.
+There is no clear way to manage the release of the policy agent. As it stands now the agent is considered to be released when it pushes to the latest tag. This creates a problem with the charts and profiles that make use of the agents, since they would be used a non fixed version that would change depending on the time the agent was deployed. In addition to that the agent itself depends on policies to be able to perform its operation. This usually comes from a policy library which is also currently not versioned with no clear way how it will work with the different CRD schemas versions.
 
 Hence we should find a coherent release methodology and convention to be applied across all these components.
 
