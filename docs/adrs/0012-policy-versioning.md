@@ -23,7 +23,7 @@ The policy agent will have its own version and it will follow the semantic versi
 
 Policy CRDs will be versioned in a Kubernetes native way and module providing the api structs in Golang should follow the same semantic versioning of the agent repository.
 
-The policy library will have its own version and it will follow the semantic versioning. When the Policy CRDs has new changes the policy library will need to undergo that same update.
+The policy library will have its own version and it will follow the semantic versioning. When the Policy CRDs has new changes the policy library will need to be updated to reflect that change.
 
 Policy Profiles will have their own separate version for the chart version and their app version would be the agent version.
 
