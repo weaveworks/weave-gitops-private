@@ -4,7 +4,7 @@
 The title must be short and descriptive.
 -->
 
-**Status:** provisional
+**Status:** withdrawn
 
 <!--
 Status represents the current state of the RFC.
@@ -13,7 +13,7 @@ Must be one of `provisional`, `implementable`, `implemented`, `deferred`, `rejec
 
 **Creation date:** 2022-09-02
 
-**Last update:** 2022-09-02
+**Last update:** 2022-09-16
 
 ## Summary
 
