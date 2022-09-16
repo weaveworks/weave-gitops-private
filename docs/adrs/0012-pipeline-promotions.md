@@ -15,7 +15,7 @@ Current iteration (v0.2) has a outcome to enable applicatio promotions by using 
 
 Two main approaches are under discussion
 
-- [Promotions via Watching](https://github.com/weaveworks/weave-gitops-enterprise/issues/1481)
+- [Promotions via Resource Watching](https://github.com/weaveworks/weave-gitops-enterprise/issues/1481)
 - [Promotions via Webhooks](https://github.com/weaveworks/weave-gitops-enterprise/issues/1487)
 
 
