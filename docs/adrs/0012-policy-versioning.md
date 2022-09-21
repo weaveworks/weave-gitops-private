@@ -30,3 +30,15 @@ Policy Profiles will have their own separate version for the chart version and t
 The policy library repository should document in it's release notes which versions of the policy agent are supported.
 
 The agent profile repository should document in it's release notes which versions of the policy agent and the policy library are supported.
+
+### Example
+
+- **Policy Agent** version [v1.0.0](https://github.com/weaveworks/policy-agent/releases/tag/v1.0.0) is compatible with **Policy Library** versions [v0.4.0](https://github.com/weaveworks/policy-library/releases/tag/v0.4.0), [v1.0.0](https://github.com/weaveworks/policy-library/releases/tag/v1.0.0)
+
+- **Policy Agent Profile** version [v0.6.0](https://github.com/weaveworks/profiles-catalog/releases/tag/weave-policy-agent-0.6.0) is compatible with **Policy Agent** version [v1.0.0](https://github.com/weaveworks/policy-agent/releases/tag/v1.0.0) and **Policy Library** versions [v0.4.0](https://github.com/weaveworks/policy-library/releases/tag/v0.4.0), [v1.0.0](https://github.com/weaveworks/policy-library/releases/tag/v1.0.0)
+
+
+## Consequences
+
+Since the different components don't share the same version. Users need to make sure they are using the correct version of each component which is compatible with other components. That can be achieved by checking the compatibility section in release notes and know which versions are supported.
+
