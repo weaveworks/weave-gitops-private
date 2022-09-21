@@ -73,7 +73,7 @@ And two tenancy models
 - shared-environments with tenancy by namespace. 
   - environments: dev, staging and prod 
   - namespaces: search and billing
-- dedicated-environment for tenannt. We have search-prod and billing-prod environments for running applications.
+- dedicated-environment for tenant. We have search-prod and billing-prod environments for running applications.
   - environments: search-prod, billing-prod
   - namespaces: not relevant
 
@@ -93,7 +93,7 @@ Both scenarios will be using WGE so
 2. As search/billing developer I want to have promotions in my pipeline done via wge (v0.2)
    1. promotions via watching  
    2. promotions via webhook
-3. As search/billing developer I cannot view/create pipelines over resources I have no access to
+3. As search developer I want to create a pipeline using billing resources
 
 
 ## Scenario A: shared environment
@@ -109,7 +109,8 @@ Environments (Dev, Staging, Prod):
 - billing namespace
   - billing helm release exists
 
-Search Pipeline
+We run the example using search with pipelines as
+
 ```yaml
 apiVersion: pipelines.weave.works/v1alpha1
 kind: Pipeline
@@ -145,7 +146,187 @@ spec:
             namespace: flux-system
 ```
 
-Billing Pipeline
+### RBAC configuration
+
+Based on the existing ones
+- [roles](https://github.com/weaveworks/weave-gitops-enterprise/blob/main/charts/mccp/templates/rbac/user_roles.yaml)
+- [role binding](https://github.com/weaveworks/weave-gitops-enterprise/blob/main/charts/mccp/templates/rbac/admin_role_bindings.yaml)
+- [documentation](https://docs.gitops.weave.works/docs/configuration/recommended-rbac-configuration/)
+
+We need to have the following access requirements  
+- developer to access pipeline resource namespace in management cluster
+- developer to access environment clusters 
+- developer to access application namespace within the clusters
+
+We then need to create the following roles and roles bindings
+
+- developer to access pipeline resource namespace in management cluster
+- developer to access application namespace within the clusters
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: search-developer-pipeline-reader
+  namespace: search
+subjects:
+  - kind: Group
+    name: search-developer
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: pipelines-reader
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: gitops-pipelines-reader
+rules:
+  - apiGroups: [ "pipelines.weave.works" ]
+    resources: [ "pipelines" ]
+    verbs: [ "get", "list", "watch" ]
+  - apiGroups: ["kustomize.toolkit.fluxcd.io"]
+    resources: [ "kustomizations" ]
+    verbs: [ "get", "list", "patch" ]
+  - apiGroups: ["helm.toolkit.fluxcd.io"]
+    resources: [ "helmreleases" ]
+    verbs: [ "get", "list", "patch" ]
+```
+and to allow impersonation from WGE backend to leaf cluster
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: impersonate-user-groups
+subjects:
+- kind: ServiceAccount
+  name: ${serviceAccountName}
+  namespace: ${serviceAccountNamespac}
+roleRef:
+  kind: ClusterRole
+  name: user-groups-impersonator
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: user-groups-impersonator
+rules:
+- apiGroups: [""]
+  resources: ["users", "groups"]
+  verbs: ["impersonate"]
+- apiGroups: [""]
+  resources: ["namespaces"]
+  verbs: ["get", "list"]
+````
+
+- developer to access application namespace within the clusters
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: read-gitopsclusters
+subjects:
+  - kind: Group
+    name: search-developer
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: gitops-gitopsclusters-reader
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: gitops-gitopsclusters-reader
+rules:
+  - apiGroups: ["gitops.weave.works"]
+    resources: ["gitopsclusters"]
+    verbs: ["get", "watch", "list"]
+```
+
+### Access model by user story 
+
+1. As search/billing developer I want to list or view a pipeline and its status (v0.1)
+
+To view the pipeline 
+
+- user clicks pipelines
+- fe request to backend with
+```
+GET /v1/pipelines/search
+Host: api.wge.com
+Authorization: Bearer search-developer-jwt-token
+```
+- backend validates token 
+- request forwarded to kube api  
+```
+GET /apis/pipelines.weave.works/v1alpha1/namespaces/search/pipeline/search
+Host: kube.managmeent
+Authorization: Bearer search-developer-jwt-token
+```
+- RBAC kicks in and will allow search-developer user access pipeline resources
+- kube api returns search pipeline
+
+And its status by environment, 
+
+for example, to get dev status we 
+
+get first the details for dev gitops cluster
+```
+GET /apis/GitopsCluster/dev
+Host: kube.managmeent
+Authorization: Bearer search-developer-jwt-token
+```
+with the kubeconfig, impersonate 
+
+```
+GET /apis/helm.toolkit.fluxcd.io/v2beta1/namespaces/search/helmreleases/search
+Host: kube.dev
+Authorization: Bearer dev-cluster-sa-with-impersonation
+Impersonate-User: search-developer
+```
+
+3. As search developer I want to create a pipeline using billing resources
+
+scenario 3a: billing pipeline created in search namespace
+
+```yaml
+apiVersion: pipelines.weave.works/v1alpha1
+kind: Pipeline
+metadata:
+  name: billing-shared-environment
+  namespace: search
+spec:
+  appRef:
+    kind: HelmRelease
+    name: billing
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+  environments:
+    - name: dev
+      targets:
+        - namespace: billing
+          clusterRef:
+            kind: GitopsCluster
+            name: dev
+            namespace: flux-system
+```
+
+- I could create/view the pipeline cause I have access to search namespace or via gitops
+- I could access dev cluster cause i have access to gitops clusters 
+- I could impersonate user
+- I cannot get helm releases in dev/billing as I have not access to that namespace
+```
+GET /apis/helm.toolkit.fluxcd.io/v2beta1/namespaces/billing/helmreleases/billing
+Host: kube.dev
+Authorization: Bearer dev-cluster-sa-with-impersonation
+Impersonate-User: search-developer
+```
+scenario 3b: billing pipeline created in billing namespace
+
 ```yaml
 apiVersion: pipelines.weave.works/v1alpha1
 kind: Pipeline
@@ -165,109 +346,21 @@ spec:
             kind: GitopsCluster
             name: dev
             namespace: flux-system
-    - name: staging
-      targets:
-        - namespace: billing
-          clusterRef:
-            kind: GitopsCluster
-            name: staging
-            namespace: flux-system
-    - name: prod
-      targets:
-        - namespace: billing
-          clusterRef:
-            kind: GitopsCluster
-            name: prod
-            namespace: flux-system
 ```
+- I could create the pipeline via gitops
+- I wont be able to view it as have not permissions to view pipelines in another namespace
+- I wont be able to view status as have not access to billing namespace
 
-### RBAC configuration
-
-Based on the existing ones
-- [roles](https://github.com/weaveworks/weave-gitops-enterprise/blob/main/charts/mccp/templates/rbac/user_roles.yaml)
-- [role binding](https://github.com/weaveworks/weave-gitops-enterprise/blob/main/charts/mccp/templates/rbac/admin_role_bindings.yaml)
-- [documentation](https://docs.gitops.weave.works/docs/configuration/recommended-rbac-configuration/)
-
-We need to have the following access requirements  
-- developer to access management cluster for pipeline namespace
-- developer to access environment clusters 
-- developer to access application namespace within the a
-- search and billing to access dev, staging and prod clusters
-- within that cluster to access to namespace that the application has access
-
-
-We create the following RBAC configuration for the scenario that allows
-
-- any developer to access any  
-- given 
-- 
+### Scenario A - Recommendations
+- use RBAC as indicated 
+- create the namespaces structure in the management cluster 
 
 
 
-We start by the following permissions
-
-```yaml
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: developer-pipelines-reader
-subjects:
-  - kind: Group
-    name: developer
-    apiGroup: rbac.authorization.k8s.io
-roleRef:
-  kind: Role
-  name: pipelines-reader
-  apiGroup: rbac.authorization.k8s.io
-```
-
-```yaml
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: gitops-pipelines-reader
-  labels:
-    { { - include "mccp.labels" . | nindent 4 } }
-      { { - if .Values.rbac.userRoles.roleAggregation.enabled } }
-      rbac.authorization.k8s.io/aggregate-to-gitops-reader: "true"
-      { { - end } }
-rules:
-  - apiGroups: [ "pipelines.weave.works" ]
-    resources: [ "pipelines" ]
-    verbs: [ "get", "list", "watch" ]
-  { { - end } }
-```
 
 
-### Access model by user story 
+and the api returns the helm release status as expected 
 
-1. As search/billing developer I want to list or view a pipeline and its status (v0.1)
-- user clicks pipelines
-- fe request to backend with
-```
-GET /pipelines
-Host: api.wge.com
-Authorization: Bearer search-developer-jwt-token
-```
-- backend validates token 
-- request forwarded to kube api  
-```
-GET /pipelines
-Host: api.kube.managmeent
-Authorization: Bearer search-developer-jwt-token
-```
-- request forwarded to kube api
-
-RBAC kicks in and will allow search-developer user access pipeline resources if 
-
-- search-developer has 
-
-
-
-If the user is ``
-
-Given that there isno
 
 
 
