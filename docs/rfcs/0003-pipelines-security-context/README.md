@@ -24,15 +24,23 @@ approach for pipelines from the
 
 ## Motivation
 
+Revisiting [pipelines rfc](../0001-pipelines/README.md) to extend security consideration
+
+>* **what happens if I create a Pipeline refering to a non-existing Namespace or cluster?** The Pipeline's `.status` field reflects the status of each referenced cluster. 
+>* However, it will not reflect any state of remote resources on one of these clusters. Therefore, a cluster that's not reachable from the pipeline-controller or a non-existing
+>* Namespace on that cluster referred to by a `Pipeline` is not visible in the `Pipeline` resource itself.
+
 1. Pipelines enables delivering apps to environments.
 2. Environments could span different deployment targets.  
 3. Deployment targets has a defined access model given by either RBAC or Tenancy. 
 
 This RFC goes into ensure that pipelines provides good security properties for users and platform 
 
+
 ### Terminology
 
 TBA
+
 
 ### Goals
 
@@ -54,22 +62,26 @@ and make progress.
 
 ## Proposal
 
-Scenario: 
+### Scenario 
 
-We have two tenants
+We have two **tenants**
 - `search`  that provides the apps for discoverability within the orgs business model
 - `billing` that provides customer billing related capabilities for the orgs business model
 
-And we have two types of organisations
+And two tenancy models
 
-- org-shared-environments where we have a single dev, staging prod environmentn for running all applications
-- tenant-segmented where we have  search-prod and billing-prod environments for running applications
+- shared-environments with tenancy by namespace. 
+  - environments: dev, staging and prod 
+  - namespaces: search and billing
+- dedicated-environment for tenannt. We have search-prod and billing-prod environments for running applications.
+  - environments: search-prod, billing-prod
+  - namespaces: not relevant
 
-Both organisation are using pipelines for wge with 
-- tenants for search and billing
-- clusters managed by WGE
+Both scenarios will be using WGE so 
+- pipelines would be in management clusters
+- applications will run in leaf clusters 
 
-The user stories that we want to run through is that
+**User stories** that we want to run through is that
 
 1. As search/billing developer I want to list or view a pipeline and its status (v0.1)
    1. as pipeline ui,
@@ -87,11 +99,15 @@ The user stories that we want to run through is that
 ## Scenario A: shared environment
 
 Management Cluster:
-- search pipeline exists 
-- billing pipeline exists
-Dev, Staging, Prod: 
-- search  app deployed as helm release in each of the environment 
-- billing app deployed as helm release in each of the environment
+- search namespace
+  - search pipeline exists
+- billing namespace 
+  - billing pipeline exists
+Environments (Dev, Staging, Prod): 
+- search namespace
+  - search helm release exists
+- billing namespace
+  - billing helm release exists
 
 Search Pipeline
 ```yaml
@@ -99,7 +115,7 @@ apiVersion: pipelines.weave.works/v1alpha1
 kind: Pipeline
 metadata:
   name: search-shared-environment
-  namespace: default
+  namespace: search
 spec:
   appRef:
     kind: HelmRelease
@@ -108,21 +124,21 @@ spec:
   environments:
     - name: dev
       targets:
-        - namespace: dev
+        - namespace: search
           clusterRef:
             kind: GitopsCluster
             name: dev
             namespace: flux-system
     - name: staging
       targets:
-        - namespace: staging
+        - namespace: search
           clusterRef:
             kind: GitopsCluster
             name: staging
             namespace: flux-system
     - name: prod
       targets:
-        - namespace: prod
+        - namespace: search
           clusterRef:
             kind: GitopsCluster
             name: prod
@@ -135,7 +151,7 @@ apiVersion: pipelines.weave.works/v1alpha1
 kind: Pipeline
 metadata:
   name: billing-shared-environment
-  namespace: default
+  namespace: billing
 spec:
   appRef:
     kind: HelmRelease
@@ -144,69 +160,87 @@ spec:
   environments:
     - name: dev
       targets:
-        - namespace: dev
+        - namespace: billing
           clusterRef:
             kind: GitopsCluster
             name: dev
             namespace: flux-system
     - name: staging
       targets:
-        - namespace: staging
+        - namespace: billing
           clusterRef:
             kind: GitopsCluster
             name: staging
             namespace: flux-system
-
     - name: prod
       targets:
-        - namespace: prod
+        - namespace: billing
           clusterRef:
             kind: GitopsCluster
             name: prod
             namespace: flux-system
 ```
 
-### RBAC configuration 
+### RBAC configuration
 
-Using existing ones
-[role binding](https://github.com/weaveworks/weave-gitops-enterprise/blob/main/charts/mccp/templates/rbac/admin_role_bindings.yaml)
+Based on the existing ones
+- [roles](https://github.com/weaveworks/weave-gitops-enterprise/blob/main/charts/mccp/templates/rbac/user_roles.yaml)
+- [role binding](https://github.com/weaveworks/weave-gitops-enterprise/blob/main/charts/mccp/templates/rbac/admin_role_bindings.yaml)
+- [documentation](https://docs.gitops.weave.works/docs/configuration/recommended-rbac-configuration/)
+
+We need to have the following access requirements  
+- developer to access management cluster for pipeline namespace
+- developer to access environment clusters 
+- developer to access application namespace within the a
+- search and billing to access dev, staging and prod clusters
+- within that cluster to access to namespace that the application has access
+
+
+We create the following RBAC configuration for the scenario that allows
+
+- any developer to access any  
+- given 
+- 
+
+
+
+We start by the following permissions
+
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
+kind: RoleBinding
 metadata:
-  name: wego-admin-read-pipelines
+  name: developer-pipelines-reader
 subjects:
-- kind: User
-  name: "wego-admin"
-  apiGroup: rbac.authorization.k8s.io
+  - kind: Group
+    name: developer
+    apiGroup: rbac.authorization.k8s.io
 roleRef:
-  kind: ClusterRole
-  name: gitops-pipelines-reader
+  kind: Role
+  name: pipelines-reader
   apiGroup: rbac.authorization.k8s.io
 ```
-[roles](https://github.com/weaveworks/weave-gitops-enterprise/blob/main/charts/mccp/templates/rbac/user_roles.yaml)
+
 ```yaml
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
+kind: Role
 metadata:
   name: gitops-pipelines-reader
   labels:
-    {{- include "mccp.labels" . | nindent 4 }}
-    {{- if .Values.rbac.userRoles.roleAggregation.enabled }}
-    rbac.authorization.k8s.io/aggregate-to-gitops-reader: "true"
-    {{- end }}
+    { { - include "mccp.labels" . | nindent 4 } }
+      { { - if .Values.rbac.userRoles.roleAggregation.enabled } }
+      rbac.authorization.k8s.io/aggregate-to-gitops-reader: "true"
+      { { - end } }
 rules:
-- apiGroups: ["pipelines.weave.works"]
-  resources: ["pipelines"]
-  verbs: ["get", "list", "watch"]
-{{- end }}
+  - apiGroups: [ "pipelines.weave.works" ]
+    resources: [ "pipelines" ]
+    verbs: [ "get", "list", "watch" ]
+  { { - end } }
 ```
 
 
-
 ### Access model by user story 
-
 
 1. As search/billing developer I want to list or view a pipeline and its status (v0.1)
 - user clicks pipelines
@@ -220,12 +254,20 @@ Authorization: Bearer search-developer-jwt-token
 - request forwarded to kube api  
 ```
 GET /pipelines
-Host: kube.api
+Host: api.kube.managmeent
 Authorization: Bearer search-developer-jwt-token
 ```
 - request forwarded to kube api
 
-RBAC kicks and will allow search-developer access if it has access to pipeline resource 
+RBAC kicks in and will allow search-developer user access pipeline resources if 
+
+- search-developer has 
+
+
+
+If the user is ``
+
+Given that there isno
 
 
 
