@@ -1,40 +1,23 @@
-# RFC-0003 Pipelines security context
-
-<!--
-The title must be short and descriptive.
--->
+# RFC-0003 pipelines security context for multi-tenancy
 
 **Status:** provisional
-
-<!--
-Status represents the current state of the RFC.
-Must be one of `provisional`, `implementable`, `implemented`, `deferred`, `rejected`, `withdrawn`, or `replaced`.
--->
 
 **Creation date:** 2022-07-29
 
 **Last update:** 2022-08-25
 
 ## Summary
-
-Define the security context where pipelines would live one. We just want to ensure that we have a proper security 
-approach for pipelines from the 
-- user perspective
-- platform perspective
+This rfc proposes the security configuration to use in the context of pipelines in order to 
+- allow developers to deliver applications within weave gitops enterprise while  
+- respecting isolation boundaries set for tenancy  
 
 ## Motivation
 
-Revisiting [pipelines rfc](../0001-pipelines/README.md) to extend security consideration
+[pipelines rfc](../0001-pipelines/README.md) is based in a pipeline CRD that contains references to apps, namespaces and clusters.  
 
 >* **what happens if I create a Pipeline refering to a non-existing Namespace or cluster?** The Pipeline's `.status` field reflects the status of each referenced cluster. 
 >* However, it will not reflect any state of remote resources on one of these clusters. Therefore, a cluster that's not reachable from the pipeline-controller or a non-existing
 >* Namespace on that cluster referred to by a `Pipeline` is not visible in the `Pipeline` resource itself.
-
-1. Pipelines enables delivering apps to environments.
-2. Environments could span different deployment targets.  
-3. Deployment targets has a defined access model given by either RBAC or Tenancy. 
-
-This RFC goes into ensure that pipelines provides good security properties for users and platform 
 
 
 ### Terminology
@@ -44,60 +27,62 @@ TBA
 
 ### Goals
 
-<!--
-List the specific goals of this RFC. What is it trying to achieve? How will we
-know that this has succeeded?
--->
-- Define security model for pipeline users.
-- Define security model for pipeline components.
+- Define security guidelines to use pipelines while honoring multi-tenancy isolation. 
 
 ### Non-Goals
 
-<!--
-What is out of scope for this RFC? Listing non-goals helps to focus discussion
-and make progress.
--->
-
-* Automatic promotion of an application through the stages of a pipeline is not part of this proposal but the proposal should allow for building that on top.
+TBA 
 
 ## Proposal
 
+### Assumptions 
+
+- An organisation uses WGE.
+- Each team within the organisation is a tenant.
+- Isolation between tenants is a requirement.  
+- Tenancy is implemented via [WGE tenancy capabilities](https://www.notion.so/weaveworks/Tenant-Workspaces-Abstracted-RBAC-d16b58f8dd89498ea7a1f792440185fc)
+
 ### Scenario 
 
-We have two **tenants**
-- `search`  that provides the apps for discoverability within the orgs business model
-- `billing` that provides customer billing related capabilities for the orgs business model
+For the proposal we are going to use the following scenario. 
 
-And two tenancy models
+**Tenants**
+- `search`  that provides the searching capabilities via search-svc app. 
+- `billing` that provides customer billing related capabilities via billing-svc app.
 
-- shared-environments with tenancy by namespace. 
+**Tenancy models**
+- `shared-environments` with tenancy by namespace. In this case
   - environments: dev, staging and prod 
   - namespaces: search and billing
-- dedicated-environment for tenant. We have search-prod and billing-prod environments for running applications.
+- `dedicated-environment` with tenancy at the level of the environment. We have search-prod and billing-prod environments for running applications.
   - environments: search-prod, billing-prod
   - namespaces: not relevant
 
-Both scenarios will be using WGE so 
-- pipelines would be in management clusters
+**Pipelines**
+Both scenarios will be using WGE for pipelines so  
+- pipelines CRD will be in the management cluster
 - applications will run in leaf clusters 
 
-**User stories** that we want to run through is that
+**User stories** 
 
-1. As search/billing developer I want to list or view a pipeline and its status (v0.1)
-   1. as pipeline ui,
-      1. I want to access `list pipelines ` or
-      2. `get pipeline` endpoint
-   2. as pipeline backend,
-      1. I want to access to pipelines resources in management cluster by <pipeline namespace, pipeline name>
-      2. I want to access the underlying helm release resources in deployment target by <helm release name, target deployment cluster, target deployment namespace>
-2. As search/billing developer I want to have promotions in my pipeline done via wge (v0.2)
-   1. promotions via watching  
-   2. promotions via webhook
-3. As search developer I want to create a pipeline using billing resources
+To consider to define the security guidelines 
+
+1. As search/billing developer,I want to create a pipeline for my tenant (v0.1)
+2. As search/billing developer,I want to view a pipeline for my tenant (v0.1)
+3. As search/billing developer,I want to be able to promote apps via pipelines for my tenant (v0.2)
+4. As platform admin, I want to ensure by design an isolated experience between tenants.
 
 
-## Scenario A: shared environment
+## Scenario A: shared environment, tenancy by namespace
 
+### Tenancy Definition 
+Environments: 
+- Dev, Staging and Prod
+Tenants:
+- Search tenant has access to only search namespace in any environment 
+- Billing tenant has access to only tenant namespace in any environment
+
+### Tenant Resources Allocation
 Management Cluster:
 - search namespace
   - search pipeline exists
@@ -109,7 +94,7 @@ Environments (Dev, Staging, Prod):
 - billing namespace
   - billing helm release exists
 
-We run the example using search with pipelines as
+Given the previous restrictions, the pipeline for search-svc would look like 
 
 ```yaml
 apiVersion: pipelines.weave.works/v1alpha1
@@ -120,7 +105,7 @@ metadata:
 spec:
   appRef:
     kind: HelmRelease
-    name: search
+    name: search-svc
     apiVersion: helm.toolkit.fluxcd.io/v2beta1
   environments:
     - name: dev
@@ -250,7 +235,8 @@ rules:
 
 ### Access model by user story 
 
-1. As search/billing developer I want to list or view a pipeline and its status (v0.1)
+
+1. As search/billing developer,I want to view pipelines for my tenant (v0.1)
 
 To view the pipeline 
 
@@ -290,52 +276,102 @@ Authorization: Bearer dev-cluster-sa-with-impersonation
 Impersonate-User: search-developer
 ```
 
-3. As search developer I want to create a pipeline using billing resources
+2. As search/billing developer,I want to be able to promote apps via pipelines for my tenant (v0.2)
+    1. promotions via watching
+    2. promotions via webhook
 
-scenario 3a: billing pipeline created in search namespace but no access to helm releases namespaces
+Assumed promotions via webhook, promotion would happen via pipeline controller that would raise a PR against the
+configuration repo. In order to raise the PR it requires
+
+1. from deployment event, to understand the environment, resource and version promoted. 
+2. from the pipeline crd, to understand the next environment to promote.
+3. from the helm release source, to understand the details and strategy to promote (for example raise PR for helm release in github). 
+4. access to the source for raising the PR to promote (for example github).
+
+Pipeline controller would then require for 2) and 3)  
+- in management 
+- and leaf clusters
+something like the following RBAC
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: pipeline-controller
+subjects:
+  - kind: ServiceAccount
+    name: pipeline-controller
+    namespace: flux-system
+roleRef:
+  kind: ClusterRole
+  name: pipeline-controller
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: pipeline-controller
+rules:
+  # model A a via impersonation
+  - apiGroups: [""]
+    resources: ["users", "groups"]
+    verbs: ["impersonate"]
+  # model B a via granted permissions
+  - apiGroups: [ "pipelines.weave.works" ]
+    resources: [ "pipelines" ]
+    verbs: [ "get", "list", "watch" ]
+  - apiGroups: ["kustomize.toolkit.fluxcd.io"]
+    resources: [ "kustomizations" ]
+    verbs: [ "get", "list", "patch" ]
+  - apiGroups: ["helm.toolkit.fluxcd.io"]
+    resources: [ "helmreleases" ]
+    verbs: [ "get", "list", "patch" ]
+```
+
+For 4) it would require target github access within tenancy boundaries meaning that we set guarantees 
+that promotions for search does not have any risk for billing. 
+
+Solutions should go into honour those boundaries like for example creating promotion job bounded to tenant 
+where the job only have access to the search configuration, search sources and secrets (ephimeral ideally). 
+
+   
+3. As platform admin, I want to ensure by design an isolated experience between tenants.
+
+For developers, we have two points to control
+- creation or admission of resources or
+- runtime or usage of these resources via 
+
+For creation scenario, we should just ensure that no resources are created outside the boundaries of the tenant that 
+we could achieve via pipeline policies at admission time. A couple of examples are shown below
+
+scenario 3a: pipeline to be created violating tenancy via namespace
 
 ```yaml
 apiVersion: pipelines.weave.works/v1alpha1
 kind: Pipeline
 metadata:
-  name: billing-shared-environment
+  name: tenancy-violated-pipeline
   namespace: search
+  annotations:
+    tenancy: billing
 spec:
-  appRef:
-    kind: HelmRelease
-    name: billing
-    apiVersion: helm.toolkit.fluxcd.io/v2beta1
-  environments:
-    - name: dev
-      targets:
-        - namespace: billing
-          clusterRef:
-            kind: GitopsCluster
-            name: dev
-            namespace: flux-system
+  xxxx
 ```
-- I could create/view the pipeline cause I have access to search namespace or via gitops
-- I could access dev cluster cause i have access to gitops clusters 
-- I could impersonate user
-- I cannot get helm releases in dev/billing as I have not access to that namespace
-```
-GET /apis/helm.toolkit.fluxcd.io/v2beta1/namespaces/billing/helmreleases/billing
-Host: kube.dev
-Authorization: Bearer dev-cluster-sa-with-impersonation
-Impersonate-User: search-developer
-```
-scenario 3b: billing pipeline created in billing namespace
+
+scenario 3b: pipeline referencing resources from other tenant
 
 ```yaml
 apiVersion: pipelines.weave.works/v1alpha1
 kind: Pipeline
 metadata:
-  name: billing-shared-environment
-  namespace: billing
+  name: serach-pipeline-using-billing-resources
+  namespace: search
+  annotations:
+    tenancy: search
 spec:
   appRef:
     kind: HelmRelease
-    name: billing
+    name: search
     apiVersion: helm.toolkit.fluxcd.io/v2beta1
   environments:
     - name: dev
@@ -346,38 +382,54 @@ spec:
             name: dev
             namespace: flux-system
 ```
-- I could create the pipeline via gitops
-- I won't be able to view it as have not permissions to view pipelines in another namespace
-- I won't be able to view status as have not access to billing namespace
+
+both pipelines should be rejected according to the tenancy rules 
 
 ### Scenario A Summary
-- With the RBAC configuration indicated in the previous example we could 
-leverage RBAC for providing the right authz.
-- This is possible cause each role has access to any cluster
 
-## Scenario B: segmentation by tenant
+- Tenancy should be extended to create the right rbac and policies that will ensure the security context of the previous journeys.
+- Pipeline controller promotions should be designed with the isolation principles in mind. 
+
+## Scenario B: tenancy by environment
+
+### Tenancy Definition
+Tenants:
+- Search tenant has access to environments within their tenancy. 
+- Billing tenant has access to environments within their tenancy.
+Environments: dev, staging production
+Clusters:
+- search-dev, search-staging and search-prod clusters
+- billing-dev, billing-staging and billing-prod clusters
+
+### Tenancy Resource Allocation 
+
+We simplify the environments / cluster to just production
 
 Management Cluster:
+given that we need to have pipelines in the management we create isolation based on the tenant with  
 - search namespace
     - search pipeline exists
     - search-prod gitops cluster exists
+    - search-pipeline-clusters policy exists 
 - billing namespace
     - billing pipeline exists 
     - billing-prod gitops cluster exists
-Environments (Dev, Staging, Prod):
+Clusters:
 - search-prod
-    - search-svc helm release exists
+    - search-svc helm release exists in any namespace
 - billing-prod
-    - billing helm release exists
+    - billing helm release exists in any namespace
 
-We run the example using search with pipelines as
+Given the previous definition, a pipeline for search-svc would look like
 
 ```yaml
 apiVersion: pipelines.weave.works/v1alpha1
 kind: Pipeline
 metadata:
-  name: search-dedicated-environment
-  namespace: search
+  name: search-tenancy-by-environment
+  namespace: search # important
+  annotations:
+    tenancy: search
 spec:
   appRef:
     kind: HelmRelease
@@ -386,12 +438,16 @@ spec:
   environments:
     - name: prod
       targets:
-        - namespace: search
+        - namespace: any-namespace
           clusterRef:
             kind: GitopsCluster
             name: search-prod
-            namespace: search
+            namespace: search # important
 ```
+
+### Policy Configuration 
+
+//TODO add a policy that assigns access to a set of clusters via policy 
 
 ### RBAC configuration
 
@@ -401,7 +457,7 @@ Based on the existing ones
 - [documentation](https://docs.gitops.weave.works/docs/configuration/recommended-rbac-configuration/)
 
 We need to have the following access requirements
-- developer to access pipeline resource namespace in management cluster
+- developer to access pipeline resource
 - developer to access environment clusters
 - developer to access application namespace within the clusters
 
@@ -410,6 +466,7 @@ We then need to create the following roles and roles bindings
 - developer to access pipeline and cluster resources in management
 - developer to access application namespace within the clusters
 
+For management cluster
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -436,27 +493,31 @@ rules:
   - apiGroups: [ "pipelines.weave.works" ]
     resources: [ "pipelines" ]
     verbs: [ "get", "list", "watch" ]
+```
+
+For leaf cluster
+
+```yaml
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
+kind: ClusterRoleBinding
 metadata:
   name: search-developer-leaf
-  namespace: search
 subjects:
   - kind: Group
     name: search-developer
     apiGroup: rbac.authorization.k8s.io
 roleRef:
-  kind: Role
+  kind: ClusterRole
   name: developer-leaf
   apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
+kind: ClusterRole
 metadata:
   name: developer-leaf
 rules:
-  - apiGroups: ["helm.toolkit.fluxcd.io"]
+  - apiGroups: [ "helm.toolkit.fluxcd.io" ]
     resources: [ "helmreleases" ]
     verbs: [ "get", "list", "patch" ]
 ```
@@ -491,7 +552,39 @@ rules:
 
 ### Access model by user story
 
-1. As search/billing developer I want to list or view a pipeline and its status (v0.1)
+1. As search/billing developer,I want to create a pipeline for my tenant (v0.1)
+
+we create the following pipeline
+```yaml
+apiVersion: pipelines.weave.works/v1alpha1
+kind: Pipeline
+metadata:
+  name: search-tenancy-by-environment
+  namespace: search # important
+  annotations:
+    tenancy: search
+spec:
+  appRef:
+    kind: HelmRelease
+    name: search
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+  environments:
+    - name: prod
+      targets:
+        - namespace: any-namespace
+          clusterRef:
+            kind: GitopsCluster
+            name: search-prod
+            namespace: search # important
+```
+that during admission time will be validated based on policies so no tenancy boundaries will be respected:
+- pipeline is created within the tenant namespace 
+- using the allowed apps
+- using the allows clusters 
+
+2. As search/billing developer I want to list or view a pipeline and its status (v0.1)
+
+given the pipeline from previous story, a developer wants to view it via the UI
 
 To view the pipeline
 
@@ -522,7 +615,6 @@ Authorization: Bearer search-developer-jwt-token
 ```
 that returns the secret with the kubeconfig to retrieve and impersonate
 and the developer could view the helm release via impersonation 
-
 ```
 GET /apis/helm.toolkit.fluxcd.io/v2beta1/namespaces/search/helmreleases/search
 Host: kube.search-production
@@ -530,83 +622,97 @@ Authorization: Bearer search-production-cluster-sa-with-impersonation
 Impersonate-User: search-developer
 ```
 
-3. As search developer I want to create a pipeline using billing resources
+the pipeline and its status is available to the user  
 
-scenario 3a: billing pipeline created in search namespace but no access to helm releases namespaces
+3. As search/billing developer,I want to be able to promote apps via pipelines for my tenant (v0.2)
 
-```yaml
-apiVersion: pipelines.weave.works/v1alpha1
-kind: Pipeline
-metadata:
-  name: billing-hacked-pipeline
-  namespace: search
-spec:
-  appRef:
-    kind: HelmRelease
-    name: billing
-    apiVersion: helm.toolkit.fluxcd.io/v2beta1
-  environments:
-    - name: prod
-      targets:
-        - namespace: billing
-          clusterRef:
-            kind: GitopsCluster
-            name: billing-production
-            namespace: billing
-```
-- I could create/view the pipeline cause I have access to search namespace or via gitops
-- I could not access billing-production cluster as i dont have access to billing namespace
-- I could impersonate user
-- I cannot get helm releases in dev/billing as I have not access to that namespace
-```
-GET /apis/helm.toolkit.fluxcd.io/v2beta1/namespaces/billing/helmreleases/billing
-Host: kube.dev
-Authorization: Bearer dev-cluster-sa-with-impersonation
-Impersonate-User: search-developer
-```
-scenario 3b: billing pipeline created in billing namespace
+There are no different considerations from this scenario to the tenancy by namespace for the pipeline controller
 
-```yaml
-apiVersion: pipelines.weave.works/v1alpha1
-kind: Pipeline
-metadata:
-  name: billing-shared-environment
-  namespace: billing
-spec:
-  appRef:
-    kind: HelmRelease
-    name: billing
-    apiVersion: helm.toolkit.fluxcd.io/v2beta1
-  environments:
-    - name: dev
-      targets:
-        - namespace: billing
-          clusterRef:
-            kind: GitopsCluster
-            name: dev
-            namespace: flux-system
-```
-- I could create the pipeline via gitops
-- I won't be able to view it as have not permissions to view pipelines in another namespace
-- I won't be able to view status as have not access to billing namespace
+3. As platform admin, I want to ensure by design an isolated experience between tenants.
 
-// TODO going over here
+- Policies checking tenancy domain should be good enough to ensure isolation at admission time
+- Right RBAC at runtime would complement user access  
+
+
 ### Scenario B Summary
-- With the RBAC configuration indicated in the previous example we could
-  leverage RBAC for providing the right authz.
-- A change is required that is the gitops clusters manifests should be created by tenant
-- pipelines api should do authz checkings 
+
+Similar to Scenario A with the addition that given that we have a new tenancy dimension: the cluster, we should 
+check permissions at that level
+- via policies for pipelines at creation (priority)
+- via RBAC on the gitops cluster resource at runtime. This is not neccesarily a super priority
+as if the tenant would not have access, it would not have been created. 
 
 
-### Recommendations
+
+
+### Summary, recommendations and further questions 
+
 - better access control to gitops clusters is required
 - in case cluster belongs to a tenant, then the manifest should be created
-withing that namespace in the cluster management
+  withing that namespace in the cluster management
 - in the context of pipelines apis and controller, once we have a reference to a resources
   - cluster or applications, we should check whether we have access to it, otherwise fail
   - we could do this via policies as admission or at runtime
-- we should leverage policies more! in particular cause we could easily assume that 
-will exist within the management cluster
+- we should leverage policies more! in particular cause we could easily assume that
+  will exist within the management cluster
+
+
+1. As search/billing developer,I want to create a pipeline for my tenant (v0.1)
+
+- We need to create the policies to validate references of pipeline, appRef and clusterRef
+
+
+2. As search/billing developer,I want to view pipelines for my tenant(v0.1)
+
+Tenancy By Namespace
+
+Tenancy By Cluster
+- We need some semantics to define rules for tenant cluster access. 
+- Two approaches are possible within wge
+  - via RBAC 
+  - via Policy
+The proposal shows both but potentially the policy approach sounds better 
+  
+3. As search/billing developer,I want to be able to promote apps via pipelines for my tenant (v0.2)
+
+Tenancy By Namespace
+
+**pipeline controller** 
+TBD 
+- we should impersonate or grant pemissions for access resources
+- impersonation should happen in the context of the event
+- we could also no use impersonation and to grant permissions
+
+**for promotions and pipeline controller, given that we need to access the repo, how
+do we ensure by design that only the right credentials are used? Here the potential solution
+is to create tenant jobs on demand bounded to the tenant. And the token to be potentially ephemeral.
+
+Tenancy By Cluster 
+
+
+3. As platform admin, I want to ensure by design an isolated experience between tenants.
+
+Recommendations
+
+- Extend tenancy to create the suggested RBAC configuration for pipelines. 
+- Extend tenancy to create the suggested policies for admission. 
+
+Tenancy By Namespace
+
+- Create policies that only allow admission of resources for a tenant within their 
+tenancy boundaries. in this case the namespace.
+
+Tenancy By Cluster
+
+- Create policies that only allow admission of resources for a tenant within their
+  tenancy boundaries. in this case the cluster.
+
+
+### Limitations 
+
+We have pictured tenancy as an static concern but not discussed when a tenant is being modified
+
+
 
 
 

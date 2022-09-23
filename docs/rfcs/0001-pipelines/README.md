@@ -74,7 +74,10 @@ If the RFC goal is to document best practices,
 then this section can be replaced with the the actual documentation.
 -->
 
-A new custom resource definition `Pipeline` lets users define a pipeline for a specific application and its associated target environments in a central place. Each pipeline is represented by a single resource consisting of an application reference and a list of all the environments in turn consisting of a list of the environments' targets. The order of environments is mandated by each environment's position in that list. An application reference within a `Pipeline` resource consists of a kind and a name. Together with the namespace declared in each target, the application is uniquely identified per-target.
+A new custom resource definition `Pipeline` lets users define a pipeline for a specific application and its associated target environments in a central place. 
+Each pipeline is represented by a single resource consisting of an application reference and a list of all the environments in turn consisting of a list of the environments' targets. 
+The order of environments is mandated by each environment's position in that list. An application reference within a `Pipeline` resource consists of a kind and a name. 
+Together with the namespace declared in each target, the application is uniquely identified per-target.
 
 Two annotations will furthermore simplify deriving the pipeline and specific stage from a certain resource:
 
