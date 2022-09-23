@@ -33,7 +33,8 @@ pipelines safely is the main goal of this RFC.
 
 ### Non-Goals
 
-TBA 
+- We picture tenant as a static image but in reality,a tenant would evolve. this evolution is out scope. 
+
 
 ## Proposal
 
@@ -595,24 +596,4 @@ Pipeline controller would require
   - configured just for the context of the event / tenant
   - using ephemeral auditable access tokens
 
-
-### Limitations 
-
-We have pictured tenancy as an static concern but not discussed when a tenant is being modified
-
-
-
-
-
-
-
-
-
-
-
-- 
- 
-
-
-
-
+  
