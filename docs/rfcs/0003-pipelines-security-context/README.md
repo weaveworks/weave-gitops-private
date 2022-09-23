@@ -1,33 +1,35 @@
-# RFC-0003 pipelines security context for multi-tenancy
+# RFC-0003 pipelines security for weave gitops enterprise multi-tenancy
 
 **Status:** provisional
-
-**Creation date:** 2022-07-29
-
-**Last update:** 2022-08-25
+**Creation date:** 2022-09-29
 
 ## Summary
-This rfc proposes the security configuration to use in the context of pipelines in order to 
-- allow developers to deliver applications within weave gitops enterprise while  
-- respecting isolation boundaries set for tenancy  
+
+This rfc proposes the security posture required for pipelines to securily work in a weave gitops enterprise multi-tenant environment.   
 
 ## Motivation
 
-[pipelines rfc](../0001-pipelines/README.md) is based in a pipeline CRD that contains references to apps, namespaces and clusters.  
+[pipelines rfc](../0001-pipelines/README.md) indicates the approach to use to define a delivery pipeline to deliver 
+an application across multiple environments.
 
->* **what happens if I create a Pipeline refering to a non-existing Namespace or cluster?** The Pipeline's `.status` field reflects the status of each referenced cluster. 
->* However, it will not reflect any state of remote resources on one of these clusters. Therefore, a cluster that's not reachable from the pipeline-controller or a non-existing
->* Namespace on that cluster referred to by a `Pipeline` is not visible in the `Pipeline` resource itself.
-
+Weave Gitops Enterprise will host multiple applications owned by multiple teams being delivered across multiple environments. 
+That multi-tenancy nature, and how to keep the isolation between tenant to ensure that any of them could use 
+pipelines safely is the main goal of this RFC.
 
 ### Terminology
 
-TBA
-
+- **Application**: A Helm Release.
+- **Pipeline**: A CD Pipeline declares a series of environments through which a given application is expected to be deployed.
+- **Environment**: An environment consists of one or more deployment targets. An example environment could be “Staging”.
+- **Promotion**: action to relase an application from a lower environment into a higher enviroment in the context of delivery pipelines.
+- **Deployment target**: A deployment target is a Cluster and Namespace combination. For example, the above “Staging” environment, could contain {[QA-1, test], [QA-2, test]}.
+- **Multi-tenancy**: ability to serve a multiple group of users in an isolated manner using a shared environment.  
+  For this proposal we could assume that a platform running WGE is the shared environment and all the application teams are the user group.
+- **Tenant**: each of the groups using services from the platform. For this proposal we could just assume that an application team is tenant.
 
 ### Goals
 
-- Define security guidelines to use pipelines while honoring multi-tenancy isolation. 
+- Define the security guidelines for pipelines to be used in a multi-tenant environment. 
 
 ### Non-Goals
 
@@ -37,7 +39,7 @@ TBA
 
 ### Assumptions 
 
-- An organisation uses WGE.
+- An organisation uses WGE. Multiple application teams conform the organisation.
 - Each team within the organisation is a tenant.
 - Isolation between tenants is a requirement.  
 - Tenancy is implemented via [WGE tenancy capabilities](https://www.notion.so/weaveworks/Tenant-Workspaces-Abstracted-RBAC-d16b58f8dd89498ea7a1f792440185fc)
@@ -46,34 +48,30 @@ TBA
 
 For the proposal we are going to use the following scenario. 
 
-**Tenants**
-- `search`  that provides the searching capabilities via search-svc app. 
-- `billing` that provides customer billing related capabilities via billing-svc app.
+**Organisations by Tenancy models**
+We are going to define two organisation, each one with a different tenancy model.
+- `shared-environments` where tenants are isolated at the level of the namespace. Each tenant owns a namespace within each environment/cluster. 
+- `dedicated-environments` where tenants are isolated at the level of the environment. Each tenant owns an entire cluster. 
 
-**Tenancy models**
-- `shared-environments` with tenancy by namespace. In this case
-  - environments: dev, staging and prod 
-  - namespaces: search and billing
-- `dedicated-environment` with tenancy at the level of the environment. We have search-prod and billing-prod environments for running applications.
-  - environments: search-prod, billing-prod
-  - namespaces: not relevant
+**Tenants**
+- `search` that provides searching capabilities for the org. 
+- `billing` that provides billing capabilities for the org.
 
 **Pipelines**
-Both scenarios will be using WGE for pipelines so  
-- pipelines CRD will be in the management cluster
-- applications will run in leaf clusters 
+Both organisations uses WGE pipelines as pipelines delivery capability so   
+- pipelines CRD are hosted in the management cluster
+- applications run in leaf clusters 
 
 **User stories** 
-
-To consider to define the security guidelines 
+To consider in the context of this proposal  
 
 1. As search/billing developer,I want to create a pipeline for my tenant (v0.1)
 2. As search/billing developer,I want to view a pipeline for my tenant (v0.1)
-3. As search/billing developer,I want to be able to promote apps via pipelines for my tenant (v0.2)
+3. As search/billing developer,I want to promote apps via pipelines for my tenant (v0.2)
 4. As platform admin, I want to ensure by design an isolated experience between tenants.
 
 
-## Scenario A: shared environment, tenancy by namespace
+## Scenario A: shared environments
 
 ### Tenancy Definition 
 Environments: 
@@ -94,13 +92,25 @@ Environments (Dev, Staging, Prod):
 - billing namespace
   - billing helm release exists
 
-Given the previous restrictions, the pipeline for search-svc would look like 
+### Security requirements by user story 
+
+#### As search/billing developer,I want to create a pipeline for my tenant (v0.1)
+
+The requirements for a pipeline to be valid in the context of its tenancy model is that 
+
+- A pipeline is created within a tenant namespace.
+- A pipeline references applications that the tenant can use. 
+- A pipeline references clusters that a tenant can use. 
+
+Given the previous definition, 
+
+A valid pipeline for search-svc could look like
 
 ```yaml
 apiVersion: pipelines.weave.works/v1alpha1
 kind: Pipeline
 metadata:
-  name: search-shared-environment
+  name: valid-search-shared-environment
   namespace: search
 spec:
   appRef:
@@ -108,20 +118,6 @@ spec:
     name: search-svc
     apiVersion: helm.toolkit.fluxcd.io/v2beta1
   environments:
-    - name: dev
-      targets:
-        - namespace: search
-          clusterRef:
-            kind: GitopsCluster
-            name: dev
-            namespace: flux-system
-    - name: staging
-      targets:
-        - namespace: search
-          clusterRef:
-            kind: GitopsCluster
-            name: staging
-            namespace: flux-system
     - name: prod
       targets:
         - namespace: search
@@ -131,17 +127,68 @@ spec:
             namespace: flux-system
 ```
 
-### RBAC configuration
+An invalid pipeline for search-svc could look like
 
-Based on the existing ones
+```yaml
+apiVersion: pipelines.weave.works/v1alpha1
+kind: Pipeline
+metadata:
+  name: invalid-search-shared-environment
+  namespace: billing #invalid pipeline namespace
+spec:
+  appRef:
+    kind: HelmRelease
+    name: billing #invalid app
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+  environments:
+    - name: prod
+      targets:
+        - namespace: billing #invalid app namespace
+          clusterRef:
+            kind: GitopsCluster
+            name: prod
+            namespace: flux-system
+```
+Therefore, to ensure that only valid pipelines are created, it will require to validate the pipeline resource 
+at admission time to ensure that the requirements are met. 
+
+//TODO: add the policies that will honor these requirements 
+
+#### As search/billing developer,I want to view pipelines for my tenant (v0.1)
+
+To view the pipeline via WGE UI a user clicks in pipeilnes therefore the following request is generated
+```
+GET /v1/pipelines/search
+Host: api.wge.com
+Authorization: Bearer search-developer-jwt-token
+```
+WGE backend validated the token and forwards the request to kube api 
+```
+GET /apis/pipelines.weave.works/v1alpha1/namespaces/search/pipeline/search
+Host: kube.managmeent
+Authorization: Bearer search-developer-jwt-token
+```
+Kube api wil authorise it based on RBAC and the search developer will retrieve the resource. 
+
+In order to compute the pipeline status, queries will be done to the leaf cluster, for example in dev 
+it would be something similar to 
+
+```
+GET /apis/helm.toolkit.fluxcd.io/v2beta1/namespaces/search/helmreleases/search
+Host: kube.dev
+Authorization: Bearer dev-cluster-sa-with-impersonation
+Impersonate-User: search-developer
+```
+For the previous flow to work we would need to meet the following Authz requirements 
+
+- developer to access pipeline resource namespace in management cluster
+- developer to access environment clusters
+- developer to access application namespace within the clusters
+
+That based on the existing ones 
 - [roles](https://github.com/weaveworks/weave-gitops-enterprise/blob/main/charts/mccp/templates/rbac/user_roles.yaml)
 - [role binding](https://github.com/weaveworks/weave-gitops-enterprise/blob/main/charts/mccp/templates/rbac/admin_role_bindings.yaml)
 - [documentation](https://docs.gitops.weave.works/docs/configuration/recommended-rbac-configuration/)
-
-We need to have the following access requirements  
-- developer to access pipeline resource namespace in management cluster
-- developer to access environment clusters 
-- developer to access application namespace within the clusters
 
 We then need to create the following roles and roles bindings
 
@@ -233,48 +280,9 @@ rules:
     verbs: ["get", "watch", "list"]
 ```
 
-### Access model by user story 
 
 
-1. As search/billing developer,I want to view pipelines for my tenant (v0.1)
 
-To view the pipeline 
-
-- user clicks pipelines
-- fe request to backend with
-```
-GET /v1/pipelines/search
-Host: api.wge.com
-Authorization: Bearer search-developer-jwt-token
-```
-- backend validates token 
-- request forwarded to kube api  
-```
-GET /apis/pipelines.weave.works/v1alpha1/namespaces/search/pipeline/search
-Host: kube.managmeent
-Authorization: Bearer search-developer-jwt-token
-```
-- RBAC kicks in and will allow search-developer user access pipeline resources
-- kube api returns search pipeline
-
-And its status by environment, 
-
-for example, to get dev status we 
-
-get first the details for dev gitops cluster
-```
-GET /apis/GitopsCluster/dev
-Host: kube.managmeent
-Authorization: Bearer search-developer-jwt-token
-```
-with the kubeconfig, impersonate 
-
-```
-GET /apis/helm.toolkit.fluxcd.io/v2beta1/namespaces/search/helmreleases/search
-Host: kube.dev
-Authorization: Bearer dev-cluster-sa-with-impersonation
-Impersonate-User: search-developer
-```
 
 2. As search/billing developer,I want to be able to promote apps via pipelines for my tenant (v0.2)
     1. promotions via watching
@@ -647,6 +655,16 @@ as if the tenant would not have access, it would not have been created.
 
 ### Summary, recommendations and further questions 
 
+
+1. As search/billing developer,I want to create a pipeline for my tenant (v0.1)
+
+- We need to create the policies to validate references of pipeline, appRef and clusterRef
+
+
+
+
+
+
 - better access control to gitops clusters is required
 - in case cluster belongs to a tenant, then the manifest should be created
   withing that namespace in the cluster management
@@ -657,9 +675,6 @@ as if the tenant would not have access, it would not have been created.
   will exist within the management cluster
 
 
-1. As search/billing developer,I want to create a pipeline for my tenant (v0.1)
-
-- We need to create the policies to validate references of pipeline, appRef and clusterRef
 
 
 2. As search/billing developer,I want to view pipelines for my tenant(v0.1)
