@@ -38,7 +38,15 @@ but also because
 - flux provides the base building blocks to integrate with existing customer's promotion systems. It opens the door 
 for a gradual adoption of the wge pipeline solution for customers that already have custom delivery logic.
 
-
 ## Consequences
 
-TBA
+As mentioned in the decision, the following consequences of the decision 
+
+- A path forward for pipelines to deliver promotions capability. Sunglow could deliver promotions based on this approach.
+- A risk to manage in the context of customer adoption: the network path opened. Sunglow would need to establish the customer feedback 
+loop with SAs/CXs to manage and mitigate the risk once it happens. 
+- A scenario further to develop: existing CI scenarios based on the approach. Sunglow would need to use customer feedback to 
+determine which existing systems are of relevance to provide the integration experience.  
+
+
+
