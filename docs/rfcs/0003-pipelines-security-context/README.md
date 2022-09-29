@@ -596,4 +596,14 @@ Pipeline controller would require
   - configured just for the context of the event / tenant
   - using ephemeral auditable access tokens
 
+
+## Alternatives 
+
+They have not been explored extensively. An RFC within the same problem space is [Flux ACLs](https://github.com/fluxcd/flux2/pull/2092/files#diff-56d9cc364ab8e4fddfb869da4508a2804b157b098d30df8d0c4984888882ec6bR143).
+
+
+
+
+
+
   
