@@ -20,7 +20,7 @@ Detect deployment changes via
 
 ## Decision
 
-As [discussed in RFC](../rfcs/0003-change-detection/README.md) each of approaches has associated unknowns. The major ones were
+As [discussed in RFC](../rfcs/0003-pipelines-promotion/README.md) each of approaches has associated unknowns. The major ones were
 
 - Webhooks: the need for a new network flow in the product, from leaf cluster to management, and the impediments
   that it would suppose for customers while adopting the solution.
