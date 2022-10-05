@@ -64,7 +64,7 @@ a deployment pipeline has changed.
 What is out of scope for this RFC? Listing non-goals helps to focus discussion
 and make progress.
 -->
-- Anything related to processing the deployment notification.  
+- Anything related to processing the deployment notification.
 
 ## Comparison
 
