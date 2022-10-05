@@ -17,11 +17,11 @@ an approach to do it. During the discovery of the second iteration, two models h
 Detect deployment changes via
 
 - [Watching](https://github.com/weaveworks/weave-gitops-enterprise/issues/1481)
-- [Webhooks](https://github.com/weaveworks/weave-gitops-enterprise/issues/1487)
+- [Alert](https://github.com/weaveworks/weave-gitops-enterprise/issues/1487)
 
 ## Decision
 
-As [discussed in RFC](../rfcs/0003-pipelines-promotion/README.md) each of approaches has associated unknowns. 
+As [discussed in RFC](../rfcs/0003-pipelines-promotion/detect-deployment-changes.md) each of approaches has associated unknowns. 
 The major ones are:
 
 - Webhooks: the need for a new network flow in the product, from leaf cluster to management, and the potential impediments

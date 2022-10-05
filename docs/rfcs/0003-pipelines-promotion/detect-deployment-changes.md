@@ -1,4 +1,4 @@
-# RFC-0003 Comparison of approaches to detect changes that trigger promotions
+# RFC-0003 How to detect deployment changes and to notify for pipeline promotions
 
 <!--
 The title must be short and descriptive.
@@ -11,15 +11,30 @@ Status represents the current state of the RFC.
 Must be one of `provisional`, `implementable`, `implemented`, `deferred`, `rejected`, `withdrawn`, or `replaced`.
 -->
 
-**Creation date:** 2022-09-21
+**Creation date:** 2022-10-05
 
-**Last update:** 2022-09-21
+**Last update:** 2022-10-05
 
 ## Summary
 
 <!--
 One paragraph explanation of the proposed feature or enhancement.
 -->
+
+Given a continious delivery pipeline is comprised of diffferent environments the application goes trough in
+its way to production, there is need for an action to move the application among environments. That concept is known as
+promotion and it is a one of the core concepts of a pipelines domain.
+
+This RFC looks at different designs for notifying that a deployment has happened in order to trigger a promotion (if needed). 
+
+## Terminology
+
+- **Pipeline**: a continuous delivery Pipeline declares a series of environments through which a given application is expected to be deployed.
+- **Promotion**: action of moving an application from a lower environment to a higher environment within a pipeline. 
+For example promote stating to production would attempt to deploy an application existing in staging environment to production environment.
+- **Environment**: An environment consists of one or more deployment targets. An example environment could be “Staging”.
+- **Deployment target**: A deployment target is a Cluster and Namespace combination. For example, the above “Staging” environment, could contain {[QA-1, test], [QA-2, test]}.
+- **Application**: A Helm Release.
 
 ## Motivation
 
@@ -28,13 +43,9 @@ This section is for explicitly listing the motivation, goals, and non-goals of
 this RFC. Describe why the change is important and the benefits to users.
 -->
 
-### Terminology
 
-- **CD Pipeline**: A CD Pipeline declares a series of environments through which a given application is expected to be deployed.
-- **Environment**: An environment consists of one or more deployment targets. An example environment could be “Staging”.
-- **Deployment target**: A deployment target is a Cluster and Namespace combination. For example, the above “Staging” environment, could contain {[QA-1, test], [QA-2, test]}.
-- **Application**: A Helm Release or an Image. 
-- **Progressive Delivery / Rollout**: Updates to an application flow from one environment to the next. This has no relationship to Flagger
+This RFC looks at different designs for notifying that a deployment has happened in order to trigger a promotion (if needed).
+
 
 ### Goals
 
@@ -43,13 +54,17 @@ List the specific goals of this RFC. What is it trying to achieve? How will we
 know that this has succeeded?
 -->
 
+- Discover different solutions within weave gitops that would allow to solve the problem of how to detect that
+a deployment pipeline has changed.
+- Recommend the one that seems better suited for the role. 
+
 ### Non-Goals
 
 <!--
 What is out of scope for this RFC? Listing non-goals helps to focus discussion
 and make progress.
 -->
-
+- Anything related to processing the deployment notification.  
 
 ## Comparison
 
@@ -60,13 +75,15 @@ you're proposing, but should not include things like API designs or
 implementation.
 
 If the RFC goal is to document best practices,
-then this section can be replaced with the the actual documentation.
+then this section can be replaced with the actual documentation.
 -->
 
 
-### Watcher approach
+### Watchers approach
 
-This approach suggests the creation of a watcher per remote cluster. Each watcher would get notified whenever a Helm release in the remote cluster changes and take an action to start the next promotion based on the Pipeline definition.
+This approach suggests the creation of [kubernetes watchers](https://kubernetes.io/docs/reference/using-api/api-concepts/#efficient-detection-of-changes) 
+per remote cluster. Each watcher would get notified whenever a Helm release in the remote cluster changes 
+and take an action to start the next promotion based on the Pipeline definition.
 
 [Tracking issue](https://github.com/weaveworks/weave-gitops-enterprise/issues/1481)
 
@@ -119,7 +136,9 @@ This approach suggests the creation of a watcher per remote cluster. Each watche
 
 ### Alert approach
 
-This approach suggests the use of Flux notification controller running on the remote cluster. An alert/provider CR can be setup to call a webhook running on the management cluster to notify the management cluster of a Helm release change in a remote cluster.
+This approach suggests the use of Flux [notification controller](https://fluxcd.io/flux/components/notification/) running on the remote cluster. 
+An [alert](https://fluxcd.io/flux/components/notification/alert/) / [provider](https://fluxcd.io/flux/components/notification/provider/) 
+would be setup to call a webhook running on the management cluster to notify a Helm release change in a remote cluster.
 
 [Tracking issue](https://github.com/weaveworks/weave-gitops-enterprise/issues/1487)
 
@@ -181,8 +200,8 @@ This approach suggests the use of Flux notification controller running on the re
 #### Advantages
 
 1. Simplicity: Uses Flux functionality as much as possible
-1. Flexiblility: Promotion can be kicked off from external systems by calling the webhook
-1. Flexibility: Promotion can be exercised by an external system
+2. Flexibility: Promotion can be kicked off from external systems by calling the webhook
+3. Flexibility: Promotion can be exercised by an external system
 
 #### Disadvantages and Mitigations
 
