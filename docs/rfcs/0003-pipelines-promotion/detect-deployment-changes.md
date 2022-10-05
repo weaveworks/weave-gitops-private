@@ -206,26 +206,38 @@ would be setup to call a webhook running on the management cluster to notify a H
 #### Disadvantages and Mitigations
 
 1. Requires Flux on all leaf clusters. _Mitigations: ?_
-1. Authenticity of events needs to be taken care of. _Mitigations: add authentication to webhook; verify event by reaching out to leaf cluster_
-1. Network connectivity from all leaf clusters to management cluster necessary. _Mitigations: promotion can be kicked from any external system so if using notification-controller would not work, an external CI system could trigger promotion instead._
+2. Authenticity of events needs to be taken care of. 
+_Mitigations: add authentication and authorization to the webhook; verify event by reaching out to leaf cluster_
+4. Network connectivity from all leaf clusters to management cluster necessary. 
+_Mitigations: promotion can be kicked from any external system so if using notification-controller would not work, 
+an external CI system could trigger promotion instead._
 
 #### Known Unknowns
 
 1. How does p-c set the correct Provider address?
    2. Configuration (user burden)
    3. Automatic determination (might get complicated quick to account for the different environments (with/without Ingress, external LB, ...)
-1. How does p-c create the Provider/Alert resources? If it creates them directly by going through the target clusters' API server then it doesn't have a way of making sure they don't get modified/deleted (owner references don't work cross-cluster). Having them be committed to Git can be very complicated as the controller would have to know (1) wich Git repository to commit them to, (2) in wich location to put them, (3) if there's a `kustomization.yaml` that would have to be patched. An alternative could be to use a [remote Kustomization](https://fluxcd.io/flux/components/kustomize/kustomization/#remote-clusters--cluster-api) and the management cluster's Git repository.
+2. How does p-c create the Provider/Alert resources? If it creates them directly by going through the target clusters' 
+API server then it doesn't have a way of making sure they don't get modified/deleted (owner references don't work cross-cluster). 
+Having them be committed to Git can be very complicated as the controller would have to know (1) wich Git repository to commit them to, 
+(2) in wich location to put them, (3) if there's a `kustomization.yaml` that would have to be patched. 
+An alternative could be to use a [remote Kustomization](https://fluxcd.io/flux/components/kustomize/kustomization/#remote-clusters--cluster-api) 
+and the management cluster's Git repository.
 
 #### Further Considerations
 
 ##### delivery semantics/failure scenarios recovery for notifications
 
-The notification-controller is using [rate limiting](https://fluxcd.io/flux/components/notification/options/) that's only configurable globally with a default of 5m. This might lead to events not being emitted to the webhook.
+The notification-controller is using [rate limiting](https://fluxcd.io/flux/components/notification/options/) that's 
+only configurable globally with a default of 5m. This might lead to events not being emitted to the webhook.
 
 notification-controller has [at-most once delivery semantics](https://github.com/fluxcd/notification-controller/tree/main/docs/spec#events-dispatching-1):
 
-> The alert delivery method is at-most once with a timeout of 15 seconds. The controller performs automatic retries for connection errors and 500-range response code. If the webhook receiver returns an error, the controller will retry sending an alert for four times with an exponential backoff of maximum 30 seconds.
+> The alert delivery method is at-most once with a timeout of 15 seconds. The controller performs automatic retries for 
+> connection errors and 500-range response code. If the webhook receiver returns an error, the controller will retry 
+> sending an alert for four times with an exponential backoff of maximum 30 seconds.
 
 #### enrichment of events for custom metadata
 
-The [Alert spec](https://fluxcd.io/flux/components/notification/alert/) allows for custom metadata to be added to events by means of the `.spec.summary` field. The content of this field will be added to the event's `.metadata` map with the key "summary".
+The [Alert spec](https://fluxcd.io/flux/components/notification/alert/) allows for custom metadata to be added to events
+by means of the `.spec.summary` field. The content of this field will be added to the event's `.metadata` map with the key "summary".
