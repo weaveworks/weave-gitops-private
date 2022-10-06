@@ -1,19 +1,17 @@
-# RFC-0003 Promotion capability for pipelines 
+# RFC-0003 Pipeline promotions 
 
 **Status:** provisional
 
-**Creation date:** 2022-10-05
+**Creation date:** 2022-10
 
 **Last update:** 2022-10-05
 
 ## Summary
 
-Given a continuous delivery pipeline is comprised of diffferent environments the application goes trough in
-its way to production, there is need for an action to move the application among environments. That concept is known as
-promotion and it is a one of the core concepts of a pipelines domain. Current pipelines in weave gitops
-does not support promotion.
-
-This RFC addresses it as specified in the [product initiative](https://www.notion.so/weaveworks/Pipeline-promotion-061bb790e2e345cbab09370076ff3258)
+Given a continuous delivery pipeline, the application goes via different environments, in its way to production. We 
+need an action to efectively move applications beteween environments. That concept is generally known as a
+promotion. Current pipelines in weave gitops does not support promotion. This RFC addresses this gap 
+as specified in the [product initiative](https://www.notion.so/weaveworks/Pipeline-promotion-061bb790e2e345cbab09370076ff3258)
 
 ## Terminology
 
@@ -26,12 +24,10 @@ This RFC addresses it as specified in the [product initiative](https://www.notio
 
 ## Motivation
 
-Given a continuous delivery pipeline is comprised of diffferent environments the application goes trough in
-its way to production, there is need for an action to move the application among environments. That concept is known as
-promotion and it is a one of the core concepts of a pipelines domain. Current pipelines in weave gitops 
-does not support promotion. 
-
-This RFC addresses it as specified in the [product initiative](https://www.notion.so/weaveworks/Pipeline-promotion-061bb790e2e345cbab09370076ff3258)
+Given a continuous delivery pipeline, the application goes via different environments, in its way to production. We
+need an action to efectively move applications beteween environments. That concept is generally known as a
+promotion. Current pipelines in weave gitops does not support promotion. This RFC addresses this gap
+as specified in the [product initiative](https://www.notion.so/weaveworks/Pipeline-promotion-061bb790e2e345cbab09370076ff3258)
 
 ### Goals
 
@@ -47,6 +43,7 @@ This RFC addresses it as specified in the [product initiative](https://www.notio
 
 The proposed solution architecture is shown below.
 
+//TODO: review diagram
 ```mermaid
    sequenceDiagram
     participant F as Flux
@@ -100,7 +97,8 @@ On the flip side, the solution has the following constraints:
 
 ### Non-functional requirements
 
-Here we try to provide to anticipate some of the non functional requirements 
+As enterprise feature, we try also to understand the considerations in terms of non-functional requirements to ensure 
+that no major impediments are found in the future. 
 
 #### Security 
 
@@ -280,7 +278,6 @@ Each task will include the following fields:
 - `url` : the git repository url or the webhook url
 - `branch`: the branch to use for the update, defaults to main (only applicable when kind is pull-request)
 - `secretRef`: a reference to a secret in the same namespace as the pipeline that holds the authentication credentials for the repository or the webhook.
-
 
 ## Implementation History
 
