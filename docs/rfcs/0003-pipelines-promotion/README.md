@@ -66,25 +66,151 @@ The proposed solution architecture is shown below.
 
 With three main responsibilities
 
-1. Detect and communicate deployment changes
-2. Process deployment change and determine promotions needs 
+1. Notify deployment changes
+2. Determine whether a promotion is needed  
 3. Execute the promotion 
 
-### Detect and communicate deployment changes
+### Notify deployment changes
 
 The solution leverages [flux native notification capabilities](https://fluxcd.io/flux/components/notification/) for this responsibility. 
 An evaluation of different alternatives solutions to this concern could be found [here](detect-deployment-changes.md).
 
-### Process deployment change and determine promotions needs
+### Determine whether a promotion is needed
 
 This responsibility is assumed by pipeline controller living in the management cluster that 
 - would expose a webhook to ingest deployment change events.
 - process concurrently these requests 
 - determine whether at the back of the event and a pipeline definition, a promotion is required. 
 
-#### Promotions within pipeline spec
+### To execute the promotion
 
-In order to accommodate promotion logic, the pipeline spec would be extended with a `promotion` field as shown below 
+Once the previous evaluation considers that a promotion is required, pipeline controller would be in charge 
+of orchestrating and executing the task according to its configuration.
+
+The current solution has been chosen over its alternatives (see alternatives section) due to 
+
+- it enables promotions. 
+- it allows to separations roles, therefore permissions between the components notifying the change and executing the promotion.
+- it is easier to develop over other alternatives.
+
+On the flip side, the solution has the following constraints:
+
+- there is a need to manage and expose the endpoint for deployment changes separately to weave gitops api.
+- non-canonical usage of controllers as its behaviour is driven by ingested event than change in the declared state of a resource.
+
+
+## Alternatives
+
+Other alternatives solutions have been discovered and discussed  
+
+- Alternative A: to use weave gitops api
+- Alternative B: create a new service - promotions service
+- Alternative C: weave gitops api + pipeline controller  + promotion executor
+
+### Alternative A: weave gitops api
+
+```mermaid
+   sequenceDiagram
+    participant F as Flux
+    participant LC as Leaf Cluster
+    participant MC as Management Cluster
+    F->>LC: deploy helm release
+    LC->>MC: notify deployment via notification controller    
+    MC->>WGE: process deployment notification
+    participant WGE as Weave Gitops Backend
+    participant k8s as Kubernetes Api
+    WGE->>k8s: get pipeline
+    WGE->>WGE: promotion business loic
+    participant k8s as Kubernetes Api
+    WGE->>configRepo: raise PR
+    participant configRepo as Configuration Repo
+```
+
+This solution is different from `pipeline controller` in that the three responsibilities 
+
+1. Notify deployment changes
+2. Determine whether a promotion is needed
+3. Execute the promotion
+
+are fulfilled within weave gitops backend app.
+
+**Pro**
+- Already setup and *should* be more easily exposed. 
+- No need to manage other exposed surface, therefore less to secure.
+- No need to generate TS client
+
+**Cons**
+- Notifier service account needs permissions for promotion resources. 
+
+### Alternative B: weave gitops api + pipeline controller  + promotion executor
+
+```mermaid
+   sequenceDiagram
+    participant F as Flux
+    participant LC as Leaf Cluster
+    participant MC as Management Cluster
+    F->>LC: deploy helm release
+    LC->>MC: notify deployment via notification controller    
+    MC->>WGE: process deployment notification
+    participant WGE as Weave Gitops Backend
+    participant k8s as Kubernetes Api
+    WGE->>k8s: write deployment event
+    participant pc as pipeline controller
+    k8s->>pc: watch deployment event & pipelines
+    pc->>pj: create promotion job
+    participant pj as promotion job
+    pj->>pj: promotion business logic
+    pj->>configRepo: raise PR
+    participant configRepo as Configuration Repo
+```
+
+This solution is different from `pipeline controller` in that the three responsibilities are split
+
+1. Notify deployment changes: ingestion is done via weave gitops api.
+2. Determine whether a promotion is needed: pipeline controller watches for changes in pipeline.
+3. Execute the promotion: extracted to a kubernetes job layer. 
+
+**Pro**
+- Already setup and *should* be more easily exposed.
+- No need to manage other exposed surface, therefore less to secure.
+- No need to generate TS client
+- Separation of concerns with scalability and fault-tolerance by design
+
+**Cons**
+- Needs to write in pipeline resource
+- Most complex solution
+- Kubernetes jobs not a popular choice
+
+### Alternative C: new service called promotions service
+
+```mermaid
+   sequenceDiagram
+    participant F as Flux
+    participant LC as Leaf Cluster
+    participant MC as Management Cluster
+    F->>LC: deploy helm release
+    LC->>MC: notify deployment via notification controller    
+    MC->>PS: process deployment notification
+    participant PS as Promotions Svc
+    participant k8s as Kubernetes Api
+    PS->>k8s: get pipeline
+    PS->>PS: promotion business loic
+    participant k8s as Kubernetes Api
+    PS->>configRepo: raise PR
+    participant configRepo as Configuration Repo
+```
+**Pro**
+- easiest to dev against
+
+**Cons**
+- 1 more component for the team to maintain
+- new repo/CI (?)
+
+## Design Details
+
+### Pipeline spec changes for promotions
+
+In order to accommodate promotion logic, the pipeline spec would be extended with a `promotion` field as shown below
 
 ```yaml
 apiVersion: pipelines.weave.works/v1alpha1
@@ -120,108 +246,7 @@ Each task will include the following fields:
 - `branch`: the branch to use for the update, defaults to main (only applicable when kind is pull-request)
 - `secretRef`: a reference to a secret in the same namespace as the pipeline that holds the authentication credentials for the repository or the webhook.
 
-### To execute the promotion
 
-Once the previous evaluation considers that a promotion is required, pipeline controller would be in charge 
-of orchestrating and executing the task according to its configuration.
+## Implementation History
 
-The current solution has been chosen over its alternatives (see alternatives section) due to 
-
-- it enables promotions. 
-- it allows to separations roles, therefore permissions between the components notifying the change and executing the promotion.
-- it is easier to develop over other alternatives.
-
-On the flip side, the solution has the following constraints:
-
-- there is a need to manage and expose the endpoint for deployment changes separately to weave gitops api.
-- non-canonical usage of controllers as its behaviour is driven by ingested event than change in the declared state of a resource.
-
-
-### Alternatives
-
-The following solutions has been identified
-- Alternative A: weave gitops backend
-- Alternative B: pipeline controller
-- Alternative C: new service called promotions service
-- Alternative D: cluster services + pipeline controller  + promotion executor
-
-### Alternative A: weave gitops backend
-
-#### Diagram
-```mermaid
-   sequenceDiagram
-    participant F as Flux
-    participant LC as Leaf Cluster
-    participant MC as Management Cluster
-    F->>LC: deploy helm release
-    LC->>MC: notify deployment via notification controller    
-    MC->>WGE: process deployment notification
-    participant WGE as Weave Gitops Backend
-    participant k8s as Kubernetes Api
-    WGE->>k8s: get pipeline
-    WGE->>WGE: promotion business loic
-    participant k8s as Kubernetes Api
-    WGE->>configRepo: raise PR
-    participant configRepo as Configuration Repo
-```
-#### Pro
-- already setup and *should* be more easily exposed
-- no need to generate TS client
-
-#### Cons
-- service account needs extra permissions
-- need to work around entitlements/user auth
-
-
-### Alternative C: new service called promotions service
-#### Diagram
-```mermaid
-   sequenceDiagram
-    participant F as Flux
-    participant LC as Leaf Cluster
-    participant MC as Management Cluster
-    F->>LC: deploy helm release
-    LC->>MC: notify deployment via notification controller    
-    MC->>PS: process deployment notification
-    participant PS as Promotions Svc
-    participant k8s as Kubernetes Api
-    PS->>k8s: get pipeline
-    PS->>PS: promotion business loic
-    participant k8s as Kubernetes Api
-    PS->>configRepo: raise PR
-    participant configRepo as Configuration Repo
-```
-#### Pro
-- easiest to dev against
-
-#### Cons
-- 1 more component for the team to maintain
-- new repo/CI (?)
-
-### Alternative D: cluster services + pipeline controller  + promotion executor
-#### Diagram
-```mermaid
-   sequenceDiagram
-    participant F as Flux
-    participant LC as Leaf Cluster
-    participant MC as Management Cluster
-    F->>LC: deploy helm release
-    LC->>MC: notify deployment via notification controller    
-    MC->>WGE: process deployment notification
-    participant WGE as Weave Gitops Backend
-    participant k8s as Kubernetes Api
-    WGE->>k8s: write deployment event
-    participant pc as pipeline controller
-    k8s->>pc: watch deployment event & pipelines
-    pc->>pj: create promotion job
-    participant pj as promotion job
-    pj->>pj: promotion business logic
-    pj->>configRepo: raise PR
-    participant configRepo as Configuration Repo
-```
-#### Pro
-- separation of concerns with scalability and fault-tolerance by design
-
-#### Cons
-- most complex solution (might be over complex?)
-- kubernetes jobs not a popular choice 
+- [Promotions Issue](https://github.com/weaveworks/weave-gitops-enterprise/issues/1589)
