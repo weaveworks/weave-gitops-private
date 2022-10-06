@@ -98,6 +98,37 @@ On the flip side, the solution has the following constraints:
 - there is a need to manage and expose the endpoint for deployment changes separately to weave gitops api.
 - non-canonical usage of controllers as its behaviour is driven by ingested event than change in the declared state of a resource.
 
+### Non-functional requirements
+
+Here we try to provide to anticipate some of the non functional requirements 
+
+#### Security 
+
+Promotions have a couple of activities that requires to drill down in terms of security:
+
+1. communication of deployment changes via webhook so over the network. 
+2. to create pull requests, so write access to gitops configuration repo.
+
+**Security for deployment changes via webhook**
+
+//TODO complete at the back of https://github.com/weaveworks/weave-gitops-enterprise/issues/1594
+
+**Security for pull request creation**
+
+//TODO complete at the back of https://github.com/weaveworks/weave-gitops-enterprise/issues/1594
+
+#### Scalability
+
+The initial strategy to scale the solution by number of request, would be vertically by using goroutines.
+
+#### Reliability 
+
+It will be implemented as part of the business logic of pipeline controller.  
+
+#### Monitoring 
+
+To leverage existing [kubebuilder metrics](https://book.kubebuilder.io/reference/metrics.html). There will be the need 
+to enhance default controller metrics with business metrics like `latency of a promtion by application`.
 
 ## Alternatives
 
@@ -207,6 +238,10 @@ This solution is different from `pipeline controller` in that the three responsi
 - new repo/CI (?)
 
 ## Design Details
+
+### Promotions Webhook 
+
+//TBA added at the back of https://github.com/weaveworks/weave-gitops-enterprise/issues/1594
 
 ### Pipeline spec changes for promotions
 
