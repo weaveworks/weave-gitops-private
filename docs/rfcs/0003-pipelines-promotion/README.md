@@ -8,8 +8,8 @@
 
 ## Summary
 
-Given a continuous delivery pipeline, the application goes via different environments, in its way to production. We 
-need an action to efectively move applications beteween environments. That concept is generally known as a
+Given a continuous delivery pipeline, the application goes via different environments in its way to production. We 
+need an action to sign the intent of deploying an application between environments. That concept is generally known as a
 promotion. Current pipelines in weave gitops does not support promotion. This RFC addresses this gap 
 as specified in the [product initiative](https://www.notion.so/weaveworks/Pipeline-promotion-061bb790e2e345cbab09370076ff3258)
 
@@ -24,8 +24,8 @@ as specified in the [product initiative](https://www.notion.so/weaveworks/Pipeli
 
 ## Motivation
 
-Given a continuous delivery pipeline, the application goes via different environments, in its way to production. We
-need an action to efectively move applications beteween environments. That concept is generally known as a
+Given a continuous delivery pipeline, the application goes via different environments in its way to production. We
+need an action to sign the intent of deploying an application between environments. That concept is generally known as a
 promotion. Current pipelines in weave gitops does not support promotion. This RFC addresses this gap
 as specified in the [product initiative](https://www.notion.so/weaveworks/Pipeline-promotion-061bb790e2e345cbab09370076ff3258)
 
@@ -40,19 +40,16 @@ as specified in the [product initiative](https://www.notion.so/weaveworks/Pipeli
 - Scenarios other than the identified in the product initiative.
 
 ## Proposal
+We propose to use a solution as specified in the following diagram. 
 
-The proposed solution architecture is shown below.
-
-//TODO: review diagram
 ```mermaid
    sequenceDiagram
     participant F as Flux
-    participant LC as Leaf Cluster
-    participant MC as Management Cluster
+    participant LC as Notification Controller (Leaf)
     F->>LC: deploy helm release
-    LC->>MC: notify deployment via notification controller    
-    MC->>pc: process deployment notification
-    participant pc as Pipeline Controller
+    LC->>pc: send deployment change event
+    participant pc as Pipeline Controller (Managment)
+    pc->>pc: authz and validate event
     participant k8s as Kubernetes Api
     pc->>k8s: get pipeline
     pc->>pc: promotion business loic
@@ -61,7 +58,7 @@ The proposed solution architecture is shown below.
     participant configRepo as Configuration Repo
 ```
 
-With three main responsibilities
+With three main activities
 
 1. Notify deployment changes
 2. Determine whether a promotion is needed  
@@ -74,26 +71,15 @@ An evaluation of different alternatives solutions to this concern could be found
 
 ### Determine whether a promotion is needed
 
-This responsibility is assumed by pipeline controller living in the management cluster that 
+This responsibility is assumed by `pipeline controller` living in the management cluster that 
 - would expose a webhook to ingest deployment change events.
-- process concurrently these requests 
+- process concurrently the deployment events 
 - determine whether at the back of the event and a pipeline definition, a promotion is required. 
 
 ### To execute the promotion
 
 Once the previous evaluation considers that a promotion is required, pipeline controller would be in charge 
 of orchestrating and executing the task according to its configuration.
-
-The current solution has been chosen over its alternatives (see alternatives section) due to 
-
-- it enables promotions. 
-- it allows to separations roles, therefore permissions between the components notifying the change and executing the promotion.
-- it is easier to develop over other alternatives.
-
-On the flip side, the solution has the following constraints:
-
-- there is a need to manage and expose the endpoint for deployment changes separately to weave gitops api.
-- non-canonical usage of controllers as its behaviour is driven by ingested event than change in the declared state of a resource.
 
 ### Non-functional requirements
 
@@ -128,30 +114,43 @@ It will be implemented as part of the business logic of pipeline controller.
 To leverage existing [kubebuilder metrics](https://book.kubebuilder.io/reference/metrics.html). There will be the need 
 to enhance default controller metrics with business metrics like `latency of a promtion by application`.
 
+### Why this solution
+
+The current solution has been chosen over its alternatives (see alternatives section) due to
+
+- it enables promotions.
+- it allows to separations roles, therefore permissions between the components notifying the change and executing the promotion.
+- it is easier to develop over other alternatives.
+
+On the flip side, the solution has the following constraints:
+
+- there is a need to manage and expose the endpoint for deployment changes separately to weave gitops api.
+- non-canonical usage of controllers as its behaviour is driven by ingested event than change in the declared state of a resource.
+
 ## Alternatives
 
-Other alternatives solutions have been discovered and discussed  
+Other alternatives solutions have been discovered and discussed. They difference among them is around 
+the component serving the promotion logic, therefore the alternatives names are based on it.
 
-- Alternative A: to use weave gitops api
-- Alternative B: create a new service - promotions service
-- Alternative C: weave gitops api + pipeline controller  + promotion executor
+- Alternative A: weave gitops backend
+- Alternative B: weave gitops api + pipeline controller  + promotion executor
+- Alternative C: promotions service (new service)
 
-### Alternative A: weave gitops api
+### Alternative A: weave gitops backend
 
 ```mermaid
    sequenceDiagram
     participant F as Flux
-    participant LC as Leaf Cluster
-    participant MC as Management Cluster
+    participant LC as Notification Controller (Leaf)
     F->>LC: deploy helm release
-    LC->>MC: notify deployment via notification controller    
-    MC->>WGE: process deployment notification
-    participant WGE as Weave Gitops Backend
+    LC->>wge: send deployment change event
+    participant wge as Weave Gitops Backend (Managment)
+    wge->>wge: authz and validate event
     participant k8s as Kubernetes Api
-    WGE->>k8s: get pipeline
-    WGE->>WGE: promotion business loic
+    wge->>k8s: get pipeline
+    wge->>wge: promotion business loic
     participant k8s as Kubernetes Api
-    WGE->>configRepo: raise PR
+    wge->>configRepo: raise PR
     participant configRepo as Configuration Repo
 ```
 
@@ -177,11 +176,9 @@ are fulfilled within weave gitops backend app.
    sequenceDiagram
     participant F as Flux
     participant LC as Leaf Cluster
-    participant MC as Management Cluster
     F->>LC: deploy helm release
-    LC->>MC: notify deployment via notification controller    
-    MC->>WGE: process deployment notification
-    participant WGE as Weave Gitops Backend
+    LC->>WGE: notify deployment via notification controller    
+    participant WGE as Weave Gitops API
     participant k8s as Kubernetes Api
     WGE->>k8s: write deployment event
     participant pc as pipeline controller
@@ -195,32 +192,33 @@ are fulfilled within weave gitops backend app.
 
 This solution is different from `pipeline controller` in that the three responsibilities are split
 
-1. Notify deployment changes: ingestion is done via weave gitops api.
+1. Notify deployment changes: ingestion is done via weave gitops api. the event is written in pipeline resource. 
 2. Determine whether a promotion is needed: pipeline controller watches for changes in pipeline.
 3. Execute the promotion: extracted to a kubernetes job layer. 
 
 **Pro**
-- Already setup and *should* be more easily exposed.
-- No need to manage other exposed surface, therefore less to secure.
+- Using ingestion layer so not increased operational costs.  
 - No need to generate TS client
-- Separation of concerns with scalability and fault-tolerance by design
+- Pipeline controller with reconcile loop so canonical usage. 
+- Scalability and fault-tolerance by design.
 
 **Cons**
 - Needs to write in pipeline resource
 - Most complex solution
 - Kubernetes jobs not a popular choice
 
-### Alternative C: new service called promotions service
+### Alternative C: promotions service
+
+This solution is a simplified approach to pipeline controller with only the promotion responsibility.
 
 ```mermaid
    sequenceDiagram
     participant F as Flux
-    participant LC as Leaf Cluster
-    participant MC as Management Cluster
+    participant LC as Notification Controller (Leaf)
     F->>LC: deploy helm release
-    LC->>MC: notify deployment via notification controller    
-    MC->>PS: process deployment notification
-    participant PS as Promotions Svc
+    LC->>PS: notify deployment via notification controller    
+    participant PS as Promotions Svc (Management)
+    PS->>PS: authz and validate event
     participant k8s as Kubernetes Api
     PS->>k8s: get pipeline
     PS->>PS: promotion business loic
@@ -230,16 +228,13 @@ This solution is different from `pipeline controller` in that the three responsi
 ```
 **Pro**
 - easiest to dev against
+- no controller so no reconcile loop executed 
 
 **Cons**
 - 1 more component for the team to maintain
 - new repo/CI (?)
 
 ## Design Details
-
-### Promotions Webhook 
-
-//TBA added at the back of https://github.com/weaveworks/weave-gitops-enterprise/issues/1594
 
 ### Pipeline spec changes for promotions
 
@@ -278,6 +273,25 @@ Each task will include the following fields:
 - `url` : the git repository url or the webhook url
 - `branch`: the branch to use for the update, defaults to main (only applicable when kind is pull-request)
 - `secretRef`: a reference to a secret in the same namespace as the pipeline that holds the authentication credentials for the repository or the webhook.
+
+### Promotions Webhook
+
+The endpoint should receive webhook requests to indicate a promotion of an environment.
+
+Each environment of each pipeline has its own webhook URL for triggering a promotion:
+
+```
+/pipelines/promotions/{namespace}/{name}/{environment}
+```
+
+When a request is received, the handler will look up the environment in the pipeline to:
+
+- `authz` the request via hmac
+- `validate` the promotion
+- `lookup and execute` the promotion actions
+
+The handler needs to run with it own set of permissions (not user permissions) to be able 
+to read app versions across environments in a pipeline.
 
 ## Implementation History
 
