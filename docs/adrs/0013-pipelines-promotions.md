@@ -11,11 +11,14 @@ covering the ability to view an application deployed across different environmen
 The [second iteration](https://www.notion.so/weaveworks/Pipeline-promotion-061bb790e2e345cbab09370076ff3258) aims 
 to enable promotions between environments. 
 
-This ADR records the major decisions taken during its design. 
+This ADR records a couple of decision we think are important:
+
+- how the promotion solutions looks like end to end.
+- how deployment changes are detected.
 
 ## Decision
 
-### Promotions solution 
+### How promotions solution looks like end to end 
 
 As [discussed in RFC](../rfcs/0003-pipelines-promotion/README.md) four alternatives were discussed:
 
@@ -35,10 +38,10 @@ On the flip side, the solution has the following constraints:
 - there is a need to manage and expose the endpoint for deployment changes separately to weave gitops api.
 - non-canonical usage of controllers as its behaviour is driven by ingested event than change in the declared state of a resource.
 
-
-### Deployment Change
+### How deployment changes are detected
 
 As [discussed in RFC](../rfcs/0003-pipelines-promotion/detect-deployment-changes.md) each of approaches has associated unknowns.
+
 The major ones are:
 
 - Webhooks: the need for a new network flow in the product, from leaf cluster to management, and the potential impediments
@@ -57,10 +60,9 @@ In order to start with one of the approaches, we have decided to start by `webho
 ## Consequences
 
 - A path forward for pipelines to deliver promotions capability. Sunglow could deliver promotions based on this approach.
-- A risk to manage in the context of customer adoption: the network path opened. 
-  - Sunglow would need to establish the customer feedback loop with SAs/CXs to manage and mitigate the risk once it happens. 
-  - Same for security.
-- A scenario further to develop: existing CI scenarios based on the approach. Sunglow would need to use customer feedback to
-  determine which existing systems are of relevance to provide the integration experience.  
+- A set of further actions needs to be risks that needs management:
+  - To manage the risk associated with the network flow between leaf to management cluster for deployment notifications. 
+  - To determine concrete CI scenarios that we need to integrate with.
+  - To discover the reliability aspects of the watchers approach to understand its feasibility.
 
 
