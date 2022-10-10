@@ -22,10 +22,10 @@ This ADR records a couple of decision we think are important:
 
 As [discussed in RFC](../rfcs/0003-pipelines-promotion/README.md) four alternatives were discussed:
 
-- weave gitops
+- weave gitops backend
 - pipelines controller
 - weave gitops + pipeline controller  + promotion executor
-- new service
+- promotions service
 
 The `pipeline controller` solution has been chosen over its alternatives (see alternatives section) due to
 

@@ -95,11 +95,20 @@ Promotions have a couple of activities that requires to drill down in terms of s
 
 **Security for deployment changes via webhook**
 
-//TODO complete at the back of https://github.com/weaveworks/weave-gitops-enterprise/issues/1594
+Communications between leaf cluster and management cluster will be protected using HMAC. HMAC shared key 
+will be used for both authentication and authorization. Application teams will be able to specify the key to use within 
+the pipeline spec as a global value. Key management will be done by the application team.
+
+Both to simplify user experience for key management and other security configuration will be evolved over time.
 
 **Security for pull request creation**
 
-//TODO complete at the back of https://github.com/weaveworks/weave-gitops-enterprise/issues/1594
+In order to create a pull request in the configuration repo, secrets will be required to both 
+- clone the git repo via http or ssh 
+- create the pull request via http api
+
+The secrets will be referenced as part of a pull request promotion task configuration. The lifecycle of the secrets
+will be managed out of pipelines by the application team.
 
 #### Scalability
 
@@ -118,17 +127,18 @@ to enhance default controller metrics with business metrics like `latency of a p
 
 The current solution has been chosen over its alternatives (see alternatives section) due to
 
-- it enables promotions.
-- it allows to separations roles, therefore permissions between the components notifying the change and executing the promotion.
-- it is easier to develop over other alternatives.
-- it follows [notification controller pattern](https://fluxcd.io/flux/guides/webhook-receivers/#expose-the-webhook-receiver)
+- It enables promotions.
+- It allows to separations roles, therefore permissions between the components notifying the change and executing the promotion.
+- It follows [notification controller pattern](https://fluxcd.io/flux/guides/webhook-receivers/#expose-the-webhook-receiver).
+- It is easier to develop over other alternatives.
+- It keeps split user-experience and machine-experience apis.
 
 On the flip side, the solution has the following constraints:
 
-- there is a need to manage and expose the endpoint for deployment changes separately to weave gitops api.
+- Need to manage another api surface. 
 - Non-canonical usage of controllers as its behaviour is driven by ingested event than change in the declared state of a resource.
-We accept this tradeoff as pipeline controller provides us a balanced approach to start delivering the feature sooner over other 
-alternatives of creating a dedicated component. 
+  - We accept this tradeoff as pipeline controller provides us with a balanced approach between tech-debt and easy to start deliverying
+  over other alternatives (like creating another component).
 
 ## Alternatives
 
@@ -172,8 +182,7 @@ are fulfilled within weave gitops backend app.
 
 **Cons**
 - Notifier service account needs permissions for promotion resources.
-- Current api layer is designed (authz, entitlments, etc ) as an experience layer for weave gitops enterprise users while the promotion webhook 
-is intended to be used by a machine audience. 
+- Current api layer is designed as an experience layer for users (humans) while the promotion webhook is intended for machines. 
 
 ### Alternative B: weave gitops api + pipeline controller  + promotion executor
 
@@ -214,7 +223,7 @@ This solution is different from `pipeline controller` in that the three responsi
 
 ### Alternative C: promotions service
 
-This solution is a simplified approach to pipeline controller with only the promotion responsibility.
+This solution would be to create a new component with the promotions responsibility. 
 
 ```mermaid
    sequenceDiagram
@@ -232,12 +241,12 @@ This solution is a simplified approach to pipeline controller with only the prom
     participant configRepo as Configuration Repo
 ```
 **Pro**
-- easiest to dev against
-- no controller so no reconcile loop executed 
+- Easiest to dev against (vs api solution).
+- No controller so no reconcile loop executed (vs pipeline controller solution). 
 
 **Cons**
-- 1 more component for the team to maintain
-- new repo/CI (?)
+- Ee would need to create it from scratch. 
+- One more component to manage. 
 
 ## Design Details
 
