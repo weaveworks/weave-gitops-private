@@ -9,7 +9,7 @@
 ## Summary
 
 Given a continuous delivery pipeline, the application goes via different environments in its way to production. We 
-need an action to sign the intent of deploying an application between environments. That concept is generally known as a
+need an action to signal the intent of deploying an application between environments. That concept is generally known as a
 promotion. Current pipelines in weave gitops does not support promotion. This RFC addresses this gap 
 as specified in the [product initiative](https://www.notion.so/weaveworks/Pipeline-promotion-061bb790e2e345cbab09370076ff3258)
 
@@ -17,7 +17,7 @@ as specified in the [product initiative](https://www.notion.so/weaveworks/Pipeli
 
 - **Pipeline**: a continuous delivery Pipeline declares a series of environments through which a given application is expected to be deployed.
 - **Promotion**: action of moving an application from a lower environment to a higher environment within a pipeline.
-  For example promote stating to production would attempt to deploy an application existing in staging environment to production environment.
+  For example promote staging to production would attempt to deploy an application existing in staging environment to production environment.
 - **Environment**: An environment consists of one or more deployment targets. An example environment could be “Staging”.
 - **Deployment target**: A deployment target is a Cluster and Namespace combination. For example, the above “Staging” environment, could contain {[QA-1, test], [QA-2, test]}.
 - **Application**: A Helm Release.
@@ -71,7 +71,7 @@ An evaluation of different alternatives solutions to this concern could be found
 
 ### Determine whether a promotion is needed
 
-This responsibility is assumed by `pipeline controller` living in the management cluster that 
+This responsibility is assumed by the `pipeline controller` running in the management cluster that 
 - would expose a webhook to ingest deployment change events.
 - process concurrently the deployment events 
 - determine whether at the back of the event and a pipeline definition, a promotion is required. 
@@ -121,7 +121,7 @@ It will be implemented as part of the business logic of pipeline controller.
 #### Monitoring 
 
 To leverage existing [kubebuilder metrics](https://book.kubebuilder.io/reference/metrics.html). There will be the need 
-to enhance default controller metrics with business metrics like `latency of a promtion by application`.
+to enhance default controller metrics with business metrics like `latency of a promotion by application`.
 
 ### Why this solution
 
