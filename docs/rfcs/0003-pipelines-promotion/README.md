@@ -2,9 +2,9 @@
 
 **Status:** provisional
 
-**Creation date:** 2022-10
+**Creation date:** 2022-10-xx
 
-**Last update:** 2022-10-05
+**Last update:** 2022-10-xx
 
 ## Summary
 
@@ -121,11 +121,14 @@ The current solution has been chosen over its alternatives (see alternatives sec
 - it enables promotions.
 - it allows to separations roles, therefore permissions between the components notifying the change and executing the promotion.
 - it is easier to develop over other alternatives.
+- it follows [notification controller pattern](https://fluxcd.io/flux/guides/webhook-receivers/#expose-the-webhook-receiver)
 
 On the flip side, the solution has the following constraints:
 
 - there is a need to manage and expose the endpoint for deployment changes separately to weave gitops api.
-- non-canonical usage of controllers as its behaviour is driven by ingested event than change in the declared state of a resource.
+- Non-canonical usage of controllers as its behaviour is driven by ingested event than change in the declared state of a resource.
+We accept this tradeoff as pipeline controller provides us a balanced approach to start delivering the feature sooner over other 
+alternatives of creating a dedicated component. 
 
 ## Alternatives
 
@@ -168,7 +171,9 @@ are fulfilled within weave gitops backend app.
 - No need to generate TS client
 
 **Cons**
-- Notifier service account needs permissions for promotion resources. 
+- Notifier service account needs permissions for promotion resources.
+- Current api layer is designed (authz, entitlments, etc ) as an experience layer for weave gitops enterprise users while the promotion webhook 
+is intended to be used by a machine audience. 
 
 ### Alternative B: weave gitops api + pipeline controller  + promotion executor
 
