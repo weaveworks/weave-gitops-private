@@ -135,7 +135,7 @@ The current solution has been chosen over its alternatives (see alternatives sec
 
 On the flip side, the solution has the following constraints:
 
-- Need to manage another api surface. 
+- Platform operators needs to manage another api surface, in this case, the `promotion webhook` endpoint.
 - Non-canonical usage of controllers as its behaviour is driven by ingested event than change in the declared state of a resource.
   - We accept this tradeoff as pipeline controller provides us with a balanced approach between tech-debt and easy to start delivering
   over other alternatives (like creating another component).
