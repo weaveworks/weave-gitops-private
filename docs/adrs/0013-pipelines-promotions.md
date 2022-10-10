@@ -4,21 +4,21 @@
 Proposed
 
 ## Context
-As part of weave gitops, Sunglow is working on delivering [Continuous Delivery Pipelines](https://www.notion.so/weaveworks/CD-Pipeline-39a6df44798c4b9fbd140f9d0df1212a) where
+As part of Weave GitOps Enterprise, Sunglow is working on delivering [Continuous Delivery Pipelines](https://www.notion.so/weaveworks/CD-Pipeline-39a6df44798c4b9fbd140f9d0df1212a) where
 [first iteration has been delivered](https://docs.gitops.weave.works/docs/next/enterprise/pipelines/intro/index.html)
 covering the ability to view an application deployed across different environments.
 
 The [second iteration](https://www.notion.so/weaveworks/Pipeline-promotion-061bb790e2e345cbab09370076ff3258) aims 
 to enable promotions between environments. 
 
-This ADR records a couple of decision we think are important:
+This ADR records a couple of decisions we think are important:
 
-- how the promotion solutions looks like end to end.
+- how the promotion solution looks like end to end.
 - how deployment changes are detected.
 
 ## Decision
 
-### How promotions solution looks like end to end 
+### How the promotion solution looks like end to end 
 
 As [discussed in RFC](../rfcs/0003-pipelines-promotion/README.md) four alternatives were discussed:
 
