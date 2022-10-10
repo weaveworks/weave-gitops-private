@@ -29,14 +29,18 @@ As [discussed in RFC](../rfcs/0003-pipelines-promotion/README.md) four alternati
 
 The `pipeline controller` solution has been chosen over its alternatives (see alternatives section) due to
 
-- it enables promotions.
-- it allows to separations roles, therefore permissions between the components notifying the change and executing the promotion.
-- it is easier to develop over other alternatives.
+- It enables promotions.
+- It allows to separations roles, therefore permissions between the components notifying the change and executing the promotion.
+- It follows [notification controller pattern](https://fluxcd.io/flux/guides/webhook-receivers/#expose-the-webhook-receiver).
+- It is easier to develop over other alternatives.
+- It keeps split user-experience and machine-experience apis.
 
 On the flip side, the solution has the following constraints:
 
-- there is a need to manage and expose the endpoint for deployment changes separately to weave gitops api.
-- non-canonical usage of controllers as its behaviour is driven by ingested event than change in the declared state of a resource.
+- Need to manage another api surface.
+- Non-canonical usage of controllers as its behaviour is driven by ingested event than change in the declared state of a resource.
+  - We accept this tradeoff as pipeline controller provides us with a balanced approach between tech-debt and easy to start delivering
+    over other alternatives (like creating another component).
 
 ### How deployment changes are detected
 

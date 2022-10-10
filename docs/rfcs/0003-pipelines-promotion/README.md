@@ -137,7 +137,7 @@ On the flip side, the solution has the following constraints:
 
 - Need to manage another api surface. 
 - Non-canonical usage of controllers as its behaviour is driven by ingested event than change in the declared state of a resource.
-  - We accept this tradeoff as pipeline controller provides us with a balanced approach between tech-debt and easy to start deliverying
+  - We accept this tradeoff as pipeline controller provides us with a balanced approach between tech-debt and easy to start delivering
   over other alternatives (like creating another component).
 
 ## Alternatives
@@ -265,6 +265,8 @@ spec:
     apiVersion: helm.toolkit.fluxcd.io/v2beta1
     kind: HelmRelease
     name: podinfo
+    #used for hmac authz - this could change at implementation 
+    secretRef: my-hmac-shared-secret 
   promotion:
   - name: promote-via-pr
     type: pull-request
