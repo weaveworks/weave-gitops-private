@@ -36,7 +36,7 @@ promotion. Current pipelines in weave gitops does not support promotion.
 ### Non-Goals
 
 - Anything beyond the scope of promotions.
-- Scenarios other than the identified in the product initiative.
+- Scenarios other than the ones identified in the product initiative.
 
 ## Proposal
 We propose to use a solution as specified in the following diagram. 
@@ -75,7 +75,7 @@ This responsibility is assumed by the `pipeline controller` running in the manag
 - process concurrently the deployment events. 
 - determine whether at the back of the event and a pipeline definition, a promotion is required. 
 
-### To execute the promotion
+### Execute the promotion
 
 Once the previous evaluation considers that a promotion is required, pipeline controller would be in charge 
 of orchestrating and executing the task according to its configuration.
@@ -322,7 +322,7 @@ The endpoint should receive webhook requests to indicate a promotion of an envir
 Each environment of each pipeline has its own webhook URL for triggering a promotion:
 
 ```
-/pipelines/promotions/{namespace}/{name}/{environment}
+/promotion/{namespace}/{name}/{environment}
 ```
 
 When a request is received, the handler will look up the environment in the pipeline to:

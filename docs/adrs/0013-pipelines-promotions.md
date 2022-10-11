@@ -23,11 +23,11 @@ This ADR records a couple of decisions we think are important:
 As [discussed in RFC](../rfcs/0003-pipelines-promotion/README.md) four alternatives were discussed:
 
 - weave gitops backend
-- pipelines controller
+- pipeline controller
 - weave gitops + pipeline controller  + promotion executor
 - promotions service
 
-The `pipeline controller` solution has been chosen over its alternatives (see alternatives section) due to
+The `pipeline controller` solution has been chosen over other alternatives (see alternatives section) due to
 
 - It enables promotions.
 - It allows to separations roles, therefore permissions between the components notifying the change and executing the promotion.
@@ -48,7 +48,7 @@ As [discussed in RFC](../rfcs/0003-pipelines-promotion/detect-deployment-changes
 
 The major ones are:
 
-- Webhooks: the need for a new network flow in the product, from leaf cluster to management, and the potential impediments that it would suppose for customers while adopting the solution, as well its security management.
+- Webhooks: the need for a new network flow in the product, from leaf cluster to management, and the potential impediments that it would impose for customers while adopting the solution, as well its security management.
 - Watching: how reliable the solution could be as not having existing examples of products using it for watching remote clusters.
 
 We envision Weave GitOps will need to offer a flexible solution, and would eventually support both approaches
