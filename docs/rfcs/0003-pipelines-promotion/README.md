@@ -201,11 +201,12 @@ are fulfilled within weave gitops backend app.
 **Pro**
 - Already setup and *should* be more easily exposed. 
 - No need to manage other exposed surface, therefore less to secure.
-- No need to generate TS client
 
 **Cons**
 - Notifier service account needs permissions for promotion resources.
-- Current api layer is designed as an experience layer for users (humans) while the promotion webhook is intended for machines. 
+- Current api layer is designed as an experience layer for users (humans) while the promotion webhook is intended for machines.
+- Extends the api layer with rest api so it would require to manage both grpc and rest apis that would increase maintainability costs.  
+
 
 ### Alternative B: weave gitops api + pipeline controller  + promotion executor
 
