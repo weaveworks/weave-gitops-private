@@ -26,8 +26,7 @@ as specified in the [product initiative](https://www.notion.so/weaveworks/Pipeli
 
 Given a continuous delivery pipeline, the application goes via different environments in its way to production. We
 need an action to sign the intent of deploying an application between environments. That concept is generally known as a
-promotion. Current pipelines in weave gitops does not support promotion. This RFC addresses this gap
-as specified in the [product initiative](https://www.notion.so/weaveworks/Pipeline-promotion-061bb790e2e345cbab09370076ff3258)
+promotion. Current pipelines in weave gitops does not support promotion. 
 
 ### Goals
 
