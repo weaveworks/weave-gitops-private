@@ -241,9 +241,10 @@ This solution is different from `pipeline controller` in that the three responsi
 - Scalability and fault-tolerance by design.
 
 **Cons**
-- Needs to write in pipeline resource
-- Most complex solution
-- Kubernetes jobs not a popular choice
+- Needs for writing the pipeline resource.
+- The most complex alternative. 
+- To extract the promotion execution logic into an external component, would require to also create a management layer 
+between pipeline controller to the execution layer. 
 
 ### Alternative C: promotions service
 
