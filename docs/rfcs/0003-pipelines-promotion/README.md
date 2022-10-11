@@ -100,14 +100,38 @@ the pipeline spec as a global value. Key management will be done by the applicat
 
 Both to simplify user experience for key management and other security configuration will be evolved over time.
 
-**Security for pull request creation**
+An example to visualise this configuration is shown below.
 
-In order to create a pull request in the configuration repo, secrets will be required to both 
-- clone the git repo via http or ssh 
-- create the pull request via http api
+```yaml
+  appRef:
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    name: podinfo
+    #used for hmac authz - this could change at implementation 
+    secretRef: my-hmac-shared-secret 
+```
 
-The secrets will be referenced as part of a pull request promotion task configuration. The lifecycle of the secrets
-will be managed out of pipelines by the application team.
+**Security for pull requests**
+
+In order to create a pull request in a configuration repo to action would be mainly required:
+
+1. To clone the configuration git repo via http or ssh. 
+2. To create a pull request with promoted changes.
+
+Both actions would require a secret to use that ends in a combination of possible scenarios to eventually support. 
+This document assumes the simplest scenario possible which is having a single token for both 
+cloning via http and to create a pull request. The token will be present as kubernetes secrets and accessible by pipeline controller.
+
+An example to visualise this configuration is shown below.
+
+```yaml
+  promotion:
+  - name: promote-via-pr
+    type: pull-request
+    url: https://github.com/organisation/gitops-configuration-monorepo.git
+    branch: main
+    secretRef: my-gitops-configuration-monorepo-secret #contains the github token to clone and create PR  
+```
 
 #### Scalability
 
@@ -269,9 +293,9 @@ spec:
   promotion:
   - name: promote-via-pr
     type: pull-request
-    url: git@github.com:organization/repo
+    url: https://github.com/organisation/gitops-configuration-monorepo.git
     branch: main
-    secretRef: my-other-deployed-secret
+    secretRef: my-gitops-configuration-monorepo-secret #contains the github token to clone and create PR  
   environments:
   - name: dev
      targets:
