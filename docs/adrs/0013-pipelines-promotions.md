@@ -4,21 +4,21 @@
 Proposed
 
 ## Context
-As part of weave gitops, Sunglow is working on delivering [Continuous Delivery Pipelines](https://www.notion.so/weaveworks/CD-Pipeline-39a6df44798c4b9fbd140f9d0df1212a) where
+As part of Weave GitOps Enterprise, Sunglow is working on delivering [Continuous Delivery Pipelines](https://www.notion.so/weaveworks/CD-Pipeline-39a6df44798c4b9fbd140f9d0df1212a) where
 [first iteration has been delivered](https://docs.gitops.weave.works/docs/next/enterprise/pipelines/intro/index.html)
 covering the ability to view an application deployed across different environments.
 
 The [second iteration](https://www.notion.so/weaveworks/Pipeline-promotion-061bb790e2e345cbab09370076ff3258) aims 
 to enable promotions between environments. 
 
-This ADR records a couple of decision we think are important:
+This ADR records a couple of decisions we think are important:
 
-- how the promotion solutions looks like end to end.
+- how the promotion solution looks like end to end.
 - how deployment changes are detected.
 
 ## Decision
 
-### How promotions solution looks like end to end 
+### How the promotion solution looks like end to end 
 
 As [discussed in RFC](../rfcs/0003-pipelines-promotion/README.md) four alternatives were discussed:
 
@@ -44,22 +44,23 @@ On the flip side, the solution has the following constraints:
 
 ### How deployment changes are detected
 
-As [discussed in RFC](../rfcs/0003-pipelines-promotion/detect-deployment-changes.md) each of approaches has associated unknowns.
+As [discussed in RFC](../rfcs/0003-pipelines-promotion/detect-deployment-changes.md) each approach has associated unknowns.
 
 The major ones are:
 
-- Webhooks: the need for a new network flow in the product, from leaf cluster to management, and the potential impediments
-  that it would suppose for customers while adopting the solution, as well its security management.
+- Webhooks: the need for a new network flow in the product, from leaf cluster to management, and the potential impediments that it would suppose for customers while adopting the solution, as well its security management.
 - Watching: how reliable the solution could be as not having existing examples of products using it for watching remote clusters.
 
-We envision weave gitops as  needs to be a flexible solution that eventually would need to support both approaches
-to accommodate the range of potential enterprises using weave gitops.
+We envision Weave GitOps will need to offer a flexible solution, and would eventually support both approaches
+to accommodate the range of potential enterprise users.
 
-In order to start with one of the approaches, we have decided to start by `webhooks` solution due to:
+In order to optimise velocity, we are starting with one approach - the `webhooks` solution due to:
 
-- Allow us to provide promotions for wge customers based on our own promotions capability with better scalability approach.
+- It allows us to provide promotions for WGE customers with suspected better scalability.
 - Reinforces the vision of weave gitops being a continuum of Flux by using Flux core components, in this context, [notification
   controller](https://fluxcd.io/flux/components/notification/), to provide the basic building blocks around deployment notification.
+- Leverages existing, tried-and-tested functionality from Flux to reduce amount of new functionality we need to write.
+- Team is taking on responsibilities for Flux primitives, which includes Notification Controller related objects, and therefore presents a good opportunity to improve the UX for working with this capability.
 
 ## Consequences
 

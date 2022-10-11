@@ -8,8 +8,8 @@
 
 ## Summary
 
-Given a continuous delivery pipeline, the application goes via different environments in its way to production. We 
-need an action to sign the intent of deploying an application between environments. That concept is generally known as a
+Given a continuous delivery pipeline, the application goes via different environments on its way to production. We 
+need an action to signal the intent of deploying an application between environments. That concept is generally known as a
 promotion. Current pipelines in weave gitops does not support promotion. This RFC addresses this gap 
 as specified in the [product initiative](https://www.notion.so/weaveworks/Pipeline-promotion-061bb790e2e345cbab09370076ff3258)
 
@@ -17,7 +17,7 @@ as specified in the [product initiative](https://www.notion.so/weaveworks/Pipeli
 
 - **Pipeline**: a continuous delivery Pipeline declares a series of environments through which a given application is expected to be deployed.
 - **Promotion**: action of moving an application from a lower environment to a higher environment within a pipeline.
-  For example promote stating to production would attempt to deploy an application existing in staging environment to production environment.
+  For example promote staging to production would attempt to deploy an application existing in staging environment to production environment.
 - **Environment**: An environment consists of one or more deployment targets. An example environment could be “Staging”.
 - **Deployment target**: A deployment target is a Cluster and Namespace combination. For example, the above “Staging” environment, could contain {[QA-1, test], [QA-2, test]}.
 - **Application**: A Helm Release.
@@ -51,7 +51,7 @@ We propose to use a solution as specified in the following diagram.
     pc->>pc: authz and validate event
     participant k8s as Kubernetes Api
     pc->>k8s: get pipeline
-    pc->>pc: promotion business loic
+    pc->>pc: promotion business logic
     participant k8s as Kubernetes Api
     pc->>configRepo: raise PR
     participant configRepo as Configuration Repo
@@ -70,9 +70,9 @@ An evaluation of different alternatives solutions to this concern could be found
 
 ### Determine whether a promotion is needed
 
-This responsibility is assumed by `pipeline controller` living in the management cluster that 
+This responsibility is assumed by the `pipeline controller` running in the management cluster that: 
 - would expose a webhook to ingest deployment change events.
-- process concurrently the deployment events 
+- process concurrently the deployment events. 
 - determine whether at the back of the event and a pipeline definition, a promotion is required. 
 
 ### To execute the promotion
@@ -82,7 +82,7 @@ of orchestrating and executing the task according to its configuration.
 
 ### Non-functional requirements
 
-As enterprise feature, we try also to understand the considerations in terms of non-functional requirements to ensure 
+As an enterprise feature, we try also to understand the considerations in terms of non-functional requirements to ensure 
 that no major impediments are found in the future. 
 
 #### Security 
@@ -144,7 +144,7 @@ It will be implemented as part of the business logic of pipeline controller.
 #### Monitoring 
 
 To leverage existing [kubebuilder metrics](https://book.kubebuilder.io/reference/metrics.html). There will be the need 
-to enhance default controller metrics with business metrics like `latency of a promtion by application`.
+to enhance default controller metrics with business metrics like `latency of a promotion by application`.
 
 ### Why this solution
 
@@ -184,13 +184,13 @@ the component serving the promotion logic, therefore the alternatives names are 
     wge->>wge: authz and validate event
     participant k8s as Kubernetes Api
     wge->>k8s: get pipeline
-    wge->>wge: promotion business loic
+    wge->>wge: promotion business logic
     participant k8s as Kubernetes Api
     wge->>configRepo: raise PR
     participant configRepo as Configuration Repo
 ```
 
-This solution is different from `pipeline controller` in that the three responsibilities 
+This solution is different from `pipeline controller` in that the three responsibilities: 
 
 1. Notify deployment changes
 2. Determine whether a promotion is needed
@@ -230,7 +230,7 @@ are fulfilled within weave gitops backend app.
 
 This solution is different from `pipeline controller` in that the three responsibilities are split
 
-1. Notify deployment changes: ingestion is done via weave gitops api. the event is written in pipeline resource. 
+1. Notify deployment changes: ingestion is done via weave gitops api. The event is written in pipeline resource. 
 2. Determine whether a promotion is needed: pipeline controller watches for changes in pipeline.
 3. Execute the promotion: extracted to a kubernetes job layer. 
 
@@ -259,7 +259,7 @@ This solution would be to create a new component with the promotions responsibil
     PS->>PS: authz and validate event
     participant k8s as Kubernetes Api
     PS->>k8s: get pipeline
-    PS->>PS: promotion business loic
+    PS->>PS: promotion business logic
     participant k8s as Kubernetes Api
     PS->>configRepo: raise PR
     participant configRepo as Configuration Repo
@@ -326,9 +326,9 @@ Each environment of each pipeline has its own webhook URL for triggering a promo
 
 When a request is received, the handler will look up the environment in the pipeline to:
 
-- `authz` the request via hmac
-- `validate` the promotion
-- `lookup and execute` the promotion actions
+- `authz` the request via hmac.
+- `validate` the promotion.
+- `lookup and execute` the promotion actions.
 
 The handler needs to run with it own set of permissions (not user permissions) to be able 
 to read app versions across environments in a pipeline.
