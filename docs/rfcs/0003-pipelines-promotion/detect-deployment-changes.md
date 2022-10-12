@@ -222,5 +222,27 @@ and take an action to start the next promotion based on the Pipeline definition.
 **Disadvantages and Mitigations**
 
 1. Requires Flux on all leaf clusters.
-1. Scalability is unclear, we don't know the threshold at which the controller will be able to handle without issues.
-1. There is no way to kick off promotions externally
+2. Scalability is unclear, we don't know the threshold at which the controller will be able to handle without issues.
+3. There is no way to kick off promotions externally
+
+## Design Details
+
+
+### Promotions Webhook
+
+The endpoint should receive webhook requests to indicate a promotion of an environment.
+
+Each environment of each pipeline has its own webhook URL for triggering a promotion:
+
+```
+/pipelines/promotions/{namespace}/{name}/{environment}
+```
+
+When a request is received, the handler will look up the environment in the pipeline to:
+
+- `authz` the request via hmac.
+- `validate` the promotion.
+- `lookup and execute` the promotion actions.
+
+The handler needs to run with it own set of permissions (not user permissions) to be able
+to read app versions across environments in a pipeline.

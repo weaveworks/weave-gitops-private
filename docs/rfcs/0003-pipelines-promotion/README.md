@@ -59,14 +59,15 @@ We propose to use a solution as specified in the following diagram.
 
 With three main activities
 
-1. Notify deployment changes
+1. Detect deployment changes
 2. Determine whether a promotion is needed  
 3. Execute the promotion 
 
-### Notify deployment changes
+### Detect deployment changes
 
 The solution leverages [flux native notification capabilities](https://fluxcd.io/flux/components/notification/) for this responsibility. 
-An evaluation of different alternatives solutions to this concern could be found [here](detect-deployment-changes.md).
+
+A deeper look into this part of the solution could be found [here](detect-deployment-changes.md).
 
 ### Determine whether a promotion is needed
 
@@ -75,76 +76,15 @@ This responsibility is assumed by the `pipeline controller` running in the manag
 - process concurrently the deployment events. 
 - determine whether at the back of the event and a pipeline definition, a promotion is required. 
 
+A deeper look into this part of the solution could be found [here](determine-promotion-needs.md).
+
 ### To execute the promotion
 
 Once the previous evaluation considers that a promotion is required, pipeline controller would be in charge 
 of orchestrating and executing the task according to its configuration.
 
-### Non-functional requirements
+A deeper look into this part of the solution could be found [here](execute-promotion.md).
 
-As an enterprise feature, we try also to understand the considerations in terms of non-functional requirements to ensure 
-that no major impediments are found in the future. 
-
-#### Security 
-
-Promotions have a couple of activities that requires to drill down in terms of security:
-
-1. communication of deployment changes via webhook so over the network. 
-2. to create pull requests, so write access to gitops configuration repo.
-
-**Security for deployment changes via webhook**
-
-Communications between leaf cluster and management cluster will be protected using HMAC. HMAC shared key 
-will be used for both authentication and authorization. Application teams will be able to specify the key to use within 
-the pipeline spec as a global value. Key management will be done by the application team.
-
-Both to simplify user experience for key management and other security configuration will be evolved over time.
-
-An example to visualise this configuration is shown below.
-
-```yaml
-  appRef:
-    apiVersion: helm.toolkit.fluxcd.io/v2beta1
-    kind: HelmRelease
-    name: podinfo
-    #used for hmac authz - this could change at implementation 
-    secretRef: my-hmac-shared-secret 
-```
-
-**Security for pull requests**
-
-In order to create a pull request in a configuration repo to action would be mainly required:
-
-1. To clone the configuration git repo via http or ssh. 
-2. To create a pull request with promoted changes.
-
-Both actions would require a secret to use that ends in a combination of possible scenarios to eventually support. 
-This document assumes the simplest scenario possible which is having a single token for both 
-cloning via http and to create a pull request. The token will be present as kubernetes secrets and accessible by pipeline controller.
-
-An example to visualise this configuration is shown below.
-
-```yaml
-  promotion:
-  - name: promote-via-pr
-    type: pull-request
-    url: https://github.com/organisation/gitops-configuration-monorepo.git
-    branch: main
-    secretRef: my-gitops-configuration-monorepo-secret #contains the github token to clone and create PR  
-```
-
-#### Scalability
-
-The initial strategy to scale the solution by number of request, would be vertically by using goroutines.
-
-#### Reliability 
-
-It will be implemented as part of the business logic of pipeline controller.  
-
-#### Monitoring 
-
-To leverage existing [kubebuilder metrics](https://book.kubebuilder.io/reference/metrics.html). There will be the need 
-to enhance default controller metrics with business metrics like `latency of a promotion by application`.
 
 ### Why this solution
 
@@ -314,25 +254,6 @@ Each task will include the following fields:
 - `url` : the git repository url or the webhook url
 - `branch`: the branch to use for the update, defaults to main (only applicable when kind is pull-request)
 - `secretRef`: a reference to a secret in the same namespace as the pipeline that holds the authentication credentials for the repository or the webhook.
-
-### Promotions Webhook
-
-The endpoint should receive webhook requests to indicate a promotion of an environment.
-
-Each environment of each pipeline has its own webhook URL for triggering a promotion:
-
-```
-/pipelines/promotions/{namespace}/{name}/{environment}
-```
-
-When a request is received, the handler will look up the environment in the pipeline to:
-
-- `authz` the request via hmac.
-- `validate` the promotion.
-- `lookup and execute` the promotion actions.
-
-The handler needs to run with it own set of permissions (not user permissions) to be able 
-to read app versions across environments in a pipeline.
 
 ## Implementation History
 
