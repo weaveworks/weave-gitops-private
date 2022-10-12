@@ -1,35 +1,46 @@
-### Non-functional requirements
+# To execute the promotion
 
-As an enterprise feature, we try also to understand the considerations in terms of non-functional requirements to ensure
-that no major impediments are found in the future.
+It is the part of the solution whose is end goal is to execute the promotion logic like raise a PR, 
+call an external webhook, etc ...  
 
-#### Security
+This document aims to look in deeper detail to this section by promotion task.
 
-Promotions have a couple of activities that requires to drill down in terms of security:
+Currently, designed supported promotion tasks are 
 
-1. communication of deployment changes via webhook so over the network.
-2. to create pull requests, so write access to gitops configuration repo.
+- Create a PR: creates a PR indicating the promotion of an application in a git configuration repo.
+- Call a webhook: calls a webhook to delegate the promotion action to an external system.
 
-**Security for deployment changes via webhook**
+## Create a PR
 
-Communications between leaf cluster and management cluster will be protected using HMAC. HMAC shared key
-will be used for both authentication and authorization. Application teams will be able to specify the key to use within
-the pipeline spec as a global value. Key management will be done by the application team.
+It creates a PR indicating the promotion of an application in a git configuration repo. 
 
-Both to simplify user experience for key management and other security configuration will be evolved over time.
-
-An example to visualise this configuration is shown below.
+An example of this promotion task looks like 
 
 ```yaml
+apiVersion: pipelines.weave.works/v1alpha1
+kind: Pipeline
+metadata:
+  name: podinfo
+  namespace: default
+spec:
   appRef:
     apiVersion: helm.toolkit.fluxcd.io/v2beta1
     kind: HelmRelease
     name: podinfo
-    #used for hmac authz - this could change at implementation 
-    secretRef: my-hmac-shared-secret 
+  promotion:
+    pullRequest:
+       url: https://github.com/organisation/gitops-configuration-monorepo.git
+       branch: main
+       secretRef: my-gitops-configuration-monorepo-secret #contains the github token to clone and create PR  
+  environments:
+  - name: dev
+     targets:
+     - namespace: podinfo
+        clusterRef:
+          kind: GitopsCluster
+          name: dev
 ```
-
-**Security for pull requests**
+### Security
 
 In order to create a pull request in a configuration repo to action would be mainly required:
 
@@ -44,12 +55,53 @@ An example to visualise this configuration is shown below.
 
 ```yaml
   promotion:
-  - name: promote-via-pr
-    type: pull-request
-    url: https://github.com/organisation/gitops-configuration-monorepo.git
-    branch: main
-    secretRef: my-gitops-configuration-monorepo-secret #contains the github token to clone and create PR  
+    pullRequest:
+      url: https://github.com/organisation/gitops-configuration-monorepo.git
+      branch: main
+      secretRef: my-gitops-configuration-monorepo-secret #contains the github token to clone and create PR  
 ```
+## Call a webhook 
+
+It calls a webhook to delegate the promotion action to an external system. An example of this promotion task looks like
+
+```yaml
+apiVersion: pipelines.weave.works/v1alpha1
+kind: Pipeline
+metadata:
+  name: podinfo
+  namespace: default
+spec:
+  appRef:
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    name: podinfo
+  promotion:
+    webhook:
+       url: https://my-jenkins.prod/webhooks/XoLZfgK
+       secretRef: my-jenkins-promotion-secret #secretontains the github token to clone and create PR  
+  environments:
+  - name: dev
+     targets:
+     - namespace: podinfo
+        clusterRef:
+          kind: GitopsCluster
+          name: dev
+```
+
+### Security
+
+For the `webhook` promotion step we follow the same configuration as flux [notification controller provider](https://fluxcd.io/flux/components/notification/provider/#generic-webhook)
+where the secret contains 
+
+```
+	// Secret reference containing the provider details, valid key names are: address, proxy, token, headers (YAML encoded)
+	// +optional
+```
+
+### Non-functional requirements
+
+Each promotion task has its security considerations defined. Other non-functional requirements will be understood in this 
+section.
 
 #### Scalability
 

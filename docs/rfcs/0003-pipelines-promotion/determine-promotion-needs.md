@@ -1,3 +1,7 @@
+### Determine whether a promotion is needed
+
+
+
 ### Non-functional requirements
 
 As an enterprise feature, we try also to understand the considerations in terms of non-functional requirements to ensure

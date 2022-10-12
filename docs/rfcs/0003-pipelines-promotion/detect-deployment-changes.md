@@ -166,6 +166,26 @@ The [Alert spec](https://fluxcd.io/flux/components/notification/alert/) allows f
 by means of the `.spec.summary` field. The content of this field will be added to the event's `.metadata` map with the key "summary".
 
 
+#### Security
+
+Communications between leaf cluster and management cluster will be protected using HMAC. HMAC shared key
+will be used for both authentication and authorization. Application teams will be able to specify the key to use within
+the pipeline spec as a global value. Key management will be done by the application team.
+
+Both to simplify user experience for key management and other security configuration will be evolved over time.
+
+An example to visualise this configuration is shown below.
+
+```yaml
+  appRef:
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    name: podinfo
+    #used for hmac authz - this could change at implementation 
+    secretRef: my-hmac-shared-secret 
+```
+
+
 ## Alternatives
 
 ### Watchers
