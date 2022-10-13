@@ -70,7 +70,7 @@ environments:
   name: prod
 ```
 
-reviewhere a deployment event coming from `dev` would end up in the need for a promotion while a deployment event coming 
+where a deployment event coming from `dev` would end up in the need for a promotion while a deployment event coming 
 from `prod` will not. 
 
 Once determined the need, the promotion strategy to use is specified in the `promotion` field. 
