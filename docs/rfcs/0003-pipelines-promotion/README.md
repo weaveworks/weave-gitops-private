@@ -18,6 +18,11 @@ as specified in the [product initiative](https://www.notion.so/weaveworks/Pipeli
 - **Pipeline**: a continuous delivery Pipeline declares a series of environments through which a given application is expected to be deployed.
 - **Promotion**: action of moving an application from a lower environment to a higher environment within a pipeline.
   For example promote staging to production would attempt to deploy an application existing in staging environment to production environment.
+- **Promotion Strategy**: a concrete promotion. for example, **create a pull request** could be a promotion strategy 
+or promote by calling an external system.
+- **Promotion Target**: the entity receiving the action of the promotion. For example, in the context of an strategy `create pull request`
+a promotion target will be the configuration git repo. In the example of calling external promotion, for example a jenkins server
+could be the promotion target.
 - **Environment**: An environment consists of one or more deployment targets. An example environment could be “Staging”.
 - **Deployment target**: A deployment target is a Cluster and Namespace combination. For example, the above “Staging” environment, could contain {[QA-1, test], [QA-2, test]}.
 - **Application**: A Helm Release.
@@ -51,10 +56,10 @@ We propose to use a solution as specified in the following diagram.
     pc->>pc: authz and validate event
     participant k8s as Kubernetes Api
     pc->>k8s: get pipeline
-    pc->>pc: promotion business logic
+    pc->>pc: is promotion required
     participant k8s as Kubernetes Api
-    pc->>configRepo: raise PR
-    participant configRepo as Configuration Repo
+    pc->>promotionTarget: execute promotion strategy 
+    participant promotionTarget as Promotion Target
 ```
 
 With three main activities
@@ -214,10 +219,10 @@ the component serving the promotion logic, therefore the alternatives names are 
     wge->>wge: authz and validate event
     participant k8s as Kubernetes Api
     wge->>k8s: get pipeline
-    wge->>wge: promotion business logic
+    wge->>wge: is promotion required
     participant k8s as Kubernetes Api
-    wge->>configRepo: raise PR
-    participant configRepo as Configuration Repo
+    wge->>promotionTarget: execute promotion strategy 
+    participant promotionTarget as Promotion Target
 ```
 
 This solution is different from `pipeline controller` in that the three responsibilities: 
@@ -254,8 +259,8 @@ are fulfilled within weave gitops backend app.
     pc->>pj: create promotion job
     participant pj as promotion job
     pj->>pj: promotion business logic
-    pj->>configRepo: raise PR
-    participant configRepo as Configuration Repo
+    pj->>promotionTarget: execute promotion strategy 
+    participant promotionTarget as Promotion Target
 ```
 
 This solution is different from `pipeline controller` in that the three responsibilities are split
@@ -289,11 +294,11 @@ This solution would be to create a new component with the promotions responsibil
     participant PS as Promotions Svc (Management)
     PS->>PS: authz and validate event
     participant k8s as Kubernetes Api
-    PS->>k8s: get pipeline
-    PS->>PS: promotion business logic
+    PS->>k8s: get pipeline    
+    PS->>PS: is promotion required
     participant k8s as Kubernetes Api
-    PS->>configRepo: raise PR
-    participant configRepo as Configuration Repo
+    PS->>promotionTarget: execute promotion strategy 
+    participant promotionTarget as Promotion Target    
 ```
 **Pro**
 - Easiest to dev against (vs api solution).
