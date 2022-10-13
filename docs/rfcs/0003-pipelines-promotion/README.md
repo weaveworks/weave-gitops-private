@@ -345,7 +345,8 @@ spec:
             name: prod
             namespace: flux-system
 ```
-It is the canonical scenario that the current solutions supports. No particular requirement is found.  
+
+It is covered by [promotion business rules](determine-promotion-needs.md#promotion-decisions-business-logic)
 
 
 ### Promotion for a pipeline with multiple deployment target per environment
@@ -391,13 +392,12 @@ spec:
             namespace: flux-system
 ```
 
+It is covered by [promotion business rules](determine-promotion-needs.md#promotion-decisions-business-logic) as 
+a PR will be created for each test deployment target `qa` and `perf
+
 ### Promotion for a pipeline with multiple deployment target per environment
 
 Original scenario specified [here](https://www.notion.so/weaveworks/Pipeline-promotion-061bb790e2e345cbab09370076ff3258#3ea85277de5543d69a9e19407e69c84b)
-
-Strategy of promotion on first successful reconciliation
-
-It is covered by [Promotion between environment will happen when at least one of lower-environment deployment targets has been successfully deployed](determine-promotion-needs.md#promotion-decisions-business-logic)
 
 ```yaml
 apiVersion: pipelines.weave.works/v1alpha1
@@ -410,21 +410,30 @@ spec:
     kind: HelmRelease
     name: search-helmrelease
     apiVersion: helm.toolkit.fluxcd.io/v2beta1
+  promotion:
+    pullRequest:
+      url: https://github.com/organisation/gitops-configuration-monorepo.git
+      branch: main
   environments:
+    - name: dev
+      targets:
+        - namespace: search
+          clusterRef:
+            kind: GitopsCluster
+            name: dev
+            namespace: flux-system
     - name: test
       targets:
-				- namespace: search
+        - namespace: search
           clusterRef:
             kind: GitopsCluster
             name: qa
             namespace: flux-system
-					git: https://github.com/my-org/gitops-repo/test-clusters/qa/search #dummy example
         - namespace: search
           clusterRef:
             kind: GitopsCluster
             name: perf
             namespace: flux-system
-					git: https://github.com/my-org/gitops-repo/test-clusters/perf/search #dummy example
     - name: prod
       targets:
         - namespace: search
@@ -432,13 +441,40 @@ spec:
             kind: GitopsCluster
             name: prod
             namespace: flux-system
-					git: https://github.com/my-org/gitops-repo/prod-clusters/prod/search #dummy example
 ```
+It is covered by [promotion business rules](determine-promotion-needs.md#promotion-decisions-business-logic) as
+it will promote to prod as soon as a succeful deployment to either `qa` or `perf` has happened.
 
 ### Promotion via external process
 
 Original scenario specified [here](https://www.notion.so/weaveworks/Pipeline-promotion-061bb790e2e345cbab09370076ff3258#bd4524a6838742cfa254642c1b42443f)
+
+```yaml
+apiVersion: pipelines.weave.works/v1alpha1
+kind: Pipeline
+metadata:
+  name: search-multiple-targets
+  namespace: search
+spec:
+  appRef:
+    kind: HelmRelease
+    name: search-helmrelease
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+  promotion:
+    webhook:
+      url: https://my-jenkins.prod/webhooks/XoLZfgK
+      secretRef: my-jenkins-promotion-secret  
+  environments:
+    - name: dev
+      targets:
+        - namespace: search
+          clusterRef:
+            kind: GitopsCluster
+            name: dev
+            namespace: flux-system
+```
 Which is covered by [Call Webhook promotion strategy](execute-promotion.md#call-a-webhook)
+
 
 ## Implementation History
 
