@@ -303,6 +303,143 @@ This solution would be to create a new component with the promotions responsibil
 - Ee would need to create it from scratch. 
 - One more component to manage. 
 
+## User Stories 
+
+This section shows how the current proposal addresses the different scenarios specified in the product
+initiative. It serves as an acceptance of the current design.
+
+### Promotion for a pipeline with a single deployment target per environment
+
+The original scenario is specified [here](https://www.notion.so/weaveworks/Pipeline-promotion-061bb790e2e345cbab09370076ff3258#0c0d8c38b42b4b1eb8c5fa7ff3a2ac31).
+
+An example of a pipeline for this scenario is shown below.
+
+```yaml
+apiVersion: pipelines.weave.works/v1alpha1
+kind: Pipeline
+metadata:
+  name: search
+  namespace: search
+spec:
+  appRef:
+    kind: HelmRelease
+    name: search-helmrelease
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+  promotion:
+    pullRequest:
+      url: https://github.com/organisation/gitops-configuration-monorepo.git
+      branch: main
+  environments:
+    - name: dev
+      targets:
+        - namespace: search
+          clusterRef:
+            kind: GitopsCluster
+            name: dev
+            namespace: flux-system
+    - name: prod
+      targets:
+        - namespace: search
+          clusterRef:
+            kind: GitopsCluster
+            name: prod
+            namespace: flux-system
+```
+It is the canonical scenario that the current solutions supports. No particular requirement is found.  
+
+
+### Promotion for a pipeline with multiple deployment target per environment
+
+Original scenario specified [here](https://www.notion.so/weaveworks/Pipeline-promotion-061bb790e2e345cbab09370076ff3258#2ffaf6d0bdc144269e39f5a44acb0dc3)
+
+An example of a pipeline for this scenario is shown below.
+
+```yaml
+apiVersion: pipelines.weave.works/v1alpha1
+kind: Pipeline
+metadata:
+  name: search-multiple-targets
+  namespace: search
+spec:
+  appRef:
+    kind: HelmRelease
+    name: search-helmrelease
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+  promotion:
+    pullRequest:
+      url: https://github.com/organisation/gitops-configuration-monorepo.git
+      branch: main
+  environments:
+    - name: dev
+      targets:
+        - namespace: search
+          clusterRef:
+            kind: GitopsCluster
+            name: dev
+            namespace: flux-system
+    - name: test
+      targets:
+        - namespace: search
+          clusterRef:
+            kind: GitopsCluster
+            name: qa
+            namespace: flux-system
+        - namespace: search
+          clusterRef:
+            kind: GitopsCluster
+            name: perf
+            namespace: flux-system
+```
+
+### Promotion for a pipeline with multiple deployment target per environment
+
+Original scenario specified [here](https://www.notion.so/weaveworks/Pipeline-promotion-061bb790e2e345cbab09370076ff3258#3ea85277de5543d69a9e19407e69c84b)
+
+Strategy of promotion on first successful reconciliation
+
+It is covered by [Promotion between environment will happen when at least one of lower-environment deployment targets has been successfully deployed](determine-promotion-needs.md#promotion-decisions-business-logic)
+
+```yaml
+apiVersion: pipelines.weave.works/v1alpha1
+kind: Pipeline
+metadata:
+  name: search-multiple-targets
+  namespace: search
+spec:
+  appRef:
+    kind: HelmRelease
+    name: search-helmrelease
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+  environments:
+    - name: test
+      targets:
+				- namespace: search
+          clusterRef:
+            kind: GitopsCluster
+            name: qa
+            namespace: flux-system
+					git: https://github.com/my-org/gitops-repo/test-clusters/qa/search #dummy example
+        - namespace: search
+          clusterRef:
+            kind: GitopsCluster
+            name: perf
+            namespace: flux-system
+					git: https://github.com/my-org/gitops-repo/test-clusters/perf/search #dummy example
+    - name: prod
+      targets:
+        - namespace: search
+          clusterRef:
+            kind: GitopsCluster
+            name: prod
+            namespace: flux-system
+					git: https://github.com/my-org/gitops-repo/prod-clusters/prod/search #dummy example
+```
+
+### Promotion via external process
+
+Original scenario specified [here](https://www.notion.so/weaveworks/Pipeline-promotion-061bb790e2e345cbab09370076ff3258#bd4524a6838742cfa254642c1b42443f)
+Which is covered by [Call Webhook promotion strategy](execute-promotion.md#call-a-webhook)
+
 ## Implementation History
 
 - [Promotions Issue](https://github.com/weaveworks/weave-gitops-enterprise/issues/1589)
