@@ -305,8 +305,9 @@ This solution would be to create a new component with the promotions responsibil
 
 ## User Stories 
 
-This section shows how the current proposal addresses the different scenarios specified in the product
-initiative. It serves as an acceptance of the current design.
+This section shows how the current proposal addresses the different scenarios specified in the [product
+initiative](https://www.notion.so/weaveworks/Pipeline-promotion-061bb790e2e345cbab09370076ff3258#5b514ad575544595b1028d73e5b6dd23).
+It serves as part of the acceptance of the current design.
 
 ### Promotion for a pipeline with a single deployment target per environment
 
@@ -346,7 +347,8 @@ spec:
             namespace: flux-system
 ```
 
-It is covered by [promotion business rules](determine-promotion-needs.md#promotion-decisions-business-logic)
+It is covered by [promotion business rules](determine-promotion-needs.md#promotion-decisions-business-logic) where 
+we want to execute promotions by environment and by deployment target. This is the base scenario. 
 
 
 ### Promotion for a pipeline with multiple deployment target per environment
@@ -391,13 +393,16 @@ spec:
             name: perf
             namespace: flux-system
 ```
+The particularity of this scenario is that we want to raise a PR for each of the deployment targets that we have. This is
+covered by [promotion business rules](determine-promotion-needs.md#promotion-decisions-business-logic) rule #1
 
-It is covered by [promotion business rules](determine-promotion-needs.md#promotion-decisions-business-logic) as 
-a PR will be created for each test deployment target `qa` and `perf
+>1. Promotion tasks are applied to deployment targets.
 
 ### Promotion for a pipeline with multiple deployment target per environment
 
 Original scenario specified [here](https://www.notion.so/weaveworks/Pipeline-promotion-061bb790e2e345cbab09370076ff3258#3ea85277de5543d69a9e19407e69c84b)
+
+An example of a pipeline representing this scenario could be found 
 
 ```yaml
 apiVersion: pipelines.weave.works/v1alpha1
@@ -442,12 +447,20 @@ spec:
             name: prod
             namespace: flux-system
 ```
-It is covered by [promotion business rules](determine-promotion-needs.md#promotion-decisions-business-logic) as
-it will promote to prod as soon as a succeful deployment to either `qa` or `perf` has happened.
+The particularity of this scenario, is that we want to promote to production as soon as a deployment to test 
+has been successfully happen. This scenario is covered
+by [promotion business rules](determine-promotion-needs.md#promotion-decisions-business-logic) rule #2 
+
+>2. Promotion between environment will happen when at least one of lower-environment deployment targets has been successfully deployed.
+
+it will promote to prod as soon as a successful deployment to either `qa` or `perf` has happened.
 
 ### Promotion via external process
 
 Original scenario specified [here](https://www.notion.so/weaveworks/Pipeline-promotion-061bb790e2e345cbab09370076ff3258#bd4524a6838742cfa254642c1b42443f)
+
+This scenario is currently supported by having [Call Webhook promotion strategy](execute-promotion.md#call-a-webhook).
+An example of pipeline for this story is shown below. 
 
 ```yaml
 apiVersion: pipelines.weave.works/v1alpha1
@@ -473,8 +486,6 @@ spec:
             name: dev
             namespace: flux-system
 ```
-Which is covered by [Call Webhook promotion strategy](execute-promotion.md#call-a-webhook)
-
 
 ## Implementation History
 
