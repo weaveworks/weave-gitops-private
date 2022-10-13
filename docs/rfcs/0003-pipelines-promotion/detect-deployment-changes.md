@@ -131,7 +131,6 @@ notification-controller has [at-most once delivery semantics](https://github.com
 The [Alert spec](https://fluxcd.io/flux/components/notification/alert/) allows for custom metadata to be added to events
 by means of the `.spec.summary` field. The content of this field will be added to the event's `.metadata` map with the key "summary".
 
-
 ## Known-Unknowns
 
 1. How does p-c set the correct Provider address?

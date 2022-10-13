@@ -73,8 +73,9 @@ A deeper look into this part of the solution could be found [here](detect-deploy
 
 ### Determine whether a promotion is needed
 
-This responsibility is assumed by the `pipeline controller` running in the management cluster that: 
-- determine whether at the back of the event and a pipeline definition, a promotion is required. 
+This responsibility is assumed by the `pipeline controller` running in the management cluster that
+determines whether, at the back of the deployment event and a pipeline definition, a promotion is required and 
+initialise the promotion. 
 
 A deeper look into this part of the solution could be found [here](determine-promotion-needs.md).
 
