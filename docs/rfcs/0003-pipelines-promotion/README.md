@@ -82,10 +82,37 @@ A deeper look into this part of the solution could be found [here](determine-pro
 ### To execute the promotion
 
 Once the previous evaluation considers that a promotion is required, pipeline controller would be in charge 
-of orchestrating and executing the task according to its configuration.
+of orchestrating and executing the promotion. The promotion configuration will be added as part of the pipeline spec. 
 
 A deeper look into this part of the solution could be found [here](execute-promotion.md).
 
+### Non-functional requirements
+
+This section does a quick look into non-functional requirements for the solution at glance. 
+
+#### Security
+
+The solution is secured by design as 
+
+1. Communication between leaf and management clusters are via https channel with endpoint authz via HMAC.
+2. Deployment events are validated to reduce the risks of impersonation.  
+3. Each promotion strategy will have their own security configuration. 
+
+#### Scalability
+
+The solution is scalable by design as 
+
+- It could horizontally scale by the number of replicas of pipeline controller.
+- It could vertically scale by using `goroutines` to concurrently handle promotion requests.  
+
+#### Reliability
+
+It will be implemented as part of the business logic of pipeline controller.
+
+#### Monitoring
+
+To leverage existing [kubebuilder metrics](https://book.kubebuilder.io/reference/metrics.html). There will be the need
+to enhance default controller metrics with business metrics like `latency of a promotion by application`.
 
 ### Why this solution
 

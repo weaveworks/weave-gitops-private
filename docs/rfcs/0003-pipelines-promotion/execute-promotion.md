@@ -92,24 +92,6 @@ For the `webhook` promotion step we follow the same configuration as flux [notif
 where the secret contains 
 
 ```
-	// Secret reference containing the provider details, valid key names are: address, proxy, token, headers (YAML encoded)
-	// +optional
+	// Secret reference containing the provider details, valid key names are: address, proxy, 
+	// token, headers (YAML encoded)
 ```
-
-### Non-functional requirements
-
-Each promotion task has its security considerations defined. Other non-functional requirements will be understood in this 
-section.
-
-#### Scalability
-
-The initial strategy to scale the solution by number of request, would be vertically by using goroutines.
-
-#### Reliability
-
-It will be implemented as part of the business logic of pipeline controller.
-
-#### Monitoring
-
-To leverage existing [kubebuilder metrics](https://book.kubebuilder.io/reference/metrics.html). There will be the need
-to enhance default controller metrics with business metrics like `latency of a promotion by application`.
