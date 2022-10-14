@@ -112,7 +112,9 @@ The solution is scalable by design as
 
 #### Reliability
 
-It will be implemented as part of the business logic of pipeline controller.
+Pipeline controller will need to implement the fault tolerance and reliability features within its business logic per 
+promotion strategy. For example, in the context of opening a pr against github, it will require to manage retries to 
+recover from api rate limiting.
 
 #### Monitoring
 
