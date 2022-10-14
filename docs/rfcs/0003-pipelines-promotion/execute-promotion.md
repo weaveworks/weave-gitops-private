@@ -8,15 +8,12 @@ It is the part of the solution whose end goal is to execute a promotion strategy
     pc->>promotionTarget: execute promotion strategy
     participant promotionTarget as Promotion Target
 ```
-
-Example of promotion strateglike raise a PR, 
-call an external webhook, etc. This document aims to look in deeper detail to this section by promotion task.
-
-
+An example of promotion strategy could be opening a pull request against a configuration repo. This document looks 
+deeper details to this part of the solution.
 
 ## Define a promotion strategy
 
-A promotion strategy is defined as part of the pipeline spec in the field `spec.promotion` as you could see below.
+A promotion strategy is defined as part of the pipeline spec in the field `spec.promotion`.
 ```yaml
 apiVersion: pipelines.weave.works/v1alpha1
 kind: Pipeline
@@ -42,11 +39,12 @@ spec:
           name: dev
 ```
 
-spec.promotion: is an optional field that app teams could use to enhance their pipeline with promotion capabilities provided.
+- `spec.promotion`: is an optional field that app teams could use to enhance their pipeline with promotion capabilities provided.
+
 Under promotion, a single promotion strategy could be defined to use for promotions. The available promotions strategies are: 
 
-- Create a PR: define `spec.promotion.pullRequest` in order to create a PR indicating the promotion of an application in a git configuration repo.
-- Call a webhook: define `spec.promotion.webhook` in order to call a webhook to delegate the promotion action to an external system.
+- `spec.promotion.pullRequest`: to promote by creating a pull request in a configuration repo.
+- `spec.promotion.webhook`: to promote by calling an external system that will be in charge of the promotion logic. 
 
 ### Create a PR
 
@@ -78,6 +76,12 @@ spec:
           kind: GitopsCluster
           name: dev
 ```
+where pullRequest configuration has
+
+- `url`: https URL for the git repo to clone. 
+- `branch`: git branch to do the promotion.  
+- `secretRef`: secret containing the tokens or keys required to clone and create the PR against the provider. See security below for more details.
+
 #### Security
 
 In order to create a pull request in a configuration repo to action would be mainly required:
@@ -125,6 +129,10 @@ spec:
           kind: GitopsCluster
           name: dev
 ```
+where webhook configuration has
+
+- `url`: URL to post the promotion event. 
+- `secretRef`: a kubernetes secret with different configuration settings to use for sending the event. See security below for more details.
 
 #### Security
 
