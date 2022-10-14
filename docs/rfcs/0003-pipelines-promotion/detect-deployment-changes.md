@@ -97,23 +97,17 @@ to read app versions across environments in a pipeline.
 ## Security
 
 Communications between leaf cluster and management cluster will be protected using [HMAC](https://en.wikipedia.org/wiki/HMAC).
-HMAC shared key will be used for both authentication and authorization. Application teams will be able to specify the key to use within
-the pipeline spec as a global value. Key management will be done by the application team.
+HMAC shared key will be used for both authentication and authorization.
 
-Both to simplify user experience for key management and other security configuration will be evolved over time.
+At the back [this story](https://github.com/weaveworks/pipeline-controller/issues/31) this section would need to be updated
+but current design guidelines state that:
 
-An example to visualise this configuration is shown below.
+- Application teams will be able to specify the key to use within the pipeline spec as a global value via a secretRef. 
+- Key management will be done manually by the application team.
 
-```yaml
-  appRef:
-    apiVersion: helm.toolkit.fluxcd.io/v2beta1
-    kind: HelmRelease
-    name: podinfo
-    #used for hmac authz - this could change at implementation 
-    secretRef: my-hmac-shared-secret
-```
+This approach puts a known operational overhead for the application team at this stage. The experience will be
+simplified over time by automation to reduce maintenance costs. 
 
-Further considerations will be added at the back of [this story](https://github.com/weaveworks/pipeline-controller/issues/31)
 
 ## Delivery semantics/failure scenarios recovery for notifications
 
