@@ -34,6 +34,7 @@ The `pipeline controller` solution has been chosen over other alternatives (see 
 - It follows [notification controller pattern](https://fluxcd.io/flux/guides/webhook-receivers/#expose-the-webhook-receiver).
 - It is easier to develop over other alternatives.
 - It keeps split user-experience and machine-experience apis.
+- It provides reasonable modularity for the feature.
 
 On the flip side, the solution has the following constraints:
 
