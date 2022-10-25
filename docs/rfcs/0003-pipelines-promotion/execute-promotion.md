@@ -120,7 +120,7 @@ spec:
   promotion:
     webhook:
        url: https://my-jenkins.prod/webhooks/XoLZfgK
-       secretRef: my-jenkins-promotion-secret #secretontains the github token to clone and create PR  
+       secretRef: my-jenkins-promotion-secret #contains the secrets to call jenkins webhook  
   environments:
   - name: dev
      targets:
