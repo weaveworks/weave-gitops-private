@@ -4,7 +4,7 @@ It is the part of the solution whose end goal is to execute a promotion strategy
 
 ```mermaid
    sequenceDiagram
-    participant pc as Pipeline Controller (Managment)
+    participant pc as Pipeline Controller (Management)
     pc->>promotionTarget: execute promotion strategy
     participant promotionTarget as Promotion Target
 ```
