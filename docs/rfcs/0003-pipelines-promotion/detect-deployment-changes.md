@@ -8,7 +8,7 @@ It is the part of the promotions solution described in the diagram.
     participant LC as Notification Controller (Leaf)
     F->>LC: deploy helm release
     LC->>pc: send deployment change event
-    participant pc as Pipeline Controller (Managment)
+    participant pc as Pipeline Controller (Management)
     pc->>pc: authz and validate event
 ```
 
