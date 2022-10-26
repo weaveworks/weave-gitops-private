@@ -200,7 +200,7 @@ and take an action to start the next promotion based on the Pipeline definition.
 2. Scalability is unclear, we don't know the threshold at which the controller will be able to handle without issues.
 3. There is no way to kick off promotions externally
 
-### Alternatives to process and execute promotions.
+### Alternatives to process and execute promotions
 
 They difference among them is around 
 the component serving the promotion logic, therefore the alternatives names are based on it.
