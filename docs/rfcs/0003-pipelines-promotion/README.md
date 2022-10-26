@@ -30,7 +30,7 @@ could be the promotion target.
 ## Motivation
 
 Given a continuous delivery pipeline, the application goes via different environments in its way to production. We
-need an action to sign the intent of deploying an application between environments. That concept is generally known as a
+need an action to signal the intent of deploying an application between environments. That concept is generally known as a
 promotion. Current pipelines in weave gitops does not support promotion. 
 
 ### Goals
