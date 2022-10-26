@@ -144,7 +144,7 @@ This solution is the result of two different alternative evaluations:
 1. Alternatives to detect deployment changes. 
 2. Alternatives to process and execute promotions.
 
-### Alternatives to detect deployment changes.
+### Alternatives to detect deployment changes
 
 This approach suggests the creation of [kubernetes watchers](https://kubernetes.io/docs/reference/using-api/api-concepts/#efficient-detection-of-changes)
 per remote cluster. Each watcher would get notified whenever a Helm release in the remote cluster changes
