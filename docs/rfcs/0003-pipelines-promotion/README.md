@@ -1,17 +1,17 @@
 # RFC-0003 Pipeline promotions 
 
-**Status:** provisional
+**Status:** implementable
 
-**Creation date:** 2022-10-xx
+**Creation date:** 2022-10-26
 
-**Last update:** 2022-10-xx
+**Last update:** 2022-10-26
 
 ## Summary
 
 Given a continuous delivery pipeline, the application goes via different environments on its way to production. We 
 need an action to signal the intent of deploying an application between environments. That concept is generally known as a
 promotion. Current pipelines in weave gitops does not support promotion. This RFC addresses this gap 
-as specified in the [product initiative](https://www.notion.so/weaveworks/Pipeline-promotion-061bb790e2e345cbab09370076ff3258).
+as specified in the [product initiative](#user-stories).
 
 ## Terminology
 
