@@ -1,7 +1,8 @@
 # 13. Pipelines Promotions
 
 ## Status
-Proposed
+
+Accepted
 
 ## Context
 As part of Weave GitOps Enterprise, Sunglow is working on delivering [Continuous Delivery Pipelines](https://www.notion.so/weaveworks/CD-Pipeline-39a6df44798c4b9fbd140f9d0df1212a) where
