@@ -33,8 +33,6 @@ We follow kubernetes [api versioning](https://kubernetes.io/docs/reference/using
 - The version name is vX where X is an integer.
 - Stable API versions do not have a maximum lifetime from introduction to deprecation.
 - Stable API versions could be deprecated and removed.  
-- Stable API versions could be deprecated at any time but only removed when there is another stable version. 
-This is to ensure that customers have at least one stable api available suitable for production workloads. 
 - Stable API versions do have 6 months or 6 releases (whichever is longer) from deprecation to removal.
 
 #### Beta
@@ -60,14 +58,17 @@ This is to ensure that customers have at least one stable api available suitable
 
 ### Deprecation
 
-We also tend to follow the rules in [kubernetes api deprecation policy](https://kubernetes.io/docs/reference/using-api/deprecation-policy/)
+We also are influenced by [kubernetes api deprecation policy](https://kubernetes.io/docs/reference/using-api/deprecation-policy/)
 
 **Rule #1: API elements may only be removed by incrementing the version of the API group.**
 
 **Rule #2: API objects must be able to round-trip between API versions in a given release without information loss, 
 except for whole REST resources that do not exist in some versions.**
 
-**Rule #3: An API version in a given track may not be deprecated in favor of a less stable API version.**
+**Rule #3: An API version in a given track may not be removed in favor of a less stable API version.**
+
+This rule refines original one to allow, for example, to deprecate stable api versions in favour of beta api versions but
+do not remove until a stable api version exists. 
 
 **Rule #4a: API lifetime is determined by the API stability level**
 
