@@ -41,9 +41,6 @@ We follow kubernetes [api versioning](https://kubernetes.io/docs/reference/using
 - Beta API versions do not have a maximum lifetime from introduction to deprecation. 
 - Beta API versions do have 3 months or 3 releases (whichever is longer) from deprecation to removal.
 - Using a feature is considered safe.
-- The schema and/or semantics of objects may change in incompatible ways in a subsequent beta or stable API version. 
-  When this happens, migration instructions are provided. Adapting to a subsequent beta or stable API version may require editing or re-creating API objects, 
-  and may not be straightforward. The migration may require downtime for applications that rely on the feature.
 - The support for a feature will not be dropped, though the details may change.
 - The software is not recommended for production uses. Subsequent releases may introduce incompatible changes. 
   Use of beta API versions is required to transition to subsequent beta or stable API versions once the beta API version is deprecated and no longer served.
@@ -78,8 +75,21 @@ until after a release has been made that supports both the new version and the p
 ### Notifying API changes
 
 API Changes should be communicated as part of the [release notes](https://github.com/weaveworks/weave-gitops-enterprise/releases) and 
-available in the [documentation](https://docs.gitops.weave.works/docs/enterprise/releases/) including references on how to migrate.
-Examples of the information to provide coudl be found in [kubernetes migration guide](https://kubernetes.io/docs/reference/using-api/deprecation-guide/) 
+available in the [documentation](https://docs.gitops.weave.works/docs/enterprise/releases/). 
+
+Examples of the information to provide could be found in [kubernetes migration guide](https://kubernetes.io/docs/reference/using-api/deprecation-guide/)
+
+### Supporting migration 
+
+In order to support a customer migrating apis:
+
+- Migration instructions should be provided.
+- They might include editing or re-creating API objects. It might not be straightforward or including downtime.
+- When there is significant impact to customers by the change, tooling to support the migration effort is recommended.
+- Two main approaches for this tooling:
+  1. To provide [conversion hooks](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definition-versioning/#webhook-conversion)
+  2. To provide tooling that allow conversion of files within git.
+- Given our context, to provide tooling for converting in git is preferred as addresses the conversion at the source.  
 
 
 ## Consequences
