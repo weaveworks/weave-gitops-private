@@ -31,14 +31,17 @@ We follow kubernetes [api versioning](https://kubernetes.io/docs/reference/using
 #### Stable
 
 - The version name is vX where X is an integer.
-- Stable API versions remain available for all future releases within a major Weave Gitops version. 
-- There is no currently specified a major version revision of Weave Gitops that removes stable APIs.
+- Stable API versions do not have a maximum lifetime from introduction to deprecation.
+- Stable API versions could be deprecated and removed.  
+- Stable API versions could be deprecated at any time but only removed when there is another stable version. 
+This is to ensure that customers have at least one stable api available suitable for production workloads. 
+- Stable API versions do have 6 months or 6 releases (whichever is longer) from deprecation to removal.
 
 #### Beta
 
 - The version names contain beta (for example, v2beta3).
 - Beta API versions do not have a maximum lifetime from introduction to deprecation. 
-- Beta API versions do have a 3-minor releases from deprecation to removal.
+- Beta API versions do have 3 months or 3 releases (whichever is longer) from deprecation to removal.
 - Using a feature is considered safe.
 - The schema and/or semantics of objects may change in incompatible ways in a subsequent beta or stable API version. 
   When this happens, migration instructions are provided. Adapting to a subsequent beta or stable API version may require editing or re-creating API objects, 
