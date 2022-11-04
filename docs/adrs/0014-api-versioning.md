@@ -78,6 +78,10 @@ except for whole REST resources that do not exist in some versions.**
 This rule refines original one to allow, for example, to deprecate stable api versions in favour of beta api versions but
 do not remove until a stable or long term supported api version exists. 
 
+It is also to refine that any removal of apis should comply with the definition of a **Recent Version** that indicates
+that three versions: recent and two previous should be supported at any time. This has the exception to new components where
+there are less than three versions in total.
+
 **Rule #4a: API lifetime is determined by the API stability level**
 
 **Rule #4b: The "preferred" API version and the "storage version" for a given group may not advance 
