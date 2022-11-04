@@ -14,7 +14,12 @@ a strategy for managing different versions is required to set sensible contract 
 - any weave gitops customers to have stability enough to adopt these changes with guarantees.
 
 This ADR defines an initial api versioning and deprecation strategy for weave gitops, based on existing kubernetes approach, 
-with the refinements considered to match our context:
+with the refinements considered to match our context. The baseline resources for it has been 
+
+From Weave Gitops Enterprise
+- [Weave GitOps Service Description ENv2.0](https://docs.google.com/document/d/1s1m8cRf2Ut2fTOdLbbooaddCh6tlq-wpYIY7ElBf9QA)
+
+From Kubernetes
 
 - [Kubernetes api versioning](https://kubernetes.io/docs/reference/using-api/#api-versioning)
 - [Kubernetes api deprecation policy](https://kubernetes.io/docs/reference/using-api/deprecation-policy/)
@@ -28,18 +33,24 @@ with the refinements considered to match our context:
 We follow kubernetes [api versioning](https://kubernetes.io/docs/reference/using-api/#api-versioning) taken at this 
 [moment](https://github.com/kubernetes/website/commit/d308cbb35a335a5eb34ef4a7fb8a20ea1b98d100). 
 
+We also consider the definition of Recent Version within weave gitops enterprise service description 
+
+>Recent Version: A recent version of any software would typically include the current version and the previous 2 versions.  
+> If there is a Long Term support version the latest Long Term support version and the previous 2 versions.
+
 #### Stable
 
-- The version name is vX where X is an integer.
+- The version name is vX where X is an integer (for example, v1).
+- Considered as Long Term supported version within weave gitops enterprise service definition. 
 - Stable API versions do not have a maximum lifetime from introduction to deprecation.
 - Stable API versions could be deprecated and removed.  
-- Stable API versions do have 6 months or 6 releases (whichever is longer) from deprecation to removal.
+- Stable API versions do have 3 months or 6 releases (whichever is longer) from deprecation to removal.
 
 #### Beta
 
 - The version names contain beta (for example, v2beta3).
 - Beta API versions do not have a maximum lifetime from introduction to deprecation. 
-- Beta API versions do have 3 months or 3 releases (whichever is longer) from deprecation to removal.
+- Beta API versions do have 2 months or 4 releases (whichever is longer) from deprecation to removal.
 - Using a feature is considered safe.
 - The support for a feature will not be dropped, though the details may change.
 - The software is not recommended for production uses. Subsequent releases may introduce incompatible changes. 
@@ -65,7 +76,7 @@ except for whole REST resources that do not exist in some versions.**
 **Rule #3: An API version in a given track may not be removed in favor of a less stable API version.**
 
 This rule refines original one to allow, for example, to deprecate stable api versions in favour of beta api versions but
-do not remove until a stable api version exists. 
+do not remove until a stable or long term supported api version exists. 
 
 **Rule #4a: API lifetime is determined by the API stability level**
 
@@ -90,6 +101,10 @@ In order to support a customer migrating apis:
   1. To provide [conversion hooks](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definition-versioning/#webhook-conversion)
   2. To provide tooling that allow conversion of files within git.
 - Given our context, to provide tooling for converting in git is preferred as addresses the conversion at the source.  
+
+### Exceptions 
+
+If you are not able to meet these guidelines, please discuss with product engineering leadership for an exception. 
 
 
 ## Consequences
