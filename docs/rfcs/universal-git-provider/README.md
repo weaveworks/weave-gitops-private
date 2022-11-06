@@ -134,9 +134,32 @@ The following alternatives has been discussed
 
 ### Extend go-git-provider by git provider request by using the official git provider sdk
 
+#### Solution
+
+The solution would be to use a library provider by the git provider. In the case of azure devops would be
+https://github.com/microsoft/azure-devops-go-api
+
+PoC not done for this as it seems clear the value that would provide to the problem in terms of pro/cons.
+In case of this alternative being selected a poc to manage risks would be encouraged.
+
+##### Evaluation
+
+**pro**
+- we would be able to integrate as soon as we have an official library.
+- we would potentially have better support for new features, so reduced time to adopt new features.
+
+**cons**
+- there is a cost linear to the number of intended git providers in terms of extension and update.
+
+**recommendation**
+Given that git is a commodity domain for us, this alternative has very high costs of extension and maintain. It feels
+could fit for edge cases where no other cheaper solutions are possible.
+
+
+
 ### Extend go-git-provider using a general-purpose git provider library to do the effort once and support many git providers.
 
-#### Support Azure Devops
+#### Solution
 
 In order to support azure devops repos within weave gitops enterprise via go git providers, [the following
 roadmap](https://miro.com/app/board/uXjVPIBD9Uw=/?share_link_id=307607922383) - as user story mapping format - could be used.
@@ -215,15 +238,43 @@ some missing features. There is a delta for integrating with wge PR flow that wo
 of jenkins-scm for the git provider. It varies from ones analysed with the common them on gaps around write operations.
 
 
-To migrate off from go-git-providers to a weave gitops enterprise git interface that is implemented via
+### To migrate off from go-git-providers to a weave gitops enterprise git interface that is implemented via
 
-#### Migrate from go git provider to https://github.com/jenkins-x/go-scm
+#### Generic git provider solution to support many
+
+##### Solution
+
+
+https://github.com/jenkins-x/go-scm
 
 This solution would consist of leverage `jenkins-x` library for weave gitops integration to git providers.
 Given that is a variation of [extend go git providers](#extend-go-git-providers), what has been said there applies
 to this alternative in the context of goals and evaluation.
 
-#### To push to a branch
+##### Evaluation 
+
+**pro**
+
+**con**
+
+
+#### Using the official git provider sdks by supported git provider
+
+##### Solution
+
+TBA
+
+##### Evaluation
+
+TBA
+**pro**
+
+**con**
+
+
+### To do not operate at git provider api level but at git api level
+
+#### Solution
 
 a stated, the alternative would be to do not use a git pr
 
@@ -233,43 +284,12 @@ a stated, the alternative would be to do not use a git pr
 
 Discovery not done for this approach.
 
-##### Support Azure Devops
+#### Evaluation
+
 TBA
-
-##### Extensible to the prioritised set of git provider
-TBA
-
-##### Evaluation
-TBA after discovery
-
-#### Add Azure DevOps support to go-git-providers without https://github.com/jenkins-x/go-scm
-
-The solution would be to use a library provider by the git provider. In the case of azure devops would be
-https://github.com/microsoft/azure-devops-go-api
-
-PoC not done for this as it seems clear the value that would provide to the problem in terms of pro/cons.
-In case of this alternative being selected a poc to manage risks would be encouraged.
-
-##### Support Azure Devops
-
-Assumed yes.
-
-##### Extensible to the prioritised set of git provider
-
-Assumed yes. It would vary by git provider.
-
-##### Evaluation
-
 **pro**
-- we would be able to integrate as soon as we have an official library.
-- we would potentially have better support for new features, so reduced time to adopt new features.
 
-**cons**
-- there is a cost linear to the number of intended git providers in terms of extension and update.
-
-**recommendation**
-Given that git is a commodity domain for us, this alternative has very high costs of extension and maintain. It feels
-could fit for edge cases where no other cheaper solutions are possible.
+**con**
 
 
 ## Design Details
