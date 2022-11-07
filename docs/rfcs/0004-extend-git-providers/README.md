@@ -1,4 +1,4 @@
-# RFC-NNNN A universal git provider for weave gitops 
+# RFC-NNNN extend git providers beyond github and gitlab 
 
 <!--
 The title must be short and descriptive.
