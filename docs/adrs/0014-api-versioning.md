@@ -98,13 +98,15 @@ Examples of the information to provide could be found in [kubernetes migration g
 
 In order to support a customer migrating apis:
 
-- Migration instructions should be provided.
-- They might include editing or re-creating API objects. It might not be straightforward or including downtime.
+- Expected timelines should be communicated.  
+- Migration instructions should be provided. They might include editing or re-creating API objects. It might not be straightforward or including downtime.
+- It is encouraged to provide how to test or get ready for the migration before it happens.  
 - When there is significant impact to customers by the change, tooling to support the migration effort is recommended.
 - Two main approaches for this tooling:
   1. To provide [conversion hooks](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definition-versioning/#webhook-conversion)
   2. To provide tooling that allow conversion of files within git.
-- Given our context, to provide tooling for converting in git is preferred as addresses the conversion at the source.  
+- Given our context, to provide tooling for converting in git is preferred as addresses the conversion at the source.
+
 
 ### Exceptions 
 
