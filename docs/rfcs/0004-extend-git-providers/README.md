@@ -1,4 +1,4 @@
-# RFC-NNNN extend git providers beyond github and gitlab 
+# RFC-0004 extend git providers beyond github and gitlab 
 
 <!--
 The title must be short and descriptive.
@@ -102,16 +102,17 @@ The following alternatives have been considered:
 With the following recommendation:
 
 Given that git domain for weave gitops enterprise it is a commodity. We consider it a commodity as we require it (like kubernetes clusters)
-but does not provide wge a sustained competitive advantage as it could be easily replicated. Therefore, a strategy 
+but does not provide wge a sustained competitive advantage as it could be easily replicated by competitors. Therefore, a strategy 
 to leverage git capabilities to an existing solution is preferred over building our own. 
 
-In that sense, a solution based on a generic git provider like jenkins/go-scm or drone/go-scm, 
-even has been proven it would require contributions, is the best alternative to achieve the largest git-providers support 
-with smaller building effort. In that sense, it is preferred over building each git provider integration ourselves. 
+In that sense, a solution based on a generic git provider like [jenkins/go-scm](https://github.com/jenkins-x/go-scm)
+or [drone/go-scm](https://github.com/drone/go-scm), even has been proven it would require contributions, 
+is the best alternative to achieve the largest git-providers support with smaller building effort. 
+In that sense, it is preferred over building each git provider integration ourselves. 
 
-Given the previous statement, the alternative #2 of extending go-git-providers with go-scm like solution would be 
+Given the previous statement, the alternative `#2 of extending go-git-providers with go-scm like solution` would be 
 the preferred solution. It has been proven technically feasible under the [azure devops poc](https://github.com/weaveworks/weave-gitops-enterprise/issues/1704).
-The recommendation would be to just extend go-git-providers api required to support the `add` or `pull request` wge user journey. 
+The recommendation would be to **just extend go-git-providers api required to support the `add` or `pull request`** wge user journey. 
 To implement other api endpoints would be out of this recommendation.
 
 A [question](https://github.com/fluxcd/flux2/discussions/3292) has been raised to go-git-providers to understand the feasibility of this approach. 
@@ -137,7 +138,6 @@ development effort to achieve the same supported git providers.
 
 The unique solution where the previous statement is not necessarily true is `#4 to operate at git level`. This
 solution is mainly discouraged due to the tradeoffs that carry on, in particular the impact on the user experience. 
-
 We are bounding a user sync call like `create a pull request` to a `git clone` operation to work with remote repositories.
 This operation is dependent of the size of the repo therefore in terms of latency. This would have a direct impact on 
 the user experience. Mitigations could be done to this problem, but it would require a more complex solution or extra infrastructure.
@@ -145,7 +145,7 @@ In any case, any the other alternatives would be preferred over this approach.
 
 #### Why investing or not in go-git-providers
 
-As mentioned in the proposal, as weave gitops enterprise product, investing in git providers does not seem strategic.
+As mentioned in the proposal, as weave gitops enterprise, investing in git providers does not seem strategic.
 Only if there are other reasons (business or technical) not scoped  in this RFC, there could be strategic value on contributing. 
 An example of it could be the willingness to create from go-git-providers de-facto solution in the space. Currently, 
 there is no a clear solution in the space that has a complete support of all the major git providers. 
