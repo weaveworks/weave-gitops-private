@@ -1,8 +1,8 @@
-# 14. weave gitops api versioning guidelines 
+# 14. weave gitops api versioning and lifecycle guidelines 
 
 ## Status
 
-Proposed
+Accepted
 
 ## Context
 
