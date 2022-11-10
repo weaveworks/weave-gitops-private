@@ -1,0 +1,33 @@
+name: update toc
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  update-toc:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+      - name: Update README
+        run: ./hack/update-toc.sh
+      - name: Create Pull Request
+        id: cpr
+        uses: peter-evans/create-pull-request@v4
+        with:
+          commit-message: |
+            Update TOC
+          committer: GitHub <noreply@github.com>
+          author: weaveworks-admin-bot <41998074+weaveworks-admin-bot@users.noreply.github.com>
+          branch: update-toc
+          title: Update TOC
+      - name: Check output
+        run: |
+          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+          echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
+
