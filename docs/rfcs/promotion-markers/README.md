@@ -93,6 +93,127 @@ This is a good place to incorporate suggestions made during discussion of the RF
 
 This RFC is a retroactive definition of what has been implemented in pipeline-controller. No alternatives were considered for this initial delivery, but are recorded here for potential future iteration. The initial proposed approach was deemed viable primarily given its similar use within Flux. Coupled with the desire within Weave GitOps to both build natively on top of Flux, and to optimise for velocity and iteration based on customer feedback.
 
+#### Scenarios
+
+**Base Scenario**
+
+As to illustrate a couple of potential alternatives, the following base scenario will be used. 
+
+There is a pipeline definition like the following.
+
+```yaml
+apiVersion: pipelines.weave.works/v1alpha1
+kind: Pipeline
+metadata:
+  name: podinfo-01
+  namespace: flux-system
+spec:
+  appRef:
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    name: podinfo
+  environments:
+    - name: dev
+      targets:
+        - namespace: podinfo-01-dev
+          clusterRef:
+            kind: GitopsCluster
+            name: dev
+            namespace: flux-system
+    - name: prod
+      targets:
+        - namespace: podinfo-01-prod
+          clusterRef:
+            kind: GitopsCluster
+            name: prod
+            namespace: default
+  promotion:
+    pull-request:
+      url: https://github.com/weaveworks/weave-gitops-clusters
+      secretRef:
+        name: promotion-credentials
+```
+Helm releases manifests exists like 
+
+```yaml
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: podinfo
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: podinfo
+      version: "6.0.1"
+      sourceRef:
+        kind: HelmRepository
+        name: podinfo
+      interval: 1m
+```
+
+#### Leverage to custom layout directory
+
+This alternative solves the base scenario by allowing the pipeline owner to define based 
+on pipeline properties the layout of repo to use the discovery. Any of the entities within the `pipeline` spec
+coudl be referenced for discovery. 
+
+For example using [flux](https://fluxcd.io/flux/guides/repository-structure) ways of organise repo. A monorepo 
+could be navigated with the following configuration: 
+
+```yaml
+promotion:
+    pull-request:
+      url: https://github.com/weaveworks/weave-gitops-clusters
+      match: "path(apps/{environment.name}/{application.name})"
+      secretRef:
+        name: promotion-credentials
+```
+
+1. Discover the helm release manifest to promote: it will use `spec.promotion.pull-request.match` 
+to determine the path for manifest to promote.
+2. Discover the field to promote: not required as we could resolve it via the schema `spec.chart.spec.version`.
+
+#### Leverage labels or annotations 
+
+This alternative tries to address the same problem using a solution based on kubernetes annotations.
+Similar to [argocd resource tracking](https://argo-cd.readthedocs.io/en/stable/user-guide/resource_tracking/#resource-tracking)
+
+An example could be
+```yaml
+promotion:
+    pull-request:
+      url: https://github.com/weaveworks/weave-gitops-clusters
+      match: "labels(app.kubernetes.io/environment=environment, annotherLabel)"
+      match: "annotations(app.kubernetes.io/environment=environment, anotherAnnotation)"
+      secretRef:
+        name: promotion-credentials
+```
+With the resource annotated like the following
+```yaml
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: podinfo
+  annotations:
+    app.kubernetes.io/environment: "dev"
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: podinfo
+      version: "6.0.1"
+      sourceRef:
+        kind: HelmRepository
+        name: podinfo
+      interval: 1m
+```
+
+1. Discover the helm release manifest to promote: it will use `spec.promotion.pull-request.match` to determine 
+ the resources matching by label or annotation.
+2. Discover the field to promote: not required as we could resolve it via the schema `spec.chart.spec.version`.
+
+
 ## Implementation History
 
 <!--
