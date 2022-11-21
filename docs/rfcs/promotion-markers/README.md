@@ -83,6 +83,12 @@ An implementation of this RFC has the following inputs and outputs:
 
 Given the inputs above an implementation is able to precisely determine which marker comment it is supposed to discover and with which value it shall update the targeted YAML field. The output of this operation is one or more modified YAML files.
 
+### Drawbacks to the proposed approach
+
+- Requires update to application manifests to know about pipelines.
+- Comments are often stripped by tooling
+  - This includes our own Templates capability currently. There is a potential enhancement to solve this but it has its own drawbacks beyond cost of implementation.
+
 ### Alternatives
 
 <!--
