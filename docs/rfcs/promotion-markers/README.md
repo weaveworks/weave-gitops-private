@@ -174,6 +174,20 @@ promotion:
 to determine the path for manifest to promote.
 2. Discover the field to promote: not required as we could resolve it via the schema `spec.chart.spec.version`.
 
+##### Evaluation
+
+__Pros__
+
+- Resolution defined within the pipelines boundaries (manifest and configuration repo).  
+- Pipeline behaviours like promotions don't impose restrictions in application manifests (loosely coupled solution).
+- Application manifests does not know about pipelines.
+
+__Cons__
+
+- Same discovery mechanism applies to any application in any deployment target within any environment so there 
+is a need for consistency.
+
+
 #### Leverage labels or annotations 
 
 This alternative tries to address the same problem using a solution based on kubernetes annotations.
@@ -212,6 +226,18 @@ spec:
 1. Discover the helm release manifest to promote: it will use `spec.promotion.pull-request.match` to determine 
  the resources matching by label or annotation.
 2. Discover the field to promote: not required as we could resolve it via the schema `spec.chart.spec.version`.
+
+##### Evaluation
+
+__Pros__
+
+- Resolution leverages a kubernetes-native metadata solution based on labels or annotations so well understood 
+by kubernetes users and supported by standard tooling.
+
+__Cons__
+
+- Application manifests does need to know about pipelines.
+- Resolution logic split between pipeline and application manifests.
 
 
 ## Implementation History
