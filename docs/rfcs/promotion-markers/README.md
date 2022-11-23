@@ -184,9 +184,10 @@ to determine the path for manifest to promote.
 
 __Pros__
 
-- Resolution defined within the pipelines boundaries (manifest and configuration repo).  
-- Pipeline behaviours like promotions don't impose restrictions in application manifests (loosely coupled solution).
-- Application manifests does not know about pipelines.
+- Manifests discovery is an explicit strategy defined within pipeline boundaries (manifest and configuration repo).  
+- Loosely couple solution 
+  - Pipeline behaviours like promotions don't impose restrictions in application manifests
+  - Application manifests does not know about pipelines.
 
 __Cons__
 
