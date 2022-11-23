@@ -110,14 +110,30 @@ or [drone/go-scm](https://github.com/drone/go-scm), even has been proven it woul
 is the best alternative to achieve the largest git-providers support with smaller building effort. 
 In that sense, it is preferred over building each git provider integration ourselves. 
 
-Given the previous statement, the alternative `#2 of extending go-git-providers with go-scm like solution` would be 
-the preferred solution. It has been proven technically feasible under the [azure devops poc](https://github.com/weaveworks/weave-gitops-enterprise/issues/1704).
-The recommendation would be to **just extend go-git-providers api required to support the `add` or `pull request`** wge user journey. 
-To implement other api endpoints would be out of this recommendation.
+Given the previous statement, the following recommendation is provided:  
 
-A [question](https://github.com/fluxcd/flux2/discussions/3292) has been raised to go-git-providers to understand the feasibility of this approach. 
+1. To create within weave gitops enterprise an interface around the PR user journey that abstracts it usage from go-git-providers.
+2. To use a factory-like pattern by git provider where:
+   1. For go-git-providers supported git providers, like github or gitlab, to implement this interface via go-git-providers.
+   2. For other git providers, implement it via go-scm.
+
+Given that this solution increases the complexity on weave gitops enterprise side, an action to make this sustainable
+should be taken by either 1) reducing exposure to go-git-providers or 2) to contribute the git provider support for go-git-providers.
+
 
 ### FAQ
+
+
+#### Why not alternative #2 of extending go-git-providers with go-scm like solution 
+
+It was the initial suggestion as it provided the greatest coverage with smallest work required within Weave Gitops.
+It has been proven technically feasible under the [azure devops poc](https://github.com/weaveworks/weave-gitops-enterprise/issues/1704).
+The recommendation would be to **just extend go-git-providers api required to support the `add` or `pull request`** wge user journey.
+To implement other api endpoints would be out of this recommendation.
+
+However, there was a risk of not being feasible for the direction of the project. A [question](https://github.com/fluxcd/flux2/discussions/3292) 
+was raised to go-git-providers to understand the feasibility of this approach. The risk has been materialised
+so no longer is an option.
 
 #### What to do in case of go-git-providers solution is not feasible 
 
