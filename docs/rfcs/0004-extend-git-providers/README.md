@@ -4,12 +4,9 @@
 The title must be short and descriptive.
 -->
 
-**Status:** provisional
+**Status:** provisional 
 
-<!--
-Status represents the current state of the RFC.
-Must be one of `provisional`, `implementable`, `implemented`, `deferred`, `rejected`, `withdrawn`, or `replaced`.
--->
+Product to set the direction based on this and other docs. Status will be updated with the decision once available.
 
 **Creation date:** 2022-11-07
 
