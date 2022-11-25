@@ -193,6 +193,9 @@ __Cons__
 
 - Same discovery mechanism applies to any application in any deployment target within any environment so there 
 is a need for consistency.
+- It is unlikely that a single directory-structure strategy would cover all scenario. For example version
+set on [variable substiution](https://fluxcd.io/flux/components/kustomize/kustomization/#variable-substitution). It would
+require then to support a set of strategies or to don't support some scenarios.
 
 
 #### Leverage labels or annotations 
