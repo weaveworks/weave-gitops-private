@@ -16,6 +16,7 @@ This is for tracking weaveworks internal information on weave-gitops. Will inclu
 - [12. Policy versioning](docs/adrs/0012-policy-versioning.md)
 - [13. Pipelines Promotions](docs/adrs/0013-pipelines-promotions.md)
 - [14. weave gitops api versioning and lifecycle guidelines](docs/adrs/0014-api-versioning-lifecycle.md)
+- [15. maintain state for pipelines](docs/adrs/0015-pipelines-state.md)
 
 <!-- /ADRS -->
 
@@ -26,5 +27,6 @@ This is for tracking weaveworks internal information on weave-gitops. Will inclu
 - [RFC-0001 Continuous Delivery Pipelines in Weave GitOps](docs/rfcs/0001-pipelines)
 - [RFC-0002 Distributing Pipelines Controller as OCI Artifact](docs/rfcs/0002-pipelines-oci-distribution)
 - [RFC-0003 Pipeline promotions](docs/rfcs/0003-pipelines-promotion)
+- [RFC-000N Markers in YAML Comments for Application Promotion](docs/rfcs/promotion-markers)
 
 <!-- /RFCS -->
