@@ -16,11 +16,11 @@ This ADR records the decision on which solution to explore around this problem.
 There are different alternatives to maintain the state. Some of them were explored
 in the [discovery](https://miro.com/app/board/uXjVP9DpBjc=/?share_link_id=229323743612):
 
-3. to hold state in the Pipeline CR status as [Flagger does](https://github.com/fluxcd/flagger/blob/main/pkg/apis/flagger/v1beta1/status.go#L70-L90)
-4. to hold state in a database as Spinnaker or [Keptn does](https://keptn.sh/docs/concepts/architecture/)
-5. to hold state in another CR as [Tekton does](https://tekton.dev/docs/pipelines/pipelineruns/) between Pipeline and PipelineRuns 
-6. to use a Configmap
-7. to use Pipeline CR metadata / annotations
+1. to hold state in the Pipeline CR status as [Flagger does](https://github.com/fluxcd/flagger/blob/main/pkg/apis/flagger/v1beta1/status.go#L70-L90)
+2. to hold state in a database as Spinnaker or [Keptn does](https://keptn.sh/docs/concepts/architecture/)
+3. to hold state in another CR as [Tekton does](https://tekton.dev/docs/pipelines/pipelineruns/) between Pipeline and PipelineRuns 
+4. to use a Configmap
+5. to use Pipeline CR metadata / annotations
 
 The direction is to explore **Pipeline CR status** as an alternative because it is the most straightforward, natural
 next step given the current understanding of the solution space.
@@ -40,4 +40,5 @@ We might be limited by how we can structure the data and query, but as of now, w
 On the other hand, it should be straightforward to implement without adding any external dependency.
 
 It has been envisioned that for complex scenarios an evolution from CR status to other more sophisticated
-solution might be required. This decision would be reviewed in that case. 
+solution might be required. At this stage, we cannot envision major future risks doing so. This decision should be 
+reviewed then.
