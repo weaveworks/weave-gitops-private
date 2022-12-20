@@ -1,7 +1,7 @@
 # 16. create the enterprise version of TF-controller
 
 ## Status
-Drafted
+Proposed
 
 ## Context
   - TF-Controller is an open-source project that is maintained by a team of software engineers.
