@@ -40,26 +40,6 @@ possible routes:
 5. Variations of 4 like having a zero-layer profile with external platform secrets.
    - This solution would work as 4 but having a different profile from git with the secrets to sync
 
-
-
----
-
-follow user journey could be followed:
-
-1. You have a supported secrets store and a the secret with the authN details for the private helm repo that you want to reference in your profile.
-2. You have provisioned [external secrets profile](https://www.notion.so/Secrets-Management-f6add2cba4be4faa8bbad1276fb0455e) within your cluster and it is able to sync secrets from the previous secret store.
-3. Your profile, defines an [ExternalSecret](https://external-secrets.io/v0.7.0/api/externalsecret/) to sync
-4. Your HelmRelease references the Secret created out of the previous step
-5. There is a need for orchestration between the helm release installed event and secret provisioned (by ESO) event
-
-Pro
-
-- independent of the cluster
-
-Limitations
-
-- the external secret reference needs to exists within target profile, so it could be duplicated among profiles from the same helm repo
-- is there an orchestration issue between secrets management gets installed and the profile that requires it?
 ## Consequences
 
 TBA
