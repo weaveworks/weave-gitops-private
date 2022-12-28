@@ -36,9 +36,11 @@ possible routes:
       2. during secrets management bootstrapping you are able to select a set of secrets to sync from 1) living in git  
       3. after secrets management bootstrapping you have bootstrapped both secrets management solution and the private helm repo secret
       4. profiles from private repo could be installed using secrets from 3)
-    - Limitations: it would only work for secrets management bootstrapping (creation) but not when the secret has changed (update / rotation).
-5. Variations of 4 like having a zero-layer profile with external platform secrets.
-   - This solution would work as 4 but having a different profile from git with the secrets to sync
+    - The secrets reference lifecycle would be linked to the profile lifecycle. 
+    - In case of the secrete reference being an external secret, the secret lifecycle could be leveraged to external secret
+   operator.
+5. Variations of 4 like having a zero-layer profile from a helm release from a private git repository with the platform secret manifests. 
+   - This solution would work as 4) but having the secrets installed by a different profile.
 
 ## Consequences
 
