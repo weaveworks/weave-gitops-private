@@ -1,4 +1,4 @@
-# 16. secrets management for profiles from private helm repositories
+# 17. secrets management for profiles from private helm repositories
 
 ## Status
 
@@ -7,7 +7,8 @@ Proposed
 ## Context
 As part of Weave GitOps Enterprise, Timberwolf is working on delivering [Secrets Management](https://www.notion.so/weaveworks/Secrets-Management-f6add2cba4be4faa8bbad1276fb0455e).
 One of the use cases to enable by this initiative is to be able to use [weave gitops profiles](https://docs.gitops.weave.works/docs/cluster-management/profiles/)
-from [private helm repositories](https://fluxcd.io/flux/guides/helmreleases/#helm-repository-authentication-with-credentials).
+from [private helm repositories](https://fluxcd.io/flux/guides/helmreleases/#helm-repository-authentication-with-credentials). 
+An example of project request this capability is [Dish](https://github.com/weaveworks-20276/clusters/blob/main/profiles-secrets/profile-secrets.yaml).
 
 This is a common scenario for enterprises willing to use profiles but having to use an off-road solution or non-long
 term solution for enterprise like using public helm repositories. Another major requirement is that it should 
