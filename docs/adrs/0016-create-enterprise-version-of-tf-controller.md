@@ -1,25 +1,22 @@
-# 16. create the enterprise version of TF-controller
+# 16. Create the enterprise version of TF-controller
+
+Date: 2022-12-20
 
 ## Status
+
 Proposed
 
 ## Context
-  - TF-Controller is an open-source project that is maintained by a team of software engineers.
-  - Customers are requesting features that should be paid features of TF-Controller.
+  - TF-Controller is [an open-source project](https://github.com/weaveworks/tf-controller) that is maintained by a team of Weaveworks engineers and external contributors.
+  - Customers are requesting features that should be paid features of TF-Controller, for example [interlock #238](https://github.com/weaveworks/weave-gitops-interlock/issues/238).
   - There is confusion over the boundary of work for the open-source version of TF-Controller and its integration as part of our product engineering work.
-
-## Implications
-  - The development of an "Enterprise" version of TF-controller could help to address the confusion around the boundary of work for the open-source version and provide a clear separation between paid and unpaid features. This could help to mitigate issues with customers requesting paid features for free.
-  - Building the Enterprise version on top of the open-source version and integrating it into the WGE system could be a complex process that requires significant development and testing efforts. This could impact the team's overall productivity and timeline for delivering new features and updates.
 
 ## Decisions
   - The team will create an "Enterprise" version of TF-Controller that includes all of the features of the open-source version, as well as additional features developed by our product engineering team (Denim).
   - The Enterprise version will be built on top of the open-source version and integrated into our WGE system as part of the product engineering work.
-
-## Rationale
-  - Creating an Enterprise version of TF-Controller will help to address the confusion around the boundary of work for the open-source version and provide a clear separation between paid and unpaid features.
-  - Building the Enterprise version on top of the open-source version and integrating it into the WGE system will allow us to leverage the existing codebase and add additional features as needed.
-  - This approach will allow us to better meet the needs of our customers and provide a clear value proposition for the paid Enterprise version of TF-Controller.
+    - TF-controller Enterprise and TF-controller OSS will share the same code base.
+    - TF-controller Enterprise should be progressive and driven by Weaveworks business context. For example, the need to separate it as an enterprise repo stemmed from an enterprise feature request.
+    - Licensing is not a problem because TF-controller OSS is MPL 2.0.
 
 ## Consequences
   - Creating the Enterprise version of TF-Controller will require additional development and testing efforts.
@@ -29,7 +26,7 @@ Proposed
     - Integrate the Enterprise version into WGE as part of the product engineering work.
   - It's important to consider the potential impact on the open-source community and the overall open-source ecosystem. It may be necessary to clearly communicate the separation between the open-source and Enterprise versions of TF-Controller to avoid any potential confusion or backlash from the community.
 
-## Notes
+## Appendix
 
 Maintaining out-of-tree patches and maintaining commits in a branch are both methods of maintaining customizations or modifications to an open-source project. However, there are some key differences between the two approaches:
 
@@ -60,3 +57,12 @@ StGIT can simplify the development process that uses out-of-tree patches in a fe
   - **Patch organization**: StGIT allows developers to organize patches into a stack, rather than managing them as individual files. This can make it easier to track and manage patches over time, as they can be managed as a single unit.
   - **Patch merging**: StGIT provides tools for merging patches into a single patch or into a branch. This can make it easier to integrate multiple patches into a single unit and simplify the process of applying them to the upstream project.
   - **Patch rebasing**: StGIT allows developers to rebase patches (i.e., apply them to a different version of the upstream project) without applying and reapplying them manually. This can save time and reduce the risk of errors when updating the upstream project.
+
+### Implications
+  - The development of an "Enterprise" version of TF-controller could help to address the confusion around the boundary of work for the open-source version and provide a clear separation between paid and unpaid features. This could help to mitigate issues with customers requesting paid features for free.
+  - Building the Enterprise version on top of the open-source version and integrating it into the WGE system could be a complex process that requires significant development and testing efforts. This could impact the team's overall productivity and timeline for delivering new features and updates.
+
+### Rationale
+  - Creating an Enterprise version of TF-Controller will help to address the confusion around the boundary of work for the open-source version and provide a clear separation between paid and unpaid features.
+  - Building the Enterprise version on top of the open-source version and integrating it into the WGE system will allow us to leverage the existing codebase and add additional features as needed.
+  - This approach will allow us to better meet the needs of our customers and provide a clear value proposition for the paid Enterprise version of TF-Controller.
