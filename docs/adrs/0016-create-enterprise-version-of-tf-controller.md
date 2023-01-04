@@ -4,23 +4,26 @@ Date: 2022-12-20
 
 ## Status
 
-Proposed
+Accepted
 
 ## Context
+
   - TF-Controller is [an open-source project](https://github.com/weaveworks/tf-controller) that is maintained by a team of Weaveworks engineers and external contributors.
   - Customers are requesting features that should be paid features of TF-Controller, for example [interlock #238](https://github.com/weaveworks/weave-gitops-interlock/issues/238).
   - There is confusion over the boundary of work for the open-source version of TF-Controller and its integration as part of our product engineering work.
+  - The decision to make some features closed-sourced is an experiment worth trying, with the ultimate goal of opening up the Terraform UI in Weave GitOps OSS by offering additional value in the enterprise version. This can be reviewed in the future.
 
 ## Decisions
-  - The team will create an "Enterprise" version of TF-Controller that includes all of the features of the open-source version, as well as additional features developed by our product engineering team (Denim).
-  - The Enterprise version will be built on top of the open-source version and integrated into our WGE system as part of the product engineering work.
-    - TF-controller Enterprise will be built on top of TF-controller OSS's code base.
-    - TF-controller Enterprise should be progressive and driven by Weaveworks business context. For example, the need to separate it as an enterprise repo stemmed from an enterprise feature request.
-    - Licensing is not a problem because TF-controller OSS is MPL 2.0.
 
+  - The team will develop an Enterprise version of TF-Controller that includes all features of the open-source version and additional features developed by product engineering teams.
+  - The Enterprise version will be built on top of the open-source version and integrated into the WGE system as part of the product engineering work.
+  - The Enterprise version will include a container image that will be published and made available for customers to deploy and a Helm chart for deployment in Kubernetes environments.
+  - The Enterprise version of TF-controller will not be open-sourced and will use the same license as Weave GitOps Enterprise.
+  
 ## Consequences
+
   - Creating the Enterprise version of TF-Controller will require additional development and testing efforts.
-  - It may be necessary to maintain both the open-source and Enterprise versions of TF-Controller. 
+  - It is necessary to maintain both the open-source and Enterprise versions of TF-Controller. 
     - Maintain the open-source version of TF-controller, following processes similar to those used by the Flux project.
     - Develop and maintain the Enterprise version of TF-controller, as one of the focuses of our product engineering team (Denim).
     - Integrate the Enterprise version into WGE as part of the product engineering work.
@@ -59,10 +62,12 @@ StGIT can simplify the development process that uses out-of-tree patches in a fe
   - **Patch rebasing**: StGIT allows developers to rebase patches (i.e., apply them to a different version of the upstream project) without applying and reapplying them manually. This can save time and reduce the risk of errors when updating the upstream project.
 
 ### Implications
+
   - The development of an "Enterprise" version of TF-controller could help to address the confusion around the boundary of work for the open-source version and provide a clear separation between paid and unpaid features. This could help to mitigate issues with customers requesting paid features for free.
   - Building the Enterprise version on top of the open-source version and integrating it into the WGE system could be a complex process that requires significant development and testing efforts. This could impact the team's overall productivity and timeline for delivering new features and updates.
 
 ### Rationale
+
   - Creating an Enterprise version of TF-Controller will help to address the confusion around the boundary of work for the open-source version and provide a clear separation between paid and unpaid features.
   - Building the Enterprise version on top of the open-source version and integrating it into the WGE system will allow us to leverage the existing codebase and add additional features as needed.
   - This approach will allow us to better meet the needs of our customers and provide a clear value proposition for the paid Enterprise version of TF-Controller.
