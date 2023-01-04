@@ -14,7 +14,7 @@ Proposed
 ## Decisions
   - The team will create an "Enterprise" version of TF-Controller that includes all of the features of the open-source version, as well as additional features developed by our product engineering team (Denim).
   - The Enterprise version will be built on top of the open-source version and integrated into our WGE system as part of the product engineering work.
-    - TF-controller Enterprise and TF-controller OSS will share the same code base.
+    - TF-controller Enterprise will be built on top of TF-controller OSS's code base.
     - TF-controller Enterprise should be progressive and driven by Weaveworks business context. For example, the need to separate it as an enterprise repo stemmed from an enterprise feature request.
     - Licensing is not a problem because TF-controller OSS is MPL 2.0.
 
