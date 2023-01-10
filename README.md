@@ -17,6 +17,7 @@ This is for tracking weaveworks internal information on weave-gitops. Will inclu
 - [13. Pipelines Promotions](docs/adrs/0013-pipelines-promotions.md)
 - [14. weave gitops api versioning and lifecycle guidelines](docs/adrs/0014-api-versioning-lifecycle.md)
 - [15. maintain state for pipelines](docs/adrs/0015-pipelines-state.md)
+- [16. Create the enterprise version of TF-controller](docs/adrs/0016-create-enterprise-version-of-tf-controller.md)
 
 <!-- /ADRS -->
 
