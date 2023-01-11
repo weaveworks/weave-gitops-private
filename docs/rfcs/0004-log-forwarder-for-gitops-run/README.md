@@ -1,10 +1,10 @@
-RFC-0004 Fluent-Bit Log Forwarding in GitOps Run
+# RFC-0004 Fluent-Bit Log Forwarding in GitOps Run
 
-Status: implementable
+**Status:** implementable
 
-Creation date: 2022-12-30
+**Creation date:** 2022-12-30
 
-Last update: 2023-01-08
+**Last update:** 2023-01-11
 
 ## Summary
 
@@ -120,6 +120,14 @@ spec:
             upload_timeout 15s
             s3_key_format /fluent-bit-logs/$TAG[4].%Y%m%d%H%M%S
 ```
+
+## Alternatives
+
+One alternative to using Fluent-Bit for log collection and forwarding in a VCluster is to use FluentD. FluentD is also a log forwarder, but it is written in Ruby and is generally considered to be more resource-intensive than Fluent-Bit. However, FluentD has a wider array of input and output plugins, which may make it a better choice for certain use cases.
+
+Another alternative is to use a Kubernetes logging agent such as FileBeat or Logstash which both have Kubernetes integration, similar to Fluent-Bit.
+
+Another alternative would be using a third-party log aggregation platform like Elasticsearch, Logstash and Kibana (ELK) stack or Splunk which can be installed and configured in the VCluster to collect, analyze and visualize logs. This method is far more complex to set up and maintain, but it can provide more advanced features such as log querying, indexing, and alerting.
 
 ## Rationale
 
