@@ -18,7 +18,7 @@ The integration of Fluent-Bit into GitOps Run will provide users with the abilit
 
 - Install and configure Fluent-Bit to collect logs from all pods in the VCluster.
 - Set up the built-in S3-compatible bucket (the dev-bucket server) to store the collected logs & configure the bucket credentials for Fluent-Bit to allow it to access the bucket.
-- Consider the storage type and log retention policy for the S3-compatible bucket.
+- Consider the storage type (in-memory vs disk-based) and log retention policy (currently there is no retention policy in place) for the S3-compatible bucket.
 - Write an API that allows users to retrieve logs by pod name and namespace.
 - Document the system and API for other users and maintainers.
 
@@ -138,7 +138,7 @@ The integration of Fluent-Bit into GitOps Run should not have any compatibility 
 
 ## Implementation
 
-The implementation of this feature will involve installing and configuring Fluent-Bit as part of the GitOps Run command, configuring credentials for Fluent-Bit to access the dev-bucket server, considering the storage type and log retention policy for the dev-bucket, writing an API for log retrieval, and creating documentation. These tasks should be assigned to a development team, with appropriate testing and documentation being performed at each step.
+The implementation of this feature will involve installing and configuring Fluent-Bit as part of the GitOps Run command, configuring credentials for Fluent-Bit to access the dev-bucket server, considering the storage type (in-memory or disk-based)and log retention policy (currently there is no retention policy in place) for the dev-bucket, writing an API for log retrieval, and creating documentation. These tasks should be assigned to a development team, with appropriate testing and documentation being performed at each step.
 
 ## Open issues (if applicable)
 - Further discussion is needed on the storage type and log retention policy for the dev-bucket.
