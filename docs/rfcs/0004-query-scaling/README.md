@@ -91,12 +91,14 @@ This data would then need to be filtered so that the user only sees what they wo
 
 - Database maintenance: what happens when a new version of WeGO starts up? (migrations, backups, etc)
 
-  - We would need to do all the things required with running a persistent database on Kubernetes
+  - The customer would need to do all the things required with running a persistent database on Kubernetes
   - Alternatively, we can decide that this data is ephemeral and the DB will need to be rebuilt in the event of schema changes on app startup. Rebuilding the DB would be expensive in terms of time.
 
 #### Alternatives Considered
 
 - The database tech we use is not terribly important. We can decide to use something more ephemeral like `Memcached` or `Redis` instead of a relational database.
+
+  - Note that if we go for an in-memory database, there will be times when we have to restart the database. After which, the Query Service will be "unhealthy" (and there for unavailable) until the index is rebuilt, which can take minutes.
 
 ### Data collection
 
@@ -107,6 +109,7 @@ To collect data from each of the leaf clusters, a scheduled process (known as th
     participant C as Collector (management)
     participant LC as K8s API (leaf-01)
     participant QS as Query Module (management)
+    participant DB as Database
     Note right of C: At a scheduled interval
     loop ForEachCluster
         C->>C: Create client via `GitopsCluster` record
@@ -117,6 +120,7 @@ To collect data from each of the leaf clusters, a scheduled process (known as th
             LC->>C: ;
         end
         C->>QS: AddObjects();
+        QS->>DB: Write to database
     end
 ```
 
@@ -187,10 +191,15 @@ One benefit of this approach is that it allows us to add additional logic or con
 - RBAC Logic Drift: Since we are replicating the behavior of Kubernetes RBAC, there may be situations where K8s RBAC behvior changes between versions, such as via a security fix. In these cases, it would take time and effort to remain compliant.
   - Mitigations:
     - All access is read-only
+    - When a user navigates to an object, they will still be subject to the RBAC of the cluster.
 
 ## Other Implementation Notes
 
 - We don't need to split up the `Query` and `Collection` modules into separate microservices to start. They can start out as part of the same runtime and then split into microservices later. This will speed up development time.
+
+- This feature can be rolled out behind a feature flag, and I would recommend a new set of UI components to accommodate the new capabilities and code path.
+
+- The `Collector` can be simple at first, using simple parallel HTTP requests. Future optimizations might include utilizing `watch` logic, if that proves to be more efficient for either the leaf-cluster API servers or provide more frequent updates.
 
 ## Implementation History
 
