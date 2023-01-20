@@ -91,13 +91,9 @@ This data would then need to be filtered so that the user only sees what they wo
 
 - SQLite/Postgres: the scope of this project should mean that we don't need a highly relational, persistent database, so persistent SQL solutions are being ignored for now.
 
-<<<<<<< HEAD
 - Memcached: memcached does not provide view-like querying options (key/value only), so it is probably not viable as a storage solution.
 
 - Note that if we go for an in-memory database, there will be times when we have to restart the database. While the data is being rebuilt, the query service will need to operate in a degraded state, which could be communicated via the UI: "Rebuilding indices...35/100 clusters queried"
-=======
-  - Note that if we go for an in-memory database, there will be times when we have to restart the database. After which, the Query Service will be "unhealthy" (and therefore unavailable) until the index is rebuilt, which can take minutes.
->>>>>>> 486f91d12704e658c8bdf1ec1e5aa03582785420
 
 ### Data collection
 
