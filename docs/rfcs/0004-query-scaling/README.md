@@ -71,18 +71,12 @@ This allows us to provide a listing/filtering/paginated experience so that users
 
 Rather than replicating the entire document in a centralized store, we would instead store a subset of the data to allow for standardization across objects. Since we are only concerned with providing a list view to the user (rather than the object detail), we do not need to store the entire object document in the store. For detailed information on an object, users would access the K8s API directly via existing methods.
 
-Each object can be represented in a standardized table structure for SQL style queries, like so:
+Each object can be represented in a normalized structure for easier querying:
 
 ```
 Cluster    | Namespace | Kind          | Name    | Status    | Message                 |
 ----------------------------------------------------------------------------------------
 my-cluster | cool-ns   | Kustomization | my-kust | unhealthy | "There was a problem!"  |
-```
-
-Query example:
-
-```sql
-SELECT * FROM objects WHERE status EQUALS "unhealthy";
 ```
 
 This data would then need to be filtered so that the user only sees what they would see if they were querying the cluster directly (more on this in the Authorization (RBAC) section).
@@ -91,14 +85,15 @@ This data would then need to be filtered so that the user only sees what they wo
 
 - Database maintenance: what happens when a new version of WeGO starts up? (migrations, backups, etc)
 
-  - The customer would need to do all the things required with running a persistent database on Kubernetes
-  - Alternatively, we can decide that this data is ephemeral and the DB will need to be rebuilt in the event of schema changes on app startup. Rebuilding the DB would be expensive in terms of time.
+  - Mitigation: we can decide that this data is ephemeral and rebuild the data set when necessary (for example, on application start). Something like Redis will give us an in-memory database with low maintenance, as well as good querying capability. This removes the operational overhead that would fall on customers if we used a persistent data store.
 
 #### Alternatives Considered
 
-- The database tech we use is not terribly important. We can decide to use something more ephemeral like `Memcached` or `Redis` instead of a relational database.
+- SQLite/Postgres: the scope of this project should mean that we don't need a highly relational, persistent database, so persistent SQL solutions are being ignored for now.
 
-  - Note that if we go for an in-memory database, there will be times when we have to restart the database. After which, the Query Service will be "unhealthy" (and there for unavailable) until the index is rebuilt, which can take minutes.
+- Memcached: memcached does not provide view-like querying options (key/value only), so it is probably not viable as a storage solution.
+
+- Note that if we go for an in-memory database, there will be times when we have to restart the database. While the data is being rebuilt, the query service will need to operate in a degraded state, which could be communicated via the UI: "Rebuilding indices...35/100 clusters queried"
 
 ### Data collection
 
@@ -139,6 +134,10 @@ Future optimizations are possible where many Collector replicas are "sharded" ag
 
   - This has the advantage of not exposing the leaf-cluster Kubernetes API server
   - Might be an ideal end-goal, but requires more work to build the agent
+
+- Event Reciever:
+  - This collector implementation could listen for incoming events using the event-publishing infrastructure being implemented in other initiatives. The incoming events would alter the state of of the data based on the paylod of the event (via the query service APIs, ie not operate directly on the data store).
+    - This approach has some of the same pitfalls as the "Agent Push" method, in addition to a fault-tolerance problem where if an event is missed, the state will remain out of sync in the data store (potentially forever).
 
 ### Authorization (RBAC)
 
