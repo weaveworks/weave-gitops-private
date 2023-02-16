@@ -4,6 +4,8 @@
 
 Accepted
 
+This ADR is in part superseded by [ADR 17](00017-pipeline-security.md).
+
 ## Context
 As part of Weave GitOps Enterprise, Sunglow is working on delivering [Continuous Delivery Pipelines](https://www.notion.so/weaveworks/CD-Pipeline-39a6df44798c4b9fbd140f9d0df1212a) where
 [first iteration has been delivered](https://docs.gitops.weave.works/docs/next/enterprise/pipelines/intro/index.html)
