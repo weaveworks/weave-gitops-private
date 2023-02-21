@@ -29,6 +29,7 @@ This is for tracking weaveworks internal information on weave-gitops. Will inclu
 - [RFC-0002 Distributing Pipelines Controller as OCI Artifact](docs/rfcs/0002-pipelines-oci-distribution)
 - [RFC-0003 Pipeline promotions](docs/rfcs/0003-pipelines-promotion)
 - [RFC-0004 Fluent-Bit Log Forwarding in GitOps Run](docs/rfcs/0004-log-forwarder-for-gitops-run)
-- [RFC-000N Markers in YAML Comments for Application Promotion](docs/rfcs/promotion-markers)
+- [RFC-0004 Multi-cluster Query Scaling (Observability Phase 3)](docs/rfcs/0004-query-scaling)
+- [RFC-0005 Markers in YAML Comments for Application Promotion](docs/rfcs/0005-promotion-markers)
 
 <!-- /RFCS -->
