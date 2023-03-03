@@ -45,7 +45,7 @@ we have decided to iterate our pull request promotions strategy flow as follows:
 1. To add a user-driven pull request promotion flow.
 2. To keep the existing pull request creation flow. Increase visibility on its usage to help users better understand its runtime status.  
 3. To recommend the user-driven pull request promotion over other ones as it meets a better easy to use / security balance.
-4. To consider implementing other most costly solutions out of the customer feedback or future needs. it includes GitHub App like integration with token exchange.    
+4. To consider implementing other most costly solutions out of the customer feedback or future needs. This includes GitHub App like integration with token exchange.    
 
 #### Add a user-driven pull request promotion flow
 
