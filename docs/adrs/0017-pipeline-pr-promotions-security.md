@@ -25,7 +25,7 @@ The following actions were decided:
 
 1. To extend the [existing documentation](https://docs.gitops.weave.works/docs/pipelines/promoting-applications) with enough context for pipeline users
 to understand, and help to manage the risks of the existing approach.    
-2. To review the current solution to find a better balance between easy to use and security that makes feel more comfortable.  
+2. To review the current solution in order to find a better balance between ease of use and security that makes users feel more comfortable using this feature.  
 
 ### Extend Documentation 
 
