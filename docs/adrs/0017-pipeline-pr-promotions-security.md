@@ -25,7 +25,7 @@ The following actions were decided:
 
 1. To extend the [existing documentation](https://docs.gitops.weave.works/docs/pipelines/promoting-applications) with enough context for pipeline users
 to understand, and help to manage the risks of the existing approach.    
-2. To review the current solution to find a better balance between easy to use and security that makes feel more comfortable.  
+2. To review the current solution in order to find a better balance between ease of use and security that makes users feel more comfortable using this feature.  
 
 ### Extend Documentation 
 
@@ -45,7 +45,7 @@ we have decided to iterate our pull request promotions strategy flow as follows:
 1. To add a user-driven pull request promotion flow.
 2. To keep the existing pull request creation flow. Increase visibility on its usage to help users better understand its runtime status.  
 3. To recommend the user-driven pull request promotion over other ones as it meets a better easy to use / security balance.
-4. To consider implementing other most costly solutions out of the customer feedback or future needs. it includes GitHub App like integration with token exchange.    
+4. To consider implementing other most costly solutions out of the customer feedback or future needs. This includes GitHub App like integration with token exchange.    
 
 #### Add a user-driven pull request promotion flow
 
