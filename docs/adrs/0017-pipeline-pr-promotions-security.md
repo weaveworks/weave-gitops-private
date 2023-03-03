@@ -14,7 +14,7 @@ ADRs [11](0011-pipelines.md) and [13](0013-pipelines-promotion.md) define an API
 and promotions from one environment to another. That API requires users to store Personal Access Tokens for the respective 
 Git provider on their clusters (see [RFC 3 for details](../rfcs/0003-pipelines-promotion/execute-promotion.md#security)).
 
-Whereas it is a simple solution to implement and certainly has contributed to gear product demos, compromised personal access 
+Whereas it is a simple solution to implement and certainly has contributed to great product demos, compromised personal access 
 tokens is a very present risk factor in attacks suffered by [git providers](https://astrix.security/3-oauth-attacks-in-6-months-the-new-generation-of-supply-chain-attacks/). 
 
 This ADR records the actions and direction set for pipelines to address this wider enterprise usage perspective. 
