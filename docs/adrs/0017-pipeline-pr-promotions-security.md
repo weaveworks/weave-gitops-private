@@ -4,7 +4,7 @@ Date: 2023-02-16
 
 ## Status
 
-Proposed
+Accepted
 
 This ADR supersedes parts of [ADR 13](0013-pipelines-promotions.md).
 
