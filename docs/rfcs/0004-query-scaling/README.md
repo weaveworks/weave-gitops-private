@@ -1,6 +1,6 @@
 # RFC-0004 Multi-cluster Query Scaling (Observability Phase 3)
 
-**Status:** provisional
+**Status:** implemented
 
 ## Summary
 
@@ -202,4 +202,10 @@ One benefit of this approach is that it allows us to add additional logic or con
 
 ## Implementation History
 
-The current implementation was completed in [Observability Phase 2](https://docs.google.com/document/d/1kxcyznya57gAW28_jUU4ZQVffAyrSze7Py_y0T_z6jE/edit#heading=h.lx604oyg19lq)
+- The current implementation was completed in [Observability Phase 2](https://docs.google.com/document/d/1kxcyznya57gAW28_jUU4ZQVffAyrSze7Py_y0T_z6jE/edit#heading=h.lx604oyg19lq)
+
+
+## Change Log
+See the PR associated with the changelog entry commit to understand the changes
+
+- March 2023: extending with learning during PoC implementations. 
