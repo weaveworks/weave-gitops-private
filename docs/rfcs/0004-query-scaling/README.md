@@ -100,6 +100,15 @@ Cluster    | Namespace | Kind          | Name    | Status    | Message          
 my-cluster | cool-ns   | Kustomization | my-kust | unhealthy | "There was a problem!"  |
 ```
 
+#### API
+
+https://github.com/weaveworks/weave-gitops-enterprise/pull/2546/files#diff-27cc22854c0e7f0469653870872052ed2ca2285e2ab3cd4ab5dc234fedfcbe18
+
+#### Non functional requirements
+
+
+Query service 
+
 
 This data would then need to be filtered so that the user only sees what they would see if they were querying the cluster directly (more on this in the Authorization (RBAC) section).
 
@@ -141,7 +150,65 @@ To collect data from each of the leaf clusters, a scheduled process (known as th
     end
 ```
 
-Future optimizations are possible where many Collector replicas are "sharded" against a set of clusters to further increase performance. This is considered out of scope for v1.
+#### API
+
+A collector api looks like the following 
+
+```go
+type ClusterWatcher interface {
+	Watch(cluster cluster.Cluster, objectsChannel chan []models.ObjectRecord, ctx context.Context, log logr.Logger) error
+	Unwatch(cluster cluster.Cluster) error
+	Status(cluster cluster.Cluster) (string, error)
+}
+
+//counterfeiter:generate . Collector
+type Collector interface {
+	ClusterWatcher
+	Start() error
+	Stop() error
+}
+
+type CollectorOpts struct {
+    ObjectKinds []schema.GroupVersionKind
+    Clusters           []cluster.Cluster
+}
+```
+with two different collector instances
+
+Access Collector
+
+```go
+opts.ObjectKinds = []schema.GroupVersionKind{
+		rbacv1.SchemeGroupVersion.WithKind("ClusterRole"),
+		rbacv1.SchemeGroupVersion.WithKind("Role"),
+		rbacv1.SchemeGroupVersion.WithKind("ClusterRoleBinding"),
+		rbacv1.SchemeGroupVersion.WithKind("RoleBinding"),
+	}
+```
+
+Objects Collector
+
+```go
+	opts.ObjectKinds = []schema.GroupVersionKind{
+		v2beta1.GroupVersion.WithKind("HelmRelease"),
+		v1beta2.GroupVersion.WithKind("Kustomization"),
+	}
+```
+
+
+#### Non functional requirements
+
+- Security: 
+Given the collector watchers clsuters 
+
+- Release: it is released as 
+- Reliability
+- Scalability: Future optimizations are possible where many Collector replicas are "sharded" against a set of clusters to further increase performance. This is considered out of scope for v1. 
+- Operations
+
+
+
+
 
 **Alternatives Considered:**
 
