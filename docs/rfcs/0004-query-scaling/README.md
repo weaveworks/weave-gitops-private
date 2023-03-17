@@ -71,13 +71,35 @@ This allows us to provide a listing/filtering/paginated experience so that users
 
 Rather than replicating the entire document in a centralized store, we would instead store a subset of the data to allow for standardization across objects. Since we are only concerned with providing a list view to the user (rather than the object detail), we do not need to store the entire object document in the store. For detailed information on an object, users would access the K8s API directly via existing methods.
 
+#### Object Schema
+
 Each object can be represented in a normalized structure for easier querying:
+
+```go
+type Object struct {
+	gorm.Model
+	Cluster   string `gorm:"type:text"` 
+	Namespace string `gorm:"type:text"`  
+	Kind      string `gorm:"type:text"`
+	Name      string `gorm:"type:text"`
+	Status    string `gorm:"type:text"` 
+	Message   string `gorm:"type:text"`
+}
+```
+
+Where:
+
+- Status comes from XYX
+- Message comes from the object
+
+An example of object could be 
 
 ```
 Cluster    | Namespace | Kind          | Name    | Status    | Message                 |
 ----------------------------------------------------------------------------------------
 my-cluster | cool-ns   | Kustomization | my-kust | unhealthy | "There was a problem!"  |
 ```
+
 
 This data would then need to be filtered so that the user only sees what they would see if they were querying the cluster directly (more on this in the Authorization (RBAC) section).
 
