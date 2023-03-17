@@ -161,7 +161,6 @@ type ClusterWatcher interface {
 	Status(cluster cluster.Cluster) (string, error)
 }
 
-//counterfeiter:generate . Collector
 type Collector interface {
 	ClusterWatcher
 	Start() error
@@ -194,12 +193,61 @@ Objects Collector
 		v1beta2.GroupVersion.WithKind("Kustomization"),
 	}
 ```
+When a collector starts, 
+- starts watching gitops clusters in management clusters
 
+When a collector stops
+- stops watchinig gitops cluster in management clusters
 
 #### Non functional requirements
 
-- Security: 
-Given the collector watchers clsuters 
+Security: 
+
+In terms of operations, the collector would need to 
+1. watch clusters so needs rbac permissions in the management cluster to read gitops clusters
+2. watch clusters resources so needs rbac permissions in the leaf cluster to read the target resources
+
+Assuming that we follow the same approach of service account + impersonation we have the following 
+running options for the collector
+
+1. Within clusters service with `wge` service account
+2. As an independent component with `collector` service account
+3. Other options TBA
+
+**Within clusters service with `wge` service account** 
+
+This solution would be leverage existing wge security context for the collector. 
+
+
+**As an independent component with `collector` service account**
+
+It would work as follows: 
+
+- A `(cluster) role: gitops-cluster-read` and binding `service account: collector` that allows the collector to watch for gitops clusters in the management cluster.
+- In each of the clusters to watch, it will require, in case of using impersonation
+  - the gitops cluster kubeconfig allows impersonation in the target cluster
+  - impersonation will happen for the target service account `collector`
+  - the collector service account in the target cluster has permissions to watch resources as specified in api section.
+- Different modes to impersonation will be added as our customer base requires them. For example DT.
+
+Pro:
+- Complete security context isolation from clusters-service.
+
+Cons:
+- Need to deliver and operate one more component. 
+
+
+
+GivIn order to ensure 
+
+Collector will be using a `collector` service account. 
+
+In order to collect resources, the collector would require:
+
+Clusters 
+
+Clusters 
+As the design states, the Those credentials are stored
 
 - Release: it is released as 
 - Reliability
