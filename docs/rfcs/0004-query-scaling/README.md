@@ -199,9 +199,7 @@ When a collector starts,
 When a collector stops
 - stops watchinig gitops cluster in management clusters
 
-#### Non functional requirements
-
-Security: 
+#### Architecture
 
 In terms of operations, the collector would need to 
 1. watch clusters so needs rbac permissions in the management cluster to read gitops clusters
@@ -210,51 +208,114 @@ In terms of operations, the collector would need to
 Assuming that we follow the same approach of service account + impersonation we have the following 
 running options for the collector
 
-1. Within clusters service with `wge` service account
-2. As an independent component with `collector` service account
-3. Other options TBA
+1. Single service
+2. Separated service single pod
+3. Separated service different pods
 
-**Within clusters service with `wge` service account** 
+##### Single service 
 
-This solution would be leverage existing wge security context for the collector. 
+This architecture would be to have both wge and collection with the same process. When the application 
+starts it starts both wge service and collector as sub-process. 
 
+**Design**
+WGE it is intended to be a webapp oriented to users. Adding a collector which does not depends on user-context 
+and it is more a controller-like breaks the desing. 
 
-**As an independent component with `collector` service account**
+The same way, impersonation is designed within wge to target users and groups of users not service accounts. 
+Extending to service accounts, it would increase the scope for wge app. 
 
-It would work as follows: 
+**Delivery and Operations**
+- Single unit of deployment with shared configuration.
+- Single unit of operations.
 
-- A `(cluster) role: gitops-cluster-read` and binding `service account: collector` that allows the collector to watch for gitops clusters in the management cluster.
-- In each of the clusters to watch, it will require, in case of using impersonation
-  - the gitops cluster kubeconfig allows impersonation in the target cluster
-  - impersonation will happen for the target service account `collector`
-  - the collector service account in the target cluster has permissions to watch resources as specified in api section.
-- Different modes to impersonation will be added as our customer base requires them. For example DT.
+**Security**
+This solution would be leverage existing wge security context for the collector in the same way that 
+WGE uses when there are user-driven requests. The journey would look like 
 
+1. the collector uses wge cluster manager. 
+2. it creates watches for each of the clients,
+3. it needs to impersonate a `collector` service account existing in any leaf cluster.  
+4. the collector in the target cluster has a set of role bindings that allow access to the namespaces to watch and kinds.
+5. it watches them 
+
+Currently, we ask customer to setup leaf clusters with [impersonation](https://docs.gitops.weave.works/docs/next/configuration/service-account-permissions/)
+so weave gitops can impersonate any user or group. Which gives us to two scenarios:
+
+1) if we could impersonate the collector service account with the current there is no need to do any other configuration. 
+2) if we cannot, then we would need to extend the impersonation to also include service accounts (and potentially restrict)
+
+**Reliability**
+Wge and collector have different scalability dimensions:
+ - while wge should scale by the number of users
+ - collector have the clusters to watch and resources to watch as the domain to scale
+This approach mixes both concerns.   
+
+**Summary**
 Pro:
-- Complete security context isolation from clusters-service.
-
+- Simpler approach to delivery
+- Simpler approach to operations
 Cons:
-- Need to deliver and operate one more component. 
+- Mix concerns: user-driven workflows, controller-driven workflows. 
+- Mix security context. 
+- Mix scalability dimensions.
 
+##### Separated service single pod
 
+This architecture would be wge and collector working as independent components deployed together a single pod as 
+different containers.
 
-GivIn order to ensure 
+**Design**
+- Split concerns by containers: wge for user interaction and collector for cluser watching.
+- They could use different configurations.
+- They user the same service account. 
 
-Collector will be using a `collector` service account. 
+**Security**
 
-In order to collect resources, the collector would require:
+Similar security approach than the previous solution as we are using the same service account. 
 
-Clusters 
+**Delivery and Operations**
+- Single unit of deployment but need to manage another container.
+- Given another container, it would also increase the overhead.
 
-Clusters 
-As the design states, the Those credentials are stored
+**Reliability**
+Same problem as before. Even we improve the previous scenario by having different resources by container, given
+that they are deployed togeather, horizontally scalling would scale both and will not have 
+into consideration that they scale based on different metrics.
 
-- Release: it is released as 
-- Reliability
-- Scalability: Future optimizations are possible where many Collector replicas are "sharded" against a set of clusters to further increase performance. This is considered out of scope for v1. 
-- Operations
+**Summary**
+TBA 
 
+##### Separated service different pods
 
+This architecture would be wge and collector working as independent components deployed as different pods.
+
+**Design**
+- Split concerns by pod: wge for user interaction and collector for cluser watching.
+- Different configuration.
+- Different service account.
+
+**Security**
+
+- Given that we have different service account we could handle the security context independently.
+- This also includes better auditability. 
+- Both of them would require to connect to cluster  it would folllow the same impersonation approach but 
+with potentially different impersonation configuration -> this is key, we need to get finer control on impersonation.
+
+**Delivery and Operations**
+- Multiple units of deployment so increased costs of delivery. 
+- The same for operations. 
+
+**Reliability**
+Independently scaling so better suitable.  
+
+**Summary**
+Pro
+- Better security context.
+- Better design.
+- Better scaling.
+
+Cons
+- Higher delivery and operational costs for us and platform admins.
 
 
 
