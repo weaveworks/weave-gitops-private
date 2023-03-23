@@ -67,7 +67,7 @@ This stage is mostly for stakeholders with direct responsibility to align on fin
 
 ### Could you use these guidelines for retroactive decisions or designs?
 
-The guidelines are thought for mainly discoverying new problems, bring alignment along the way and document. 
+The guidelines are thought for mainly discovering new problems, bringing alignment along the way and document. 
 A retrospectrive action definitely makes sense whether any of the previous outcomes (potentially the two later) are
 not achived with the current status quo. 
 
