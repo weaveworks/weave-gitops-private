@@ -68,6 +68,50 @@ List plausible alternatives to the proposal and explain why the proposal is supe
 This is a good place to incorporate suggestions made during discussion of the RFC.
 -->
 
+
+#### Non-functional Requirements
+
+<!--
+To complete the proposal with non-functional requirements on how the solution addresses them.
+
+The subsections are the ones we think are a baseline to be considered. If your solution calls for other ones, feel 
+free to add them in addition.
+
+Comments in the subsections are examples of questions of problems to address within that section.  
+-->
+
+
+#### Security
+
+<!--
+Some questions for this section could be 
+
+- How the solution handles securely e2e the workflow with the user and other systems.
+- How we are reducing the risks of the solution to be compromised.  
+- How do keep secure the data and other customer assets. 
+-->
+
+#### Reliability
+
+<!--
+Some questions for this section could be 
+
+- How the solution handles failure and recovers in a context of non-reliable cloud infrastructure (network, compute etc ...)
+- How the solution is able to adapt and scale to different processing units (requests, jobs, etc ...)
+-->
+
+
+#### Operability and Observability
+
+<!--
+Some questions for this section could be 
+
+- How a developer is able to troubleshoot a known issue within our solution.
+- How a developer is able to troubleshoot an unknown issue within our solution.
+- How a developer is able to understand how the solution behaves.
+-->
+
+
 ## Design Details
 
 <!--
@@ -86,7 +130,7 @@ The design details should address at least the following questions:
 
 <!--
 Major milestones in the lifecycle of the RFC such as:
-- The first Flux release where an initial version of the RFC was available.
-- The version of Flux where the RFC graduated to general availability.
-- The version of Flux where the RFC was retired or superseded.
+- The first Weave Gitops release where an initial version of the RFC was available.
+- The version of Weave Gitops where the RFC graduated to general availability.
+- The version of Weave Gitops where the RFC was retired or superseded.
 -->
