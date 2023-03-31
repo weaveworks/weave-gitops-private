@@ -32,7 +32,7 @@ In order align around engineering discovery we take the following actions:
 them through our existing templates:
    1. [ADR template](./0001-record-architecture-decisions.md)
    2. [RFC template](../rfcs/template.md)
-   3. Teams might use other templates but suggested to cover the baseline from the previous ones.
+   3. Teams might use other templates but suggested to cover the topics indicated in them.
 3. Add a section in the [product initiative template](https://www.notion.so/weaveworks/New-Initiative-Template-b4e150ca759a4698ab6eae9ff08b4914?pvs=4) 
 to link product and engineering design to help with discoverability.  
 
