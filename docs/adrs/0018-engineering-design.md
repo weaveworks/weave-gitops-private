@@ -1,4 +1,4 @@
-# 18. 
+# 18. Better expectations for engineering designs 
 
 Date: 2023-03-XX
 
@@ -21,20 +21,20 @@ For example, we  have seen how in second half of 2022 what matters to us meant d
 2023 we are more looking for more stable, enterprise-ready part of our product. This involves, for example, a change in the 
 priorities for non-functional requirements. 
 
-With the aim to set that organisational-wide expectations for the engineering discover and discovery we raise this ADR.
+With the aim to set that organisational-wide expectations for the engineering discovery we raise this ADR.
 
 ## Decision
 
 In order align around engineering discovery we take the following actions:
 
 1. To provide [guidance](../README.md) for the engineering design process once the product initiative has been flushed.
-2. The guidance set a set common baseline topics that we think beneficial each engineering design should consider. We add
+2. The guidance includes a set of baseline topics that we consider each design should consider. We add
 them through our existing templates:
    1. [ADR template](./0001-record-architecture-decisions.md)
    2. [RFC template](../rfcs/template.md)
-3. Add a section in the product initiative to create the connection between the engineering design docs.
-
-![technical design](images/technical-design.png)
+   3. Teams might use other templates but suggested to cover the baseline from the previous ones.
+3. Add a section in the [product initiative template](https://www.notion.so/weaveworks/New-Initiative-Template-b4e150ca759a4698ab6eae9ff08b4914?pvs=4) 
+to link product and engineering design to help with discoverability.  
 
 ## Consequences
 
