@@ -68,6 +68,12 @@ List plausible alternatives to the proposal and explain why the proposal is supe
 This is a good place to incorporate suggestions made during discussion of the RFC.
 -->
 
+#### Landscape consideration 
+
+<!--
+Landscape of existing solution used as input to conform our alternatives list. 
+-->
+
 
 #### Non-functional Requirements
 
