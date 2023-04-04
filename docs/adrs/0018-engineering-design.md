@@ -27,9 +27,9 @@ With the aim to set that organisational-wide expectations for the engineering di
 
 In order align around engineering discovery we take the following actions:
 
-1. To provide [guidance](../README.md) for the engineering design process once the product initiative has been flushed.
-2. The guidance includes a set of baseline topics that we consider each design should consider. We add
-them through our existing templates:
+1. To record in this ADR that one of our strategy goals for 2023 is product consolidation where non-functional requirements are as important as functional.    
+2. To support 1), to provide set of baseline topics that we consider each design should consider as baseline. 
+We add them through our existing templates:
    1. [ADR template](./0001-record-architecture-decisions.md)
    2. [RFC template](../rfcs/template.md)
    3. Teams might use other templates but suggested to cover the topics indicated in them.
