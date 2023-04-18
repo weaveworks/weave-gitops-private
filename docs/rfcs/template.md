@@ -51,7 +51,7 @@ you're proposing, but should not include things like API designs or
 implementation.
 
 If the RFC goal is to document best practices,
-then this section can be replaced with the the actual documentation.
+then this section can be replaced with the actual documentation.
 -->
 
 ### User Stories
@@ -75,9 +75,10 @@ Landscape of existing solution used as input to conform our alternatives list.
 -->
 
 
-#### Non-functional Requirements
+### Non-functional Requirements
 
 <!--
+
 To complete the proposal with non-functional requirements on how the solution addresses them.
 
 The subsections are the ones we think are a baseline to be considered. If your solution calls for other ones, feel 
@@ -107,7 +108,7 @@ Some questions for this section could be
 -->
 
 
-#### Operability and Observability
+#### Operations and Observability
 
 <!--
 Some questions for this section could be 
