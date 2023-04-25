@@ -25,7 +25,7 @@ With the aim to set that organisational-wide expectations for the engineering di
 
 ## Decision
 
-In order align around engineering discovery we take the following actions:
+In order to align around engineering discovery, we take the following actions:
 
 1. To record in this ADR that one of our strategy goals for 2023 is product consolidation where non-functional requirements are as important as functional.    
 2. To support 1), to provide set of baseline topics that we consider each design should consider as baseline. 
