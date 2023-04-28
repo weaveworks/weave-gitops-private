@@ -1,10 +1,10 @@
 # 18. Better expectations for engineering designs 
 
-Date: 2023-03-XX
+Date: 2023-04-28
 
 ## Status
 
-Proposed
+Accepted
 
 ## Context
 
