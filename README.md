@@ -19,6 +19,7 @@ This is for tracking weaveworks internal information on weave-gitops. Will inclu
 - [15. maintain state for pipelines](docs/adrs/0015-pipelines-state.md)
 - [16. Create the enterprise version of TF-controller](docs/adrs/0016-create-enterprise-version-of-tf-controller.md)
 - [17. Pipeline pull request promotions security review](docs/adrs/0017-pipeline-pr-promotions-security.md)
+- [18. Better expectations for engineering designs](docs/adrs/0018-engineering-design.md)
 
 <!-- /ADRS -->
 
