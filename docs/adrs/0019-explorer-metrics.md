@@ -27,13 +27,44 @@ We have two main path: querying and collecting that we need to monitor.
 ## Metrics for Querying
 
 It is a sync request/response driven system that we could monitor by its [golden signals](https://sre.google/sre-book/monitoring-distributed-systems/#xref_monitoring_golden-signals):
-In particular the regular latency, rate, errors and saturation. 
+In particular the regular latency, rate, errors and saturation. At this stage we will calculate from the api server serving 
+the request and using the search endpoints https://github.com/weaveworks/weave-gitops-enterprise/blob/main/api/query/query.proto
 
-At this stage we will calculate from the api server serving the request and using the search endpoints https://github.com/weaveworks/weave-gitops-enterprise/blob/main/api/query/query.proto
+// missing the how
 
+// i am expecting that from https://docs.gitops.weave.works/docs/references/helm-reference/#values metrics enabled + adding some metrics
+// we need to poc this
 
 ## Metrics for Collection 
 
+Collection is a workflow in three stages that we want to monitor:
+- watching resource events
+- process or reconcile the events
+- write them to the correct remote store
+
+these three stages shoudl be monitor as follow
+
+### watching resource events
+
+Based on kubernetes watching api server we could monitor it via default controller-runtime metrics
+
+//TODO define which ones
+
+### process or reconcile the events
+
+once the event has been received it is then queued for processing, the queing and processing could be monitored
+by metrics provided too by controller-runtime
+
+//TODO define which ones
+
+### write them to the correct remote store
+
+last step is to store in the right targets that could be monitor based on their clients 
+
+//TODO define which ones
+
+// authz store client metrics 
+// index client metrics
 
 
 
