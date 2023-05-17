@@ -30,10 +30,51 @@ It is a sync request/response driven system that we could monitor by its [golden
 In particular the regular latency, rate, errors and saturation. At this stage we will calculate from the api server serving 
 the request and using the search endpoints https://github.com/weaveworks/weave-gitops-enterprise/blob/main/api/query/query.proto
 
-// missing the how
+Following the same approach as OSS 
+1) configuration flag to enable / disable metrics
+2) Using same OSS library https://github.com/slok/go-http-metrics
+3) Instrumenting the `/v1` api endpoint to get the metrics as done for OSS https://github.com/weaveworks/weave-gitops/blob/f69ed59f72e682330022dd7ce8217341944e0e8a/cmd/gitops-server/cmd/cmd.go#L268
 
-// i am expecting that from https://docs.gitops.weave.works/docs/references/helm-reference/#values metrics enabled + adding some metrics
-// we need to poc this
+```
+# HELP http_request_duration_seconds The latency of the HTTP requests.
+# TYPE http_request_duration_seconds histogram
+
+http_request_duration_seconds_bucket{code="200",handler="/",method="GET",service="",le="0.005"} 40532
+http_request_duration_seconds_bucket{code="200",handler="/",method="GET",service="",le="0.01"} 40533
+http_request_duration_seconds_bucket{code="200",handler="/",method="GET",service="",le="0.025"} 40533
+http_request_duration_seconds_bucket{code="200",handler="/",method="GET",service="",le="0.05"} 40533
+http_request_duration_seconds_bucket{code="200",handler="/",method="GET",service="",le="0.1"} 40533
+http_request_duration_seconds_bucket{code="200",handler="/",method="GET",service="",le="0.25"} 40533
+http_request_duration_seconds_bucket{code="200",handler="/",method="GET",service="",le="0.5"} 40533
+http_request_duration_seconds_bucket{code="200",handler="/",method="GET",service="",le="1"} 40533
+http_request_duration_seconds_bucket{code="200",handler="/",method="GET",service="",le="2.5"} 40533
+http_request_duration_seconds_bucket{code="200",handler="/",method="GET",service="",le="5"} 40533
+http_request_duration_seconds_bucket{code="200",handler="/",method="GET",service="",le="10"} 40533
+http_request_duration_seconds_bucket{code="200",handler="/",method="GET",service="",le="+Inf"} 40533
+http_request_duration_seconds_sum{code="200",handler="/",method="GET",service=""} 7.091229956999948
+http_request_duration_seconds_count{code="200",handler="/",method="GET",service=""} 40533
+
+
+# HELP http_requests_inflight The number of inflight requests being handled at the same time.
+# TYPE http_requests_inflight gauge
+http_requests_inflight{handler="/",service=""} 0
+http_requests_inflight{handler="/ProximaNovaBold.87676319.otf",service=""} 0
+http_requests_inflight{handler="/ProximaNovaRegular.91a8c864.otf",service=""} 0
+http_requests_inflight{handler="/ProximaNovaSemibold.7fa90ba1.otf",service=""} 0
+http_requests_inflight{handler="/gitops-LOGO.4e557fcc.ico",service=""} 0
+http_requests_inflight{handler="/index.21dc008b.js",service=""} 0
+
+
+# HELP rest_client_request_duration_seconds Request latency in seconds. Broken down by verb, and host.
+# TYPE rest_client_request_duration_seconds histogram
+rest_client_request_duration_seconds_bucket{host="https://10.2.0.1:443/api/v1/namespaces/%7Bname%7D?timeout=30s",verb="GET",le="0.005"} 0
+rest_client_request_duration_seconds_bucket{host="https://10.2.0.1:443/api/v1/namespaces/%7Bname%7D?timeout=30s",verb="GET",le="0.025"} 1
+rest_client_request_duration_seconds_bucket{host="https://10.2.0.1:443/api/v1/namespaces/%7Bname%7D?timeout=30s",verb="GET",le="0.1"} 1
+rest_client_request_duration_seconds_bucket{host="https://10.2.0.1:443/api/v1/namespaces/%7Bname%7D?timeout=30s",verb="GET",le="0.25"} 1
+rest_client_request_duration_seconds_bucket{host="https://10.2.0.1:443/api/v1/namespaces/%7Bname%7D?timeout=30s",verb="GET",le="0.5"} 1
+rest_client_request_duration_seconds_bucket{host="https://10.2.0.1:443/api/v1/namespaces/%7Bname%7D?timeout=30s",verb="GET",le="1"} 1
+
+```
 
 ## Metrics for Collection 
 
