@@ -377,8 +377,63 @@ func sendData() {
 
 ### Object transactions process to ensure we process and write them to the store.
 
-TBA with Saeed
+Inorder to monitor objects are being written to different stores successfully, we need to monitor latency, errors and requests per each store. 
 
+Starting with the Adding/Inserting functionality, we calculate the time to process object and we count errors.
+
+```golang
+		storeLatencyHistogram := prometheus.NewHistogramVec(prometheus.HistogramOpts{
+			Subsystem: "store",
+			Name:    "latency",
+			Help:    "Store latency",
+			Buckets: prometheus.LinearBuckets(0.001, 0.001, 10),
+		}, []string{"store_type", "action"})
+
+		errorCounter := prometheus.NewCounterVec(prometheus.CounterOpts{
+			Subsystem: "store",
+			Name: "errors_count",
+			Help: "Number of errors",
+		}, []string{"store_type", "action"})
+
+		requestCounter := prometheus.NewCounterVec(prometheus.CounterOpts{
+			Subsystem: "store",
+			Name: "requests_count",
+			Help: "Number of requests",
+		}, []string{"store_type", "action"})
+```
+Where **store_type** is the type of store "indexred | sqlite" and action "add | remove | search".
+
+Metrics List:
+
+**store_latency** to store the latency per action per store_type.
+
+**store_errors_count** to count errors that happen while proccessing data per store.
+
+**store_requests_count** to get the total number of requests at any time.
+
+
+Here how we get the values for metrics:
+```golang
+func (i *bleveIndexer) Add(ctx context.Context, objects []models.Object) error {
+	start := time.Now()
+	...
+	// Increment requestCounter for add functionality
+	i.recorder.IncRequestCounter("indexer", "add")
+
+	for _, obj := range objects {
+		err := batch.Index(obj.GetID(), obj)
+		if err != nil {
+
+			// Increment errorsCounter for add functionality
+			i.recorder.IncErrorCounter("indexer", "add")
+			...
+		}
+	}
+	// Set the latency
+	i.recorder.SetStoreLatency("indexer", "add", time.Since(start))
+	...
+}
+```
 
 ### Stores health to ensure that we write them.
 
