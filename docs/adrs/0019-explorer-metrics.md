@@ -83,7 +83,7 @@ Monitor health of the pipeline means that we understand health of:
 - Object transactions process to ensure we process and write them to the store. 
 - Stores health to ensure that we write them.
 
-### Cluster Watcher Manager
+### Cluster Watcher Status
 
 We would like to understand that given a set of gitops clusters we are watching them 
 or not. Collector is the cluster watcher manager so we would like to see 
@@ -121,6 +121,25 @@ const (
 	ClusterWatchingStopped ClusterWatchingStatus = "stopped"
 )
 ```
+
+#### Pro/Cons
+
+(+) Allow us disaggregated to the cluster visibility for the watcher.   
+(-) Metrics cardinality would be #number_of_clusters times #watching_status  
+
+#### Alternatives
+
+A few alternatives we could put in place around this scenario: 
+
+- Nothing: we do not need to record telemetry around cluster watcher status.   
+- Logging: 
+  - we don't record metric at the level of the cluster.
+  - we do write a logging event with the status of the cluster watcher.
+  - users could create compose metrics on logging events or alert on logging events directly.
+- Aggregation: to create an aggregation visibility so we could provide some actionable insight to admins
+  - `collector_cluster_watchers_started`: number of watchers in started state.
+  - `collector_cluster_watchers_total`: number of total cluster watchers.
+
 
 ### Clusters watcher
 
