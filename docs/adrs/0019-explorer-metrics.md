@@ -56,7 +56,7 @@ http_request_duration_seconds_count{code="200",handler="/v1/query",method="POST"
 Where we could take the golden signals from, and we could [dashboard](./resources/dashboard.json) as usual via grafana
 ![explorer-metrics.png](images%2Fexplorer-metrics.png)
 
-### Indexer
+### Store
 
 Inorder to monitor objects are being written to different stores successfully, we need to monitor latency, errors and requests per each store. 
 
@@ -65,58 +65,62 @@ Starting with the Adding/Inserting functionality, we calculate the time to proce
 ```golang
 		storeLatencyHistogram := prometheus.NewHistogramVec(prometheus.HistogramOpts{
 			Subsystem: "store",
-			Name:    "latency",
+			Name:    "latency_seconds",
 			Help:    "Store latency",
 			Buckets: prometheus.LinearBuckets(0.001, 0.001, 10),
 		}, []string{"store_type", "action"})
 
-		errorCounter := prometheus.NewCounterVec(prometheus.CounterOpts{
-			Subsystem: "store",
-			Name: "errors_count",
-			Help: "Number of errors",
-		}, []string{"store_type", "action"})
-
 		requestCounter := prometheus.NewCounterVec(prometheus.CounterOpts{
 			Subsystem: "store",
-			Name: "requests_count",
+			Name: "requests_total",
 			Help: "Number of requests",
-		}, []string{"store_type", "action"})
+		}, []string{"store_type", "action", "status"})
 ```
 Where **store_type** is the type of store "indexred | sqlite" and action "add | remove | search".
 
 Metrics List:
 
-**store_latency** to store the latency per action per store_type.
+**store_latency_seconds** to store the latency per action per store_type in seconds.
 
-**store_errors_count** to count errors that happen while proccessing data per store.
+**store_requests_total** to get the total number of requests per request status "success | error".
 
-**store_requests_count** to get the total number of requests at any time.
-
+#### Indexer
 
 Here how we get the values for metrics:
 ```golang
 func (i *bleveIndexer) Add(ctx context.Context, objects []models.Object) error {
 	start := time.Now()
 	...
-	// Increment requestCounter for add functionality
-	i.recorder.IncRequestCounter("indexer", "add")
 
 	for _, obj := range objects {
 		err := batch.Index(obj.GetID(), obj)
 		if err != nil {
 
-			// Increment errorsCounter for add functionality
-			i.recorder.IncErrorCounter("indexer", "add")
+			// record a request with error status
+			i.recorder.IncRequestCounter("indexer", "add", "error")
 			...
 		}
 	}
+
+	// The bleve Index is not updated until the batch is executed, so we need to run Batch() before we report the process is success.
+	err := i.idx.Batch(batch)
+	if err != nil {
+
+		// record a request with error status
+		i.recorder.IncRequestCounter("indexer", "add", "error")
+		...
+	}
+
 	// Set the latency
 	i.recorder.SetStoreLatency("indexer", "add", time.Since(start))
-	...
+
+	// record a request with success status
+	i.recorder.IncRequestCounter("indexer", "add", "success")
+	return nil
 }
 ```
 
-### Data Store
+#### Data Store
 
 TBA
 
