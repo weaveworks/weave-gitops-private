@@ -86,6 +86,21 @@ Metrics List:
 
 #### Indexer
 
+We intiate prometheus-recorder with NewIndexer():
+```golang
+func NewIndexer(s Store, path string) (Indexer, error) {
+	...
+
+	recorder := metrics.NewRecorder(true)
+
+	return &bleveIndexer{
+		idx:   index,
+		store: s,
+		recorder: recorder,
+	}, nil
+}
+```
+
 Here how we get the values for metrics:
 ```golang
 func (i *bleveIndexer) Add(ctx context.Context, objects []models.Object) error {
