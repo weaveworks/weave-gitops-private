@@ -75,6 +75,12 @@ Starting with the Adding/Inserting functionality, we calculate the time to proce
 			Name: "requests_total",
 			Help: "Number of requests",
 		}, []string{"store_type", "action", "status"})
+
+		inflightRequests := prometheus.NewGaugeVec(prometheus.GaugeOpts{
+			Subsystem: "store",
+			Name: "inflight_requests",
+			Help: "Number of in-flight requests.",
+		}, []string{"store_type", "action"})
 ```
 Where **store_type** is the type of store "indexred | sqlite" and action "add | remove | search".
 
@@ -83,6 +89,8 @@ Metrics List:
 **store_latency_seconds** to store the latency per action per store_type in seconds.
 
 **store_requests_total** to get the total number of requests per request status "success | error".
+
+**store_inflight_requests_total** to track the number of requests that are currently in progress or "in flight".
 
 #### Indexer
 
@@ -105,6 +113,8 @@ Here how we get the values for metrics:
 ```golang
 func (i *bleveIndexer) Add(ctx context.Context, objects []models.Object) error {
 	start := time.Now()
+	// Increase number of in-flight requests by 1.
+	i.recorder.InflightRequests("indexer", "add", 1)
 	...
 
 	for _, obj := range objects {
@@ -125,6 +135,9 @@ func (i *bleveIndexer) Add(ctx context.Context, objects []models.Object) error {
 		i.recorder.IncRequestCounter("indexer", "add", "error")
 		...
 	}
+
+	// reduce number of in-flight requests by 1.
+	defer i.recorder.InflightRequests("indexer", "add", -1)
 
 	// Set the latency
 	i.recorder.SetStoreLatency("indexer", "add", time.Since(start))
