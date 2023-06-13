@@ -63,34 +63,58 @@ Inorder to monitor objects are being written to different stores successfully, w
 Starting with the Adding/Inserting functionality, we calculate the time to process object and we count errors.
 
 ```golang
-		storeLatencyHistogram := prometheus.NewHistogramVec(prometheus.HistogramOpts{
-			Subsystem: "store",
-			Name:    "latency_seconds",
-			Help:    "Store latency",
-			Buckets: prometheus.LinearBuckets(0.001, 0.001, 10),
-		}, []string{"store_type", "action"})
+func NewRecorder(register bool, subsystem string) (Recorder) {
+	storeLatencyHistogram := prometheus.NewHistogramVec(prometheus.HistogramOpts{
+		Subsystem: subsystem,
+		Name:    "latency_seconds",
+		Help:    "Store latency",
+		Buckets: prometheus.LinearBuckets(0.001, 0.001, 10),
+	}, []string{"action"})
 
-		requestCounter := prometheus.NewCounterVec(prometheus.CounterOpts{
-			Subsystem: "store",
-			Name: "requests_total",
-			Help: "Number of requests",
-		}, []string{"store_type", "action", "status"})
+	requestCounter := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Subsystem: subsystem,
+		Name: "requests_total",
+		Help: "Number of requests",
+	}, []string{"action", "status"})
 
-		inflightRequests := prometheus.NewGaugeVec(prometheus.GaugeOpts{
-			Subsystem: "store",
-			Name: "inflight_requests",
-			Help: "Number of in-flight requests.",
-		}, []string{"store_type", "action"})
+	inflightRequests := prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Subsystem: subsystem,
+		Name: "inflight_requests_total",
+		Help: "Number of in-flight requests.",
+	}, []string{"action"})
+
+
+	_ = prometheus.Register(storeLatencyHistogram)
+	_ = prometheus.Register(requestCounter)
+	_ = prometheus.Register(inflightRequests)
+
+	record := Recorder{
+		storeLatencyHistogram: storeLatencyHistogram,
+		requestCounter: requestCounter,
+		inflightRequests: inflightRequests,
+	}
+		
+
+	return record
+}
 ```
-Where **store_type** is the type of store "indexred | sqlite" and action "add | remove | search".
+
+Where action is "add | remove | search".
 
 Metrics List:
 
-**store_latency_seconds** to store the latency per action per store_type in seconds.
+**explorer_indexer_latency_seconds** to store the latency per action for indexer in seconds.
 
-**store_requests_total** to get the total number of requests per request status "success | error".
+**explorer_indexer_requests_total** to get the total number of requests per request status "success | error".
 
-**store_inflight_requests_total** to track the number of requests that are currently in progress or "in flight".
+**explorer_indexer_inflight_requests_total** to track the number of requests that are currently in progress or "in flight".
+
+**explorer_datastore_latency_seconds** to store the latency per action for datastore in seconds.
+
+**explorer_datastore_requests_total** to get the total number of requests per request status "success | error".
+
+**explorer_datastore_inflight_requests_total** to track the number of requests that are currently in progress or "in flight".
+
 
 #### Indexer
 
@@ -99,12 +123,10 @@ We intiate prometheus-recorder with NewIndexer():
 func NewIndexer(s Store, path string) (Indexer, error) {
 	...
 
-	recorder := metrics.NewRecorder(true)
-
 	return &bleveIndexer{
 		idx:   index,
 		store: s,
-		recorder: recorder,
+		recorder: metrics.NewRecorder(true, "explorer_indexer"),
 	}, nil
 }
 ```
@@ -113,44 +135,66 @@ Here how we get the values for metrics:
 ```golang
 func (i *bleveIndexer) Add(ctx context.Context, objects []models.Object) error {
 	start := time.Now()
-	// Increase number of in-flight requests by 1.
-	i.recorder.InflightRequests("indexer", "add", 1)
-	...
-
-	for _, obj := range objects {
-		err := batch.Index(obj.GetID(), obj)
+	const action = "add"
+	
+	i.recorder.InflightRequests(action, 1)
+	
+	var err error
+	defer func() {
+		i.recorder.SetStoreLatency(action, time.Since(start))
+		i.recorder.InflightRequests(action, -1)
 		if err != nil {
-
-			// record a request with error status
-			i.recorder.IncRequestCounter("indexer", "add", "error")
-			...
+			i.recorder.IncRequestCounter(action, "error")
+			return
 		}
-	}
+		i.recorder.IncRequestCounter(action, "success")
+	}()
 
-	// The bleve Index is not updated until the batch is executed, so we need to run Batch() before we report the process is success.
-	err := i.idx.Batch(batch)
-	if err != nil {
-
-		// record a request with error status
-		i.recorder.IncRequestCounter("indexer", "add", "error")
-		...
-	}
-
-	// reduce number of in-flight requests by 1.
-	defer i.recorder.InflightRequests("indexer", "add", -1)
-
-	// Set the latency
-	i.recorder.SetStoreLatency("indexer", "add", time.Since(start))
-
-	// record a request with success status
-	i.recorder.IncRequestCounter("indexer", "add", "success")
+	...
+	
 	return nil
 }
 ```
 
 #### Data Store
 
-TBA
+We intiate prometheus-recorder with NewSQLiteStore():
+```golang
+func NewSQLiteStore(db *gorm.DB, log logr.Logger) (*SQLiteStore, error) {
+	return &SQLiteStore{
+		db:    db,
+		log:   log.WithName("sqllite"),
+		debug: log.WithName("sqllite").V(logger.LogLevelDebug),
+		recorder: metrics.NewRecorder(true, "explorer_datastore"),
+	}, nil
+}
+```
+
+Here how we get the values for metrics:
+
+```golang
+func (i *SQLiteStore) StoreObjects(ctx context.Context, objects []models.Object) error {
+	start := time.Now()
+	const action = "store_objects"
+
+	i.recorder.InflightRequests(action, 1)
+
+	var err error
+	defer func() {
+		i.recorder.SetStoreLatency(action, time.Since(start))
+		i.recorder.InflightRequests(action, -1)
+		if err != nil {
+			i.recorder.IncRequestCounter(action, "error")
+			return
+		}
+		i.recorder.IncRequestCounter(action, "success")
+	}()
+
+	...
+	return nil
+}
+
+```
 
 ## Metrics for Collection 
 
