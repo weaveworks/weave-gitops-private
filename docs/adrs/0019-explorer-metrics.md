@@ -12,13 +12,8 @@ Proposed
 scaling multi-cluster querying [initiative](https://www.notion.so/weaveworks/Scaling-Weave-Gitops-Observability-Phase-3-7e0a1cfcc89641c9bb05a05c5356af34?pvs=4) 
 also known by explorer capability. 
 
-During q1 we have worked on getting an initial functional iteration that validates we could solve the latency 
-and loading problems as part of [release v0.1](https://www.notion.so/weaveworks/Scaling-Weave-Gitops-Observability-Phase-3-7e0a1cfcc89641c9bb05a05c5356af34?pvs=4#270880bd0c4044c5b426eb0d8fb92faa).
-
-In q2, we are looking to move towards a new [iteration v1.0](https://www.notion.so/weaveworks/Scaling-Weave-Gitops-Observability-Phase-3-7e0a1cfcc89641c9bb05a05c5356af34?pvs=4#d175338bd2004544ac8d52764ce26140) 
-to complete the solution and make ir production ready, where reliability is first-class concerns and observability and metrics as part of it. 
-
-This ADR writes the direction we are tacking to address metrics for observability for explorer. 
+In https://github.com/weaveworks/weave-gitops-private/pull/122 we have defined the monitoring vision 
+This ADR records the design decision on the metrics part of that vision
 
 ## Decision
 
@@ -215,7 +210,7 @@ Monitor health of the pipeline means that we understand health of:
 - Object transactions process to ensure we process and write them to the store. 
 - Stores health to ensure that we write them.
 
-### Cluster Watcher Status
+### Cluster Watcher
 
 We would like to understand that given a set of gitops clusters we are watching them 
 or not. Collector is the cluster watcher manager so we would like to see 
@@ -238,42 +233,35 @@ type ClusterWatcher interface {
 We create the following metrics for that purpose
 
 ```go
-	depth = prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Subsystem: CollectorSubSystem,
-		Name:      "collector_cluster_watcher",
-		Help:      "cluster watcher status",
-	}, []string{"name","host", "status"})
+    var clusterWatcher = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+        Subsystem: collectorSubsystem,
+        Name:      "cluster_watcher",
+        Help:      "number of cluster watchers by watcher status",
+	}, []string{"status"})
+
 ```
 
 where status is 
 
 ```go
 const (
-	ClusterWatchingStarted ClusterWatchingStatus = "started"
-	ClusterWatchingStopped ClusterWatchingStatus = "stopped"
+  ClusterWatchingFailed   ClusterWatchingStatus = "Failed"
+  ClusterWatchingStarting ClusterWatchingStatus = "Starting"
+  ClusterWatchingStarted  ClusterWatchingStatus = "Started"
+  ClusterWatchingStopping ClusterWatchingStatus = "Stopping"
 )
 ```
 
 #### Pro/Cons
 
-(+) Allow us disaggregated to the cluster visibility for the watcher.   
-(-) Metrics cardinality would be #number_of_clusters times #watching_status  
+(+) We could determine health of the cluster watcher infra layer.    
+(-) We need also logging to determine the failing watcher.  
 
-#### Alternatives
+#### Other alternatives
+- Enum state metrics by cluster to monitor each of the clusters individually. Not selected due to the potential
+- high-cardinality of the metrics. instead metric + logs provides the same solution.
 
-A few alternatives we could put in place around this scenario: 
-
-- Nothing: we do not need to record telemetry around cluster watcher status.   
-- Logging: 
-  - we don't record metric at the level of the cluster.
-  - we do write a logging event with the status of the cluster watcher.
-  - users could create compose metrics on logging events or alert on logging events directly.
-- Aggregation: to create an aggregation visibility so we could provide some actionable insight to admins
-  - `collector_cluster_watchers_started`: number of watchers in started state.
-  - `collector_cluster_watchers_total`: number of total cluster watchers.
-
-
-### Clusters watcher
+### Clusters watcher events
 
 Once the cluster watchers has been created, we want to understand the next part of the pipeline: 
 we receive object events.  Given that we are leveraging controller-runtime for doing the watching, 
