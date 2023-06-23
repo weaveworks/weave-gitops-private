@@ -56,13 +56,145 @@ http_request_duration_seconds_count{code="200",handler="/v1/query",method="POST"
 Where we could take the golden signals from, and we could [dashboard](./resources/dashboard.json) as usual via grafana
 ![explorer-metrics.png](images%2Fexplorer-metrics.png)
 
-### Indexer
+### Store
 
-TBA
+Inorder to monitor objects are being written to different stores successfully, we need to monitor latency, errors and requests per each store. 
 
-### Data Store
+Starting with the Adding/Inserting functionality, we calculate the time to process object and we count errors.
 
-TBA
+```golang
+func NewRecorder(register bool, subsystem string) (Recorder) {
+	storeLatencyHistogram := prometheus.NewHistogramVec(prometheus.HistogramOpts{
+		Subsystem: subsystem,
+		Name:    "latency_seconds",
+		Help:    "Store latency",
+		Buckets: prometheus.LinearBuckets(0.001, 0.001, 10),
+	}, []string{"action"})
+
+	requestCounter := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Subsystem: subsystem,
+		Name: "requests_total",
+		Help: "Number of requests",
+	}, []string{"action", "status"})
+
+	inflightRequests := prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Subsystem: subsystem,
+		Name: "inflight_requests_total",
+		Help: "Number of in-flight requests.",
+	}, []string{"action"})
+
+
+	_ = prometheus.Register(storeLatencyHistogram)
+	_ = prometheus.Register(requestCounter)
+	_ = prometheus.Register(inflightRequests)
+
+	record := Recorder{
+		storeLatencyHistogram: storeLatencyHistogram,
+		requestCounter: requestCounter,
+		inflightRequests: inflightRequests,
+	}
+		
+
+	return record
+}
+```
+
+Where action is "add | remove | search".
+
+Metrics List:
+
+**explorer_indexer_latency_seconds** to store the latency per action for indexer in seconds.
+
+**explorer_indexer_requests_total** to get the total number of requests per request status "success | error".
+
+**explorer_indexer_inflight_requests_total** to track the number of requests that are currently in progress or "in flight".
+
+**explorer_datastore_latency_seconds** to store the latency per action for datastore in seconds.
+
+**explorer_datastore_requests_total** to get the total number of requests per request status "success | error".
+
+**explorer_datastore_inflight_requests_total** to track the number of requests that are currently in progress or "in flight".
+
+
+#### Indexer
+
+We intiate prometheus-recorder with NewIndexer():
+```golang
+func NewIndexer(s Store, path string) (Indexer, error) {
+	...
+
+	return &bleveIndexer{
+		idx:   index,
+		store: s,
+		recorder: metrics.NewRecorder(true, "explorer_indexer"),
+	}, nil
+}
+```
+
+Here how we get the values for metrics:
+```golang
+func (i *bleveIndexer) Add(ctx context.Context, objects []models.Object) error {
+	start := time.Now()
+	const action = "add"
+	
+	i.recorder.InflightRequests(action, 1)
+	
+	var err error
+	defer func() {
+		i.recorder.SetStoreLatency(action, time.Since(start))
+		i.recorder.InflightRequests(action, -1)
+		if err != nil {
+			i.recorder.IncRequestCounter(action, "error")
+			return
+		}
+		i.recorder.IncRequestCounter(action, "success")
+	}()
+
+	...
+	
+	return nil
+}
+```
+
+#### Data Store
+
+We intiate prometheus-recorder with NewSQLiteStore():
+```golang
+func NewSQLiteStore(db *gorm.DB, log logr.Logger) (*SQLiteStore, error) {
+	return &SQLiteStore{
+		db:    db,
+		log:   log.WithName("sqllite"),
+		debug: log.WithName("sqllite").V(logger.LogLevelDebug),
+		recorder: metrics.NewRecorder(true, "explorer_datastore"),
+	}, nil
+}
+```
+
+Here how we get the values for metrics:
+
+```golang
+func (i *SQLiteStore) StoreObjects(ctx context.Context, objects []models.Object) error {
+	start := time.Now()
+	const action = "store_objects"
+
+	i.recorder.InflightRequests(action, 1)
+
+	var err error
+	defer func() {
+		i.recorder.SetStoreLatency(action, time.Since(start))
+		i.recorder.InflightRequests(action, -1)
+		if err != nil {
+			i.recorder.IncRequestCounter(action, "error")
+			return
+		}
+		i.recorder.IncRequestCounter(action, "success")
+	}()
+
+	...
+	return nil
+}
+
+```
 
 ## Metrics for Collection 
 
@@ -378,7 +510,6 @@ func sendData() {
 ### Object transactions process to ensure we process and write them to the store.
 
 TBA with Saeed
-
 
 ### Stores health to ensure that we write them.
 
