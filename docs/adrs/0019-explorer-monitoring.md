@@ -28,22 +28,22 @@ As platform engineer, I have at least two potential troubleshooting scenarios th
 
 With some of its characteristics like:
 
-- the issue is around one or multiple platform components.
-- impacts a group of requests from different users.
-- notified via alerting or multiple customer reporting failures.
-- telemetry at the level of the components are required to follow the journey along the system.
+- The issue is around one or multiple platform components.
+- Impacts a group of requests from different users.
+- Notified via alerting or multiple customer reporting failures.
+- Telemetry at the level of a component is required to follow the journey along the system.
 
 **Request issues**
 
 With some of its characteristics like:
 
-- the error happens in the context of particular request, for example, from user with userId=123 or for payload=XYZ.
-- usually notified via ticketing system as the customer is not able to do an action. 
-- telemetry at the level of the transaction is required to follow the journey along the system.
+- The error happens in the context of particular request, for example, from user with userId=123.
+- Usually notified via ticketing system as the customer is not able to do an action. 
+- Telemetry at the level of a transaction is required to follow the journey along the system.
 
 ### Troubleshooting Platform Issues 
 
-#### Setup 
+#### Background 
 
 As platform engineer, I have setup Explorer monitoring using the guidance in [monitoring documentation](https://docs.gitops.weave.works/docs/next/explorer/operations/#monitoring).
 Therefore:
@@ -56,30 +56,32 @@ I could find the previous resources as part of [explorer monitoring documentatio
 
 #### Troubleshooting an alert
 
-As platform engineer, I've been paged from an explorer alert due to burn rate breach. I react to the alert and I 
-follow the runbook the alert has associated to. The runbook indicates doing the following:
+As platform engineer, I've been paged from an explorer alert due to burn rate breach. I 
+follow the alert runbook that indicates the following:
 
 1. Go to Explorer Dashboard
-2. Go to the first row of the dashboard that shows you the Explorer SLOs:
+2. The first row of the dashboard shows you Explorer SLOs:
    - Confirm the alerting event by seeing the impact in the burn rate. 
-3. Go to the second row of the dashboard that shows you the Explorer querying path health. It will flag whether queries are not being served: 
+3. Go to the second row of the dashboard. It shows Explorer querying path health. It will flag whether queries are not being served: 
     - Check Query API endpoint's health via its [RED](https://www.weave.works/blog/the-red-method-key-metrics-for-microservices-architecture/) metrics. 
-In case of not healthy, troubleshoot here.
-   - Check Indexer reads health via its RED metrics. In case of not healthy, troubleshoot here.
-   - Check Datastore reads health via its RED metrics. In case of not healthy, troubleshoot here.
-4. Go to the third row of the dashboard that shows you the Explorer collecting path health:
-   - Check Cluster Watching health. In case of not healthy, troubleshoot here. The following metrics are available:
-     - `cluster_watchers`: number of cluster watchers in a given state (via label=state). Useful to verify the health of the cluster watcher infrastructure. 
-     - `cluster_watching_inflight_events`: number of cluster watching events being processed. Useful to determine whether an issue might be happening if no events over a time-window. 
-   - Check Indexer writes health via its RED metrics. In case of not healthy, troubleshoot here.
-   - Check Datastore writes health via its RED metrics. In case of not healthy, troubleshoot here.
+In case of not healthy, troubleshoot it.
+   - Check Indexer reads health via its RED metrics. In case of not healthy, troubleshoot it.
+   - Check Datastore reads health via its RED metrics. In case of not healthy, troubleshoot it.
+4. Go to the third row of the dashboard. It shows Explorer collecting path health:
+   - Check Cluster Watching health. In case of not healthy, troubleshoot it using the following metrics are available:
+     - `cluster_watcher`: number of cluster watchers in a given state (via label=state). Useful to verify the health of the cluster watcher infrastructure. 
+     - `cluster_watcher_event`: number of cluster watcher events processed. Useful to determine whether an issue with the event processing infrastructure. 
+   - Check Indexer writes health via its RED metrics. In case of not healthy, troubleshoot it.
+   - Check Datastore writes health via its RED metrics. In case of not healthy, troubleshoot it.
 
 ### Troubleshooting Request Issues
 
-Given that you have received a ticket indicating that an explorer user is not seeing the expected application. 
+As platform engineer, you have received indicating that an Explorer User does not find applications that is expected to see.  
 You have the details of the user and a screenshot that shows an empty explorer view.
 
-As example:
+![Explorer Empty View](./images/explorer-empty-view.png)
+
+with a request like 
 
 ```
 curl 'https://demo3.weavegitops.com/v1/query' \
@@ -102,9 +104,9 @@ with userId
   "iat": 1687419249
 }
 ```
-In order to troubleshoot the request I follow the request runbook that says:
+In order to troubleshoot the request, I follow the runbook that says:
 
-**Application Errors**
+**Troubleshoot Application Errors**
 
 1. Retrieve from the access logs the requestId associated with the ticket by using `"sub": "user@my-company.com"`. It is requestId='123abc'. 
 2. Retrieve from the application logs if there has been any error with that transaction, for that you could filter by queries 
