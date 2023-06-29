@@ -20,6 +20,7 @@ This is for tracking weaveworks internal information on weave-gitops. Will inclu
 - [16. Create the enterprise version of TF-controller](docs/adrs/0016-create-enterprise-version-of-tf-controller.md)
 - [17. Pipeline pull request promotions security review](docs/adrs/0017-pipeline-pr-promotions-security.md)
 - [18. Better expectations for engineering designs](docs/adrs/0018-engineering-design.md)
+- [19. Retain objects after they have been removed from the cluster](docs/adrs/0019-query-retention.md)
 
 <!-- /ADRS -->
 
