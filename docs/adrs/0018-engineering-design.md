@@ -4,7 +4,7 @@ Date: 2023-03-XX
 
 ## Status
 
-Proposed
+Accepted
 
 ## Context
 
