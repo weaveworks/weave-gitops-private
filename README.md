@@ -21,6 +21,7 @@ This is for tracking weaveworks internal information on weave-gitops. Will inclu
 - [17. Pipeline pull request promotions security review](docs/adrs/0017-pipeline-pr-promotions-security.md)
 - [18. Better expectations for engineering designs](docs/adrs/0018-engineering-design.md)
 - [19. Retain objects after they have been removed from the cluster](docs/adrs/0019-query-retention.md)
+- [20. Explorer Monitoring](docs/adrs/0020-explorer-monitoring.md)
 
 <!-- /ADRS -->
 
