@@ -1,10 +1,10 @@
-# 19. Explorer Monitoring 
+# 20. Explorer Monitoring 
 
-Date: 2023-06-XX
+Date: 2023-07-13
 
 ## Status
 
-Proposed
+Accepted
 
 ## Context
 
