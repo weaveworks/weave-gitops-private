@@ -125,6 +125,21 @@ respErrors := []*pb.ListError{}
 	return &pb.ListFluxRuntimeObjectsResponse{Deployments: results, Errors: respErrors}, nil
 }
 ```
+Solutions to handle this situation in a fully isolated multi-tenancy context
+
+#### To breach fully isolated multi-tenancy
+ 
+This solution would be the current one whereas a tenant, in this example `eneko`tenant, in this example sees 
+that there are other tenants in the system, for example `azure-weaveworks-webinar`:
+
+![tenancy-isolation-breach.png](imgs%2Ftenancy-isolation-breach.png)
+
+
+
+
+### 
+c) hard-multi tenancy: examples of this could be
+
 
 
 ### Goals
