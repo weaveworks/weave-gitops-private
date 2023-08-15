@@ -44,7 +44,7 @@ When reconciling pipelines, the controller will create a set of **used** cluster
 
 ### Events Management
 
-Whenever I new app update event comes in the controller will use `app + cluster` name as the key to identifying which pipeline that app belongs to.
+Whenever a new app update event comes in, the controller will use `app + cluster` name as the key to identifying which pipeline that app belongs to.
 
 It will then detect if a change has happened, in the case of `HelmReleases``, it will check if the new `lastAppliedRevision` is different from the old one and trigger the promotion accordingly.
 
