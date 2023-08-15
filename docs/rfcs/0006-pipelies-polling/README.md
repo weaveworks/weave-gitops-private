@@ -75,8 +75,9 @@ sequenceDiagram
 
 ```
 
-Glossary:
-**Clusters Manager**: Entity that manages clusters config. It will be responsible for keeping cluster configuration up to date and notifying other entities of cluster changes.
-**Apps Watcher**: Creates informers to watch app changes.
-**Pipeline Strategy**: Responsible for promoting an app.
-**Apps Index**: It holds the association between Cluster <> Pipelines <> Apps. Given update events, it will help to query which pipeline a particular app belongs to.
+**Glossary**:
+
+- **Clusters Manager**: Entity that manages clusters config. It will be responsible for keeping cluster configuration up to date and notifying other entities of cluster changes.
+- **Apps Watcher**: Creates informers to watch app changes.
+- **Pipeline Strategy**: Responsible for promoting an app.
+- **Apps Index**: It holds the association between Cluster <> Pipelines <> Apps. Given update events, it will help to query which pipeline a particular app belongs to.
