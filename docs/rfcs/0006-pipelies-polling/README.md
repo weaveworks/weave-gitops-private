@@ -44,7 +44,7 @@ When reconciling pipelines, the controller will create a set of **used** cluster
 
 ### Events Management
 
-Whenever a new app update event comes in, the controller will use `app + cluster` name as the key to identifying which pipeline that app belongs to.
+During the informer creation, we inject the cluster name, so, whenever a new app update event comes in, the informer function will be able to use `app + namespace + cluster` name as the key to identifying which pipeline that app belongs to.
 
 It will then detect if a change has happened, in the case of `HelmReleases``, it will check if the new `lastAppliedRevision` is different from the old one and trigger the promotion accordingly.
 
@@ -53,7 +53,7 @@ It will then detect if a change has happened, in the case of `HelmReleases``, it
 
 ```mermaid
 sequenceDiagram
-    actor U as operator
+    actor U as User
     U->>+API Server: creates Pipeline
     participant PC as Pipeline Controller
     participant CM as Clusters Manager
@@ -74,3 +74,9 @@ sequenceDiagram
     AW->>+PS: kick off promotion
 
 ```
+
+Glossary:
+**Clusters Manager**: Entity that manages clusters config. It will be responsible for keeping cluster configuration up to date and notifying other entities of cluster changes.
+**Apps Watcher**: Creates informers to watch app changes.
+**Pipeline Strategy**: Responsible for promoting an app.
+**Apps Index**: It holds the association between Cluster <> Pipelines <> Apps. Given update events, it will help to query which pipeline a particular app belongs to.
