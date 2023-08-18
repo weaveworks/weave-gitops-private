@@ -1,6 +1,6 @@
 # RFC-0004 Multi-cluster Query Scaling (Observability Phase 3)
 
-**Status:** provisional
+**Status:** implemented
 
 ## Summary
 
