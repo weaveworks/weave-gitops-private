@@ -71,44 +71,13 @@ This allows us to provide a listing/filtering/paginated experience so that users
 
 Rather than replicating the entire document in a centralized store, we would instead store a subset of the data to allow for standardization across objects. Since we are only concerned with providing a list view to the user (rather than the object detail), we do not need to store the entire object document in the store. For detailed information on an object, users would access the K8s API directly via existing methods.
 
-#### Object Schema
-
 Each object can be represented in a normalized structure for easier querying:
-
-```go
-type Object struct {
-	gorm.Model
-	Cluster   string `gorm:"type:text"` 
-	Namespace string `gorm:"type:text"`  
-	Kind      string `gorm:"type:text"`
-	Name      string `gorm:"type:text"`
-	Status    string `gorm:"type:text"` 
-	Message   string `gorm:"type:text"`
-}
-```
-
-Where:
-
-- Status comes from XYX
-- Message comes from the object
-
-An example of object could be 
 
 ```
 Cluster    | Namespace | Kind          | Name    | Status    | Message                 |
 ----------------------------------------------------------------------------------------
 my-cluster | cool-ns   | Kustomization | my-kust | unhealthy | "There was a problem!"  |
 ```
-
-#### API
-
-https://github.com/weaveworks/weave-gitops-enterprise/pull/2546/files#diff-27cc22854c0e7f0469653870872052ed2ca2285e2ab3cd4ab5dc234fedfcbe18
-
-#### Non functional requirements
-
-
-Query service 
-
 
 This data would then need to be filtered so that the user only sees what they would see if they were querying the cluster directly (more on this in the Authorization (RBAC) section).
 
@@ -150,174 +119,7 @@ To collect data from each of the leaf clusters, a scheduled process (known as th
     end
 ```
 
-#### API
-
-A collector api looks like the following 
-
-```go
-type ClusterWatcher interface {
-	Watch(cluster cluster.Cluster, objectsChannel chan []models.ObjectRecord, ctx context.Context, log logr.Logger) error
-	Unwatch(cluster cluster.Cluster) error
-	Status(cluster cluster.Cluster) (string, error)
-}
-
-type Collector interface {
-	ClusterWatcher
-	Start() error
-	Stop() error
-}
-
-type CollectorOpts struct {
-    ObjectKinds []schema.GroupVersionKind
-    Clusters           []cluster.Cluster
-}
-```
-with two different collector instances
-
-Access Collector
-
-```go
-opts.ObjectKinds = []schema.GroupVersionKind{
-		rbacv1.SchemeGroupVersion.WithKind("ClusterRole"),
-		rbacv1.SchemeGroupVersion.WithKind("Role"),
-		rbacv1.SchemeGroupVersion.WithKind("ClusterRoleBinding"),
-		rbacv1.SchemeGroupVersion.WithKind("RoleBinding"),
-	}
-```
-
-Objects Collector
-
-```go
-	opts.ObjectKinds = []schema.GroupVersionKind{
-		v2beta1.GroupVersion.WithKind("HelmRelease"),
-		v1beta2.GroupVersion.WithKind("Kustomization"),
-	}
-```
-When a collector starts, 
-- starts watching gitops clusters in management clusters
-
-When a collector stops
-- stops watchinig gitops cluster in management clusters
-
-#### Architecture
-
-In terms of operations, the collector would need to 
-1. watch clusters so needs rbac permissions in the management cluster to read gitops clusters
-2. watch clusters resources so needs rbac permissions in the leaf cluster to read the target resources
-
-Assuming that we follow the same approach of service account + impersonation we have the following 
-running options for the collector
-
-1. Single service
-2. Separated service single pod
-3. Separated service different pods
-
-##### Single service 
-
-This architecture would be to have both wge and collection with the same process. When the application 
-starts it starts both wge service and collector as sub-process. 
-
-**Design**
-WGE it is intended to be a webapp oriented to users. Adding a collector which does not depends on user-context 
-and it is more a controller-like breaks the desing. 
-
-The same way, impersonation is designed within wge to target users and groups of users not service accounts. 
-Extending to service accounts, it would increase the scope for wge app. 
-
-**Delivery and Operations**
-- Single unit of deployment with shared configuration.
-- Single unit of operations.
-
-**Security**
-This solution would be leverage existing wge security context for the collector in the same way that 
-WGE uses when there are user-driven requests. The journey would look like 
-
-1. the collector uses wge cluster manager. 
-2. it creates watches for each of the clients,
-3. it needs to impersonate a `collector` service account existing in any leaf cluster.  
-4. the collector in the target cluster has a set of role bindings that allow access to the namespaces to watch and kinds.
-5. it watches them 
-
-Currently, we ask customer to setup leaf clusters with [impersonation](https://docs.gitops.weave.works/docs/next/configuration/service-account-permissions/)
-so weave gitops can impersonate any user or group. Which gives us to two scenarios:
-
-1) if we could impersonate the collector service account with the current there is no need to do any other configuration. 
-2) if we cannot, then we would need to extend the impersonation to also include service accounts (and potentially restrict)
-
-**Reliability**
-Wge and collector have different scalability dimensions:
- - while wge should scale by the number of users
- - collector have the clusters to watch and resources to watch as the domain to scale
-This approach mixes both concerns.   
-
-**Summary**
-Pro:
-- Simpler approach to delivery
-- Simpler approach to operations
-Cons:
-- Mix concerns: user-driven workflows, controller-driven workflows. 
-- Mix security context. 
-- Mix scalability dimensions.
-
-##### Separated service single pod
-
-This architecture would be wge and collector working as independent components deployed together a single pod as 
-different containers.
-
-**Design**
-- Split concerns by containers: wge for user interaction and collector for cluser watching.
-- They could use different configurations.
-- They user the same service account. 
-
-**Security**
-
-Similar security approach than the previous solution as we are using the same service account. 
-
-**Delivery and Operations**
-- Single unit of deployment but need to manage another container.
-- Given another container, it would also increase the overhead.
-
-**Reliability**
-Same problem as before. Even we improve the previous scenario by having different resources by container, given
-that they are deployed togeather, horizontally scalling would scale both and will not have 
-into consideration that they scale based on different metrics.
-
-**Summary**
-TBA 
-
-##### Separated service different pods
-
-This architecture would be wge and collector working as independent components deployed as different pods.
-
-**Design**
-- Split concerns by pod: wge for user interaction and collector for cluser watching.
-- Different configuration.
-- Different service account.
-
-**Security**
-
-- Given that we have different service account we could handle the security context independently.
-- This also includes better auditability. 
-- Both of them would require to connect to cluster  it would folllow the same impersonation approach but 
-with potentially different impersonation configuration -> this is key, we need to get finer control on impersonation.
-
-**Delivery and Operations**
-- Multiple units of deployment so increased costs of delivery. 
-- The same for operations. 
-
-**Reliability**
-Independently scaling so better suitable.  
-
-**Summary**
-Pro
-- Better security context.
-- Better design.
-- Better scaling.
-
-Cons
-- Higher delivery and operational costs for us and platform admins.
-
-
+Future optimizations are possible where many Collector replicas are "sharded" against a set of clusters to further increase performance. This is considered out of scope for v1.
 
 **Alternatives Considered:**
 
@@ -400,10 +202,4 @@ One benefit of this approach is that it allows us to add additional logic or con
 
 ## Implementation History
 
-- The current implementation was completed in [Observability Phase 2](https://docs.google.com/document/d/1kxcyznya57gAW28_jUU4ZQVffAyrSze7Py_y0T_z6jE/edit#heading=h.lx604oyg19lq)
-
-
-## Change Log
-See the PR associated with the changelog entry commit to understand the changes
-
-- March 2023: extending with learning during PoC implementations. 
+The current implementation was completed in [Observability Phase 2](https://docs.google.com/document/d/1kxcyznya57gAW28_jUU4ZQVffAyrSze7Py_y0T_z6jE/edit#heading=h.lx604oyg19lq)
