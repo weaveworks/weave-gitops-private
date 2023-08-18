@@ -53,7 +53,7 @@ It will then detect if a change has happened, in the case of `HelmReleases``, it
 
 ```mermaid
 sequenceDiagram
-    actor U as User
+    actor U as operator
     U->>+API Server: creates Pipeline
     participant PC as Pipeline Controller
     participant CM as Clusters Manager
@@ -62,12 +62,13 @@ sequenceDiagram
 
     API Server->>+PC: notifies
 
-    PC->>+PC: Reconcile
-    PC->>+PC: Add pipeline to apps index
-    participant dt1 as dev/target 1
+	loop Reconcile
+	    PC->>+PC: Add pipeline to apps index
+	    PC ->>CM: Adds targets
+    end
 
-    PC ->>CM: Adds targets
     CM->>+AW: Notifies clusters change
+    participant dt1 as dev/target 1
     AW->>+dt1: Creates Shared Infomer
     dt1->>+AW: update events from AppRef
     AW->>+AW: Detect app changes
