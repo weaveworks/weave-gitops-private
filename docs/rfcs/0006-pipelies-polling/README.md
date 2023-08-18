@@ -18,7 +18,7 @@ We can detect those changes by using two approaches:
 	- Detect any change and act
 - Watching
 	- List all pipelines
-	- Filter used targets
+	- Determine which clusters are referenced in pipeline definitions and therefore need to be watched
 	- Create an informer for each target
 	- Receive update events from each informer
 	- Detect any change and act
