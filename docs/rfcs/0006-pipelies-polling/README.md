@@ -80,6 +80,14 @@ sequenceDiagram
 
 This section explains functions that need to be adapted to work in the proposed architecture.
 
+#### Idempotent promotions
+
+In the current architecture, promotions are triggered _at most once_. If a notification is missed, or fails, the promotion will not be attempted again. Flux notifications are not intended to be a reliable medium; and, the pipeline machinery does not record the fact of a notification, so if a promotion fails it does not know to retry it.
+
+The new design has a chance to improve on this by making promotion attempts _exactly once_ (or at least "usually once", since exactly once is generally impossible). By examining the state, rather than relying on being triggered by events, the controller is able to retry if a promotion is missed (the controller was offline when a update happened), or fails. However, this introduces a new problem: how does the controller avoid running a promotion more than once if it hasn't completed yet?
+
+TODO: explain mechanism for recording the fact of a promotion attempt.
+
 #### Manual approval
 
 At present, the Promotion type includes a field ".Manual" which indicates that a promotion may not proceed until a webhook in invoked. This is a state machine:
