@@ -76,6 +76,21 @@ sequenceDiagram
 
 ```
 
+### Specific functions
+
+This section explains functions that need to be adapted to work in the proposed architecture.
+
+#### Manual approval
+
+At present, the Promotion type includes a field ".Manual" which indicates that a promotion may not proceed until a webhook in invoked. This is a state machine:
+
+ - when a promotion notification is received: if manual approval is not required, the promotion is triggered, else a marker with the expected revision is put in `.Status.Environments[env]`;
+ - if an approval webhook is invoked and the marker matches, a promotion is triggered.
+
+An HTTP endpoint accepts POST requests, and extract the pipeline namespace, name, environment, and revision from the path. The handler checks a signature in the header of the request, against a secret given in the Promotion value. So, to set this up, you create a secret with a shared key, and make that key available to any process that needs to do an approval.
+
+TODO: determine whether this machinery can also work with the proposed machinery.
+
 **Glossary**:
 
 - **Clusters Manager**: Entity that manages clusters config. It will be responsible for keeping cluster configuration up to date and notifying other entities of cluster changes.
