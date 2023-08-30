@@ -2,10 +2,21 @@
 
 ## Summary
 
-Currently, our pipeline workflow is heavily reliant on the addition of multiple resources beyond just the Pipeline CRDs. Users are tasked with creating several Notification resources (typically 2 per cluster) across all clusters. These resources are vital for transmitting update events to the management cluster, where the pipeline controller operates. However, due to the sheer quantity of resources required, the task quickly becomes unmanageable.
+Currently, the pipeline controller relies on receiving webhook invocations to trigger changes. This has several problems:
+
+**Promotions are attempted at most once**
+
+Flux notifications are not intended to be reliable, and there is one chance to succeed at each promotion. If the endpoint is unavailable, or the promotion fails, then it will not be attempted again. Since the Pipeline status does not record promotion attempts, a missed promotion may be invisible to the user even if attempted.
+
+**You can make the promotion endpoint trigger promotions that are not intended**
+
+The promotion webhook handler acts on the information contained in the URL and in the request body. Only the request body is included in the HMAC, so it's possible to replay a request against a different URL. Since there's a shared key in each target cluster, there's an increased chance a shared key will be compromised, in which situation a notification can be forged.
+
+**It necessitates the addition of several resources beyond just the Pipeline object**
+
+Users must create several resources, usually in leaf clusters, to make notifications work (typically two per environment, a Provider and an Alert). These resources are needed for transmitting update events to the management cluster, where the pipeline controller operates. The notifications usually have their own secrets, and must target a specific URL per environment. Getting these exactly right and in place is onerous.
 
 We aim to engineer a new architecture that simplifies this process while retaining its functionality. We plan to design an architecture that requires less manual configuration, making it more efficient and manageable to operate. By doing so, we hope to reduce the complexities of the workflow and improve the overall user experience.
-
 
 ## Proposal
 
