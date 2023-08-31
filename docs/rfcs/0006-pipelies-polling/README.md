@@ -20,71 +20,19 @@ We aim to engineer a new architecture that simplifies this process while retaini
 
 ## Proposal
 
-Use a watch approach, instead of waiting for events coming from leaf clusters via webhook mechanisms, the controller is now responsible for detecting the changes in the clusters.
+The controller should rely only on the current state of the pipeline and its apps to decide if needs to promote or not.
 
-We can detect those changes by using two approaches:
-- Polling
-	- List all pipelines
-	- Loop through all environments and targets and pull the status of the app
-	- Detect any change and act
-- Watching
-	- List all pipelines
-	- Determine which clusters are referenced in pipeline definitions and therefore need to be watched
-	- Create an informer for each target
-	- Receive update events from each informer
-	- Detect any change and act
+To accomplish will take the naive approach of fetching the state of the pipeline, and the app state in all clusters. The downside of that is the pressure we would put on k8s apis of the cluster by potentially make a lot of requests frequently.
 
-### Polling
-This approach provides some scaling challenges since we'll need to request the status of an app in all targets, which will potentially add a lot of pressure on k8s api of the leaf clusters. To overcome that we could use a cached client, which under the hood creates informers, so, it ends up not being a real polling mechanism.
+To avoid that, we'll rely on the the cache option the `controller-runtime` client provides. When enabled, the client creates Informers to cache the apps data, so when the controller makes a request it will transparently fetch it from the cache instead of calling the cluster's api.
 
-Additionally, there's the issue of change detection. To ascertain if something has changed, you'd have to maintain the current state of an app and compare it with the newly polled state to determine the differences. Ensuring reliable state storage is always a significant concern.
-
-### Watching
-
-In this method, we employ [Shared Informers](https://www.cncf.io/blog/2019/10/15/extend-kubernetes-via-a-shared-informer/) to set up watches for app resources in each target cluster. These informers instantly notify us of Add, Delete, and Update events as they occur. Because there's no polling required, the strain on the k8s API is significantly diminished.
-
-Furthermore, the update hook is defined as `UpdateFunc: func(old interface{}, new interface{})`, which lets us directly compare the previous state (old) with the current state (new). This directly addresses the state storage concern inherent in the polling approach.
 
 ## Design Details
 
 ### Clusters Management
 
-When reconciling pipelines, the controller will create a set of **used** clusters by listing the pipeline's targets and making sure to create clients only for clusters that belong to at least one pipeline. With that, we avoid watching clusters that don't be long to any pipeline.
+To avoid watching clusters that don't belong to any pipeline, the controller will create a set of **used** clusters by listing the pipeline's targets and making sure to create clients only for clusters that belong to at least one pipeline. This way we avoid spending resources on checking clusters that contains no apps of interest.
 
-
-### Events Management
-
-During the informer creation, we inject the cluster name, so, whenever a new app update event comes in, the informer function will be able to use `app + namespace + cluster` name as the key to identifying which pipeline that app belongs to.
-
-It will then detect if a change has happened, in the case of `HelmReleases``, it will check if the new `lastAppliedRevision` is different from the old one and trigger the promotion accordingly.
-
-
-### Diagram
-
-```mermaid
-sequenceDiagram
-    actor U as operator
-    U->>+API Server: creates Pipeline
-    participant PC as Pipeline Controller
-    participant CM as Clusters Manager
-    participant AW as Apps Watcher
-    participant PS as Pipeline Strategy
-
-    API Server->>+PC: notifies
-
-	loop Reconcile
-	    PC->>+PC: Add pipeline to apps index
-	    PC ->>CM: Adds targets
-    end
-
-    CM->>+AW: Notifies clusters change
-    participant dt1 as dev/target 1
-    AW->>+dt1: Creates Shared Infomer
-    dt1->>+AW: update events from AppRef
-    AW->>+AW: Detect app changes
-    AW->>+PS: kick off promotion
-
-```
 
 ### Detecting and enacting promotions
 
@@ -92,10 +40,51 @@ In the current architecture, promotions are triggered _at most once_. If a notif
 
 The new design has a chance to improve on this by making promotion attempts _exactly once_ (or at least "usually once", since exactly once is in general impossible). By examining the state, rather than relying on being triggered by events, the controller is able to retry if a promotion is missed (the controller was offline when a update happened), or fails.
 
+Given the following infrastructure:
+
+```
+dev:
+ dev-cluster-1
+ dev-cluster-2
+staging:
+ staging-cluster-1
+ staging-cluster-2
+production:
+  production-cluster-1
+```
+
+During the reconcile the controller loops through the `dev`'s targets and check the `latestAppliedRevision` and save it as `latestRevision`, that's the revision the controller will try to propagate across environments.
+
+The controller will have to `wait` modes, `AtLeastOne` where it waits at least a single cluster to be ready with desired revision before proceeding, and `All` where it waits until all clusters are ready.
+
+if the pipeline is set to `AtLeastOne`, check the `staging` environment revisions, if at least one matches the `latestRevision`, it means a promotion to `staging` has already happened and there is no need to act on that environment anymore, so is safe to proceed. Now we check `production` revisions, if not equal to `latestRevision`, promote that revision.
+
+### Promotion  Idempotency
+This setup requires the promotion strategies to be idempotent, so there are no collateral effects of running it multiple times.
+
+For example, the current Pull Request strategy needs to be changed to following algorithm:
+```
+if there is a PR for `app` + `environment`
+	if revision equal to `latestRevision`
+		do nothing
+	else
+		change the PR or Close the current and create another one
+else
+	open the the PR
+```
+
+This way we are able to run it in a reconcile loop without worry. Although we should pay attention to caching to avoid spamming git providers api.
+
 This introduces a new problem: how does the controller avoid running a promotion more than once if it hasn't completed yet?
 
 TODO: explain mechanism for deciding when to trigger a promotion
 TODO: explain how to make promotions idempotent (NB creating a PR is not the only promotion strategy)
+
+#### Concerns
+
+- with this approach there is a reliance on timestamps to identify the latest revision, if there is any delay in a particular cluster of the first environment while applying a revision, that might lead to the controller trying to promote an older revision.
+- we wont be able to support multiple deployments at the same time, when ever pipeline-controller detects a new revision it will try to promote that, meaning that open prs with older revision will be closed/replaced with the new revision.
+
 
 ### Manual approval
 
@@ -107,10 +96,3 @@ At present, the Promotion type includes a field ".Manual" which indicates that a
 An HTTP endpoint accepts POST requests, and extract the pipeline namespace, name, environment, and revision from the path. The handler checks a signature in the header of the request, against a secret given in the Promotion value. So, to set this up, you create a secret with a shared key, and make that key available to any process that needs to do an approval.
 
 TODO: determine whether this machinery can also work with the proposed machinery.
-
-**Glossary**:
-
-- **Clusters Manager**: Entity that manages clusters config. It will be responsible for keeping cluster configuration up to date and notifying other entities of cluster changes.
-- **Apps Watcher**: Creates informers to watch app changes.
-- **Pipeline Strategy**: Responsible for promoting an app.
-- **Apps Index**: It holds the association between Cluster <> Pipelines <> Apps. Given update events, it will help to query which pipeline a particular app belongs to.
