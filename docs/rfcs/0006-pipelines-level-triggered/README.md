@@ -12,7 +12,7 @@ The problems with using notifications are:
 
 **Promotions are attempted at most once**
 
-Flux notifications are not intended to be reliable, and there is one chance to succeed at each promotion. If the endpoint is unavailable, or the promotion fails <!-- check if Flux does retries on 500s -->, then it will not be attempted again. Since the Pipeline status does not record promotion attempts, a missed promotion may be invisible to the user even if attempted.
+Flux notifications are not intended to be reliable, and there is a [finite chance](https://github.com/fluxcd/notification-controller/blob/v1.1.0/internal/notifier/client.go#L76) to succeed at each promotion. If the endpoint is unavailable, or the promotion fails, then it will not be attempted again. Since the Pipeline status does not record promotion attempts, a missed promotion may be invisible to the user even if attempted.
 
 **You can make the promotion endpoint trigger promotions that are not intended**
 
