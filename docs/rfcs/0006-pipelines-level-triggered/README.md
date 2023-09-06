@@ -77,22 +77,60 @@ In the current architecture, promotions are triggered _at most once_. If a notif
 
 The design proposed here has the opportunity to improve on this by making promotion attempts _exactly once_, or at least "usually once", since exactly once is in general impossible. By examining the state, rather than relying on being triggered by events, the controller is able to retry if a promotion is missed (the controller was offline when a update happened), or fails.
 
-TODO: elaborate on the following.
+To know what is the case with a particular promotion, we keep a record in the status under the specific environment. A promotion is particular to an environment and revision, so it must be recorded against the environment, and with the revision as a field.
 
-This setup requires the promotion strategies to be idempotent, so there are no collateral effects of triggering a promotion multiple times.
+For a notification promotion, the notification either succeeds or fails, and if it fails, it is retried:
 
-For example, the current Pull Request strategy needs to be changed to following algorithm:
+```mermaid
+---
+title: Promotion by notification states
+---
+stateDiagram-v2
+    [*] --> unattempted : Promotion needed
+    unattempted --> succeeded : Notification succeeded
+    unattempted --> failed : Notification failed
+    succeeded --> unattempted : Promotion to new revision needed
+    failed --> unattempted : Promotion to new revision needed
+    failed --> succeeded : Notification succeeded
+    failed --> failed : Notification fails
 ```
-if there is a PR for `app` + `environment`
-	if revision equal to `latestRevision`
-		do nothing
-	else
-		change the PR or Close the current and create another one
-else
-	open the the PR
+
+For a pull request promotion, the success or failure depends on what happens to the pull request once it's created:
+
+```mermaid
+---
+title: Pull request states
+---
+stateDiagram-v2
+    [*] --> unattempted : Promotion needed
+    unattempted --> created : Pull request created
+    unattempted --> failed : Pull request creation failed
+    failed --> created : Pull requested created
+    failed --> failed : Pull request creation failed
+    created --> succeeded : Pull request merged
+    created --> abandoned : Pull request closed without merging
+    created --> unattempted : Promotion to new revision needed
+    failed --> unattempted : Promotion to new revision needed
+    succeeded --> unattempted : Promotion to new revision needed
 ```
 
-This way we are able to run it in a reconcile loop without worry. Although we should pay attention to caching to avoid spamming git providers api.
+If a promotion is abandoned, it proceeds no further until there is another revision to attempt.
+
+To be able to check the status of a pull request after creation, the URL for the pull request is recorded in the status as well. If a new revision is to be promoted, and there is already a pull request for a previous promotion, it should be closed and a new PR opened*.
+
+*This is simpler that trying to repurpose a PR for a new promotion.
+
+#### Alternatives
+
+**Keep promotion records in a separate object**
+
+The usual advice is that `.status` is only for caching information that you can reconstruct from cluster state. For example, a `Deployment` keeps track of the state of `ReplicaSet` objects it has created, so they can be seen at a glance, but you could get the same information by finding all the ReplicaSet objects and examining _their_ status. Keeping promotion state in the Pipeline status goes against this advice.
+
+A different way would be to record the fact of a triggered promotion in its own object -- a Promotion, say, owned by the Pipeline. The success or failure of a promotion can be recorded in the Promotion object's status, when processing a Pipeline object. This means the Pipeline controller can decouple the processes of enacting promotions from that of calculating pipeline runs.
+
+This may be useful for reasons that are out of scope for this PR, like being able to process promotions independently. However, it introduces complexity -- the system has more possible states to account for. It will be more straight-forward to disregard the advice and store state in the Promotion status. The trade-off is that restoring an object from a backup might result in duplicate promotions, because the status will either be discarded or reinstated after the spec. There's an [informative note about state versus status](https://cluster-api.sigs.k8s.io/developer/providers/implementers-guide/controllers_and_reconciliation.html#a-note-about-the-status) in the Cluster API book.
+
+Writing promotion state directly to the Pipeline status should not prejudice against using a separate object and controller later, since in that case it could be read from that separate object and written to the Pipeline status.
 
 #### Questions
 
