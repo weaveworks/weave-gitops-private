@@ -172,9 +172,12 @@ For the purpose of this RFC we will assume support for only `Kustomization` and 
 
 **What happens with outstanding promotions when a pipeline is restarted with a new revision?**
 
-TODO expand on this:
-- we wont be able to support multiple deployments at the same time, when ever pipeline-controller detects a new revision it will try to promote that, meaning that open prs with older revision will be closed/replaced with the new revision.
+In the case of pull requests, if an outstanding promotion pull request has not been merged, it can be closed. The new promotion can create a fresh pull request. It may be worth doing this eagerly, that is once an environment is updated, all subsequent incomplete promotions are abandoned.
 
 **What about if the first environment is following a branch, and there are lots of merges, will it just restart the pipeline all the time?**
 
-TODO address this.
+If you are following `main` branch in the first environment, and people are merging to `main` faster than you can approve promotions (or PRs), then your pipeline is not going to make progress. This could be a common situation, when teams share a monorepo with Kustomization manifests for each cluster, as Weave GitOps encourages.
+
+This is one situation in which there is a marked difference with the alternative model (of comparing environments pair-wise, rather than setting the revision from the first environment). In that case, a revision can make progress through the pipeline when there are new revisions being deployed in the first environment. As indicated in the section discussing promotions though, this is not the prefered model for other reasons.
+
+The best advice at present is "don't use pipelines with an environment following a git branch". Experience with using it may suggest workarounds or better models.
