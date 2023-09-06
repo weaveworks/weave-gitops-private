@@ -69,6 +69,8 @@ The algorithm assumes it has all application state to hand. Usually when using c
 
 Therefore the controller will need to manage a set of clients and watchers itself. A similar piece of machinery is in [Cluster API](https://github.com/kubernetes-sigs/cluster-api/blob/v1.5.1/controllers/remote/cluster_cache_tracker.go) (but unfortunately it's not usable as it is, because you can't explicitly destroy a client). This must maintain the invariant that only clusters with application objects of interest should have a watcher, which may entail some bookkeeping so that, for example, a client is destroyed when no Pipeline is using it any more.
 
+We would also want to use watches to notify us when an application object changes, so the Pipeline using that application can be examined. To be able to take an application object event and figure out the relevant pipeline object, we need to keep an map of `{cluster, api version and kind, application name} -> pipeline name`. This is possible by using controller-runtime's indexing and (in the func given to the indexer) extracting the tuple for each application from the pipeline object's targets. Then, it remains to provide a source which will queue pipeline objects by consulting the index.
+
 ### Promotion reliability
 
 In the current architecture, promotions are triggered _at most once_. If a notification is missed, or fails, the promotion will not be attempted again. Flux notifications are not intended to be reliable, and the pipeline machinery does not record the fact of a notification -- so if a promotion fails it does not know to retry it.
