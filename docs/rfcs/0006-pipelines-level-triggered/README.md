@@ -132,6 +132,36 @@ This may be useful for reasons that are out of scope for this PR, like being abl
 
 Writing promotion state directly to the Pipeline status should not prejudice against using a separate object and controller later, since in that case it could be read from that separate object and written to the Pipeline status.
 
+### Manual approval
+
+At present, the Promotion type includes a field ".Manual" which indicates that a promotion may not proceed until a webhook in invoked. This is a state machine:
+
+ - when a promotion notification is received: if manual approval is not required, the promotion is triggered, else a marker with the expected revision is put in `.Status.Environments[env]`;
+ - if an approval webhook is invoked and the marker matches, a promotion is triggered.
+
+An HTTP endpoint accepts POST requests, and extract the pipeline namespace, name, environment, and revision from the path. The handler checks a signature in the header of the request, against a secret given in the Promotion value. So, to set this up, you create a secret with a shared key, and make that key available to any process that needs to do an approval.
+
+This can work similarly in the proposed design, using a similar model:
+
+ - when a promotion is determined to be needed: if manual approval is not required, trigger the promotion (make the transition from "unattempted"); else, mark the status as above;
+ - if an approval webhook is invoked and the marker matches, make the transition from "unattempted".
+
+```mermaid
+---
+title: Promotion with manual approval
+---
+stateDiagram-v2
+    [*] --> unapproved : Promotion needed
+    unapproved --> unattempted : Approval given
+    unattempted --> unapproved : Promotion for new revision needed
+    unattempted --> failed : Promotion attempt failed
+    failed --> failed : Promotion attempt failed
+    failed --> succeeded : Promotion attempt succeeded
+    failed --> unapproved : Promotion for new revision needed
+    unattempted --> succeeded : Promotion attempt succeeded
+    succeeded --> unapproved : Promotion for new revision needed
+```
+
 #### Questions
 
 **What about types other than HelmRelease and Kustomization?**
@@ -148,14 +178,3 @@ TODO expand on this:
 **What about if the first environment is following a branch, and there are lots of merges, will it just restart the pipeline all the time?**
 
 TODO address this.
-
-### Manual approval
-
-At present, the Promotion type includes a field ".Manual" which indicates that a promotion may not proceed until a webhook in invoked. This is a state machine:
-
- - when a promotion notification is received: if manual approval is not required, the promotion is triggered, else a marker with the expected revision is put in `.Status.Environments[env]`;
- - if an approval webhook is invoked and the marker matches, a promotion is triggered.
-
-An HTTP endpoint accepts POST requests, and extract the pipeline namespace, name, environment, and revision from the path. The handler checks a signature in the header of the request, against a secret given in the Promotion value. So, to set this up, you create a secret with a shared key, and make that key available to any process that needs to do an approval.
-
-TODO: determine whether this machinery can also work with the proposed machinery.
