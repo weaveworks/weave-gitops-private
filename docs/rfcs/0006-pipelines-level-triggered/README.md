@@ -31,10 +31,11 @@ Users must create several resources, usually in leaf clusters, to make notificat
 ## Non-goals
 
  - It is not a goal to support systems in which the management cluster is not able to connect to leaf cluster API servers. This kind of connectivity does get used, but the rest of Weave GitOps Enterprise (e.g., the Application view) does not support it so we make no effort to do so here either.
+ - This RFC does not examine how automated promotions work once triggered. In the interest of keeping the scope under control, this part of the system is assumed good.
 
 ## Design Details
 
-This section explains the algorithm for running promotions "usually once", which assumes the state of all applications mentioned in pipelines is available. Then it explains how to make sure that state is available efficiently.
+This section explains the algorithm for deletecting and running promotions "usually once", which assumes the state of all applications mentioned in pipelines is available. Then it explains how to make sure that state is available efficiently.
 
 ### Promotion algorithm
 
@@ -56,6 +57,38 @@ while there's a next environment:
 The health of a target application is determined by its [`Ready` condition](https://fluxcd.io/flux/components/kustomize/kustomizations/#ready-kustomization). The revision run by a target application is determined by the application object's [`.status.lastAppliedRevision`](https://fluxcd.io/flux/components/kustomize/kustomizations/#last-applied-revision). The `Kustomization` and `HelmRelease` types have that condition and field in common.
 
 The behaviour of this algorithm is that it treats a successful deployment of a revision in the first environment as signalling a "run" of that revision through the pipeline. The revision moves to the each successive environment by triggering a promotion as specified in the Pipeline. This has the effect that successfully deploying a _new_ revision to the first environment will interrupt the current pipeline run, starting again with the new revision.
+
+#### Example of changes running through a pipeline
+
+This example shows how the promotion algorithm chooses what to do next. Note that how promotions happen once triggered is out of the scope of this RFC.
+
+![Starting state: all targets at the same version 1.0.0](pipeline-example-1.jpg)
+
+In this example, there are three environments with some targets. The starting state is that all the targets are ready and running the same revision of the configuration. Since the environments are at the same version, there is no promotion to attempt.
+
+![Version 1.0.1 is deployed to the staging environment](pipeline-example-2.jpg)
+
+A new revision of the configuration is deployed to the first environment. This would probably be due to its Flux source following a semver range, and deploying a new tag within that range (but this detail is not important for the purpose of the example). Since the newly deployed configuration is not ready, the promotion is not yet attempted.
+
+![The promotion gate opens; the new version 1.0.1 is deployed to UAT environment](pipeline-example-3.jpg)
+
+The staging target reaches a ready state, and the promotion to the next environment UAT is triggered. The targets in the UAT environment now have version 1.0.1 of the configuration deployed, but have not reached a ready state.
+
+![A new version 1.0.2 is deployed to the first environment, staging](pipeline-example-4.jpg)
+
+While the deployment to UAT is underway, a problem is found in the configuration and a new revision 1.0.2 is deployed to the staging environment. This resets the pipeline, so that the next promotion that can be triggered is from staging to UAT.
+
+![staging environment reaches a ready state and 1.0.2 is promoted to UAT](pipeline-example-5.jpg)
+
+Once the target in staging reaches a ready state, revision 1.0.2 is promoted to UAT.
+
+![UAT reaches a ready state and 1.0.2 is promoted to production](pipeline-example-6.jpg)
+
+Once both the targets in the UAT environment reach a ready state, revision 1.0.2 is promoted to the production environment.
+
+![Production reaches a ready state; revision 1.0.2 has finished running through the pipeline](pipeline-example-7.jpg)
+
+This shows a new steady state, with targets in all environments running revision 1.0.2 and ready.
 
 #### Alternative algorithms
 
