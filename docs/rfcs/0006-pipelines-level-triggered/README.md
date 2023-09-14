@@ -162,7 +162,7 @@ stateDiagram-v2
     succeeded --> unapproved : Promotion for new revision needed
 ```
 
-#### Questions
+### Questions
 
 **What about types other than HelmRelease and Kustomization?**
 
@@ -180,4 +180,12 @@ If you are following `main` branch in the first environment, and people are merg
 
 This is one situation in which there is a marked difference with the alternative model (of comparing environments pair-wise, rather than setting the revision from the first environment). In that case, a revision can make progress through the pipeline when there are new revisions being deployed in the first environment. As indicated in the section discussing promotions though, this is not the prefered model for other reasons.
 
-The best advice at present is "don't use pipelines with an environment following a git branch". Experience with using it may suggest workarounds or better models.
+The best advice at present is "don't use pipelines with an environment following a shared git branch". Experience with using it may suggest workarounds or better models.
+
+**Will environments with several targets ever be in a steady state?**
+
+The promotion algorithm relies on all targets in an environment being healthy and at the same revision, at once. In practice, Kubernetes systems dance all over the place, and if you are depending on several systems reaching a steady state, you may not ever see it.
+
+There are two mitigations:
+ - slowing down the cadence of changes and apply backpressure from the pipeline -- that is, don't let a new change enter the pipeline until the prior change has gone as far as it will go. Using git tags, publishing charts, and pushing images all tend to slow down the candence. We may be able to develop tooling for helping apply backpressure; as a crude example, an action for GitHub that blocks on an unready pipeline.
+ - a more sophisticated way of determining a healthy environment. As a sketch: require only that each target has at some point reached a Ready status with the revision in question, which could be determined by looking back through Event objects.
