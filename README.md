@@ -23,6 +23,7 @@ This is for tracking weaveworks internal information on weave-gitops. Will inclu
 - [19. Retain objects after they have been removed from the cluster](docs/adrs/0019-query-retention.md)
 - [20. Explorer Monitoring](docs/adrs/0020-explorer-monitoring.md)
 - [21. Query Scaling Implementation Decisions](docs/adrs/0021-query-scaling-implementation-decisions.md)
+- [23. Explorer Collector Deletion Detection](docs/adrs/0023-explorer-collector-deletion-detection.md)
 
 <!-- /ADRS -->
 
