@@ -1,4 +1,4 @@
-# 23. Explorer Collector Deletion Detection
+# 22. Explorer Collector Deletion Detection
 
 Date: 2023-10-09
 
