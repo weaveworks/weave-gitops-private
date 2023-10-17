@@ -235,3 +235,17 @@ The promotion algorithm relies on all targets in an environment being healthy an
 There are two mitigations:
  - slowing down the cadence of changes and apply backpressure from the pipeline -- that is, don't let a new change enter the pipeline until the prior change has gone as far as it will go. Using git tags, publishing charts, and pushing images all tend to slow down the candence. We may be able to develop tooling for helping apply backpressure; as a crude example, an action for GitHub that blocks on an unready pipeline.
  - a more sophisticated way of determining a healthy environment. As a sketch: require only that each target has at some point reached a Ready status with the revision in question, which could be determined by looking back through Event objects.
+
+## Security considerations
+
+### RBAC permissions needed
+
+In the current design, only notification objects must be created in target clusters, and there are no reads from the pipeline controller on target clusters. The creation of notifications is out of scope of the controller: it is the pipeline author, or automation they delegate to (e.g., Flux), that needs permission to create the objects. The controller does not need permissions in target clusters.
+
+In the proposed design, the pipeline controller will query application objects in target clusters. Each of the target clusters is accessed via a `GitOpsCluster` object and its `kubeconfig` secret (possibly via a Cluster API `Cluster` object). Usually these `kubeconfig` secrets will yield clients with broad permissions; but in any case, it is worth detailing which permissions specifically are needed.
+
+To query and cache "application" objects, the controller will need the verbs `get,list,watch` on those objects. In principle it needs only the _exact_ permissions -- the precise application objects in question -- but, in practice it may be difficult to implement caching in such a way that it picks out exact objects to watch. A compromise that fits with the use of the controller-runtime client is to require permissions for `{kinds...} x {get,list,watch}` on each target. That is, `get,list,watch` for each kind that can be used in a pipeline, in each `{cluster, namespace}` where there's an application used in a pipeline.
+
+It is not necessary to have permissions for types outside of the application types. In particular it is not necessary to be able to list or read namespaces, since a pipeline always gives the namespace for an application*; and, it is not necesssary to read workloads (Deployments etc.) to get their status, since the promotion algorithm works only from the ready status of the application object.
+
+*The controller-runtime implementation of caching may need permission to read namespaces, in order to watch resources in all namespaces.
