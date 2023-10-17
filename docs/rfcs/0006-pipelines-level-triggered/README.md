@@ -162,9 +162,7 @@ stateDiagram-v2
 
 If a promotion is abandoned, it proceeds no further until there is another revision to attempt.
 
-To be able to check the status of a pull request after creation, the URL for the pull request is recorded in the status as well. If a new revision is to be promoted, and there is already a pull request for a previous promotion, it should be closed and a new PR opened*.
-
-*This is simpler that trying to repurpose a PR for a new promotion.
+To be able to check the status of a pull request after creation, the URL for the pull request is recorded in the status as well. If a new revision is to be promoted, and there is already a pull request for a previous promotion, the controller should close the old PR and open a new one. This is simpler that trying to repurpose a PR for a different revision.
 
 #### Alternatives
 
