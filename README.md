@@ -37,5 +37,6 @@ This is for tracking weaveworks internal information on weave-gitops. Will inclu
 - [RFC-0004 Fluent-Bit Log Forwarding in GitOps Run](docs/rfcs/0004-log-forwarder-for-gitops-run)
 - [RFC-0004 Multi-cluster Query Scaling (Observability Phase 3)](docs/rfcs/0004-query-scaling)
 - [RFC-0005 Markers in YAML Comments for Application Promotion](docs/rfcs/0005-promotion-markers)
+- [Pipelines: level-triggered architecture](docs/rfcs/0006-pipelines-level-triggered)
 
 <!-- /RFCS -->
