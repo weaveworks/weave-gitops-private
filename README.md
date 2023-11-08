@@ -24,6 +24,7 @@ This is for tracking weaveworks internal information on weave-gitops. Will inclu
 - [20. Explorer Monitoring](docs/adrs/0020-explorer-monitoring.md)
 - [21. Query Scaling Implementation Decisions](docs/adrs/0021-query-scaling-implementation-decisions.md)
 - [22. Explorer Collector Deletion Detection](docs/adrs/0022-explorer-collector-deletion-detection.md)
+- [23. Create Sources from the UI](docs/adrs/0023-create-sources-from-the-ui.md)
 
 <!-- /ADRS -->
 
