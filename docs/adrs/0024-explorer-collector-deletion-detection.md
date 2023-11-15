@@ -51,11 +51,66 @@ Therefore, we want to ensure we have a mechanism to map generic to specific reso
 
 This ADR looks into it and will use template type as driving example.
 
-## Decision
-
 ### Achieve Facets Filter `TemplateType`
 
-  
+Currently, we have that the api endpoint `ListFacets` just return the index Facet domain entity
+
+```
+func (q *qs) ListFacets(ctx context.Context) (store.Facets, error) {
+	return q.index.ListFacets(ctx)
+}
+```
+
+Therefore, the api is service the indexer domain.
+
+Potential alternatives:
+
+1. `do nothing`: serve the indexer domain is fine and modify the UI to use the index field.
+2. `transfrom at the level of the UI`: serve the indexer domain as api and any transformation to happen at the level of the UI.
+3. `api for explorer domain`: explorer is a capability on weave gitops and gitopstempalte is a business entity for weave gitops. therefore
+   api entities should be in the context of weave gitosp domains and not in the context of bleve index search.
+
+#### `do nothing`: 
+
+Serve the indexer domain is fine and modify the UI to use the index field
+
+#### `transfrom at the level of the UI`: 
+
+Serve the indexer domain as api and any transformation to happen at the level of the UI
+
+#### `api for explorer domain`: 
+
+Explorer is a capability on weave gitops and gitops templates is a business entity for weave gitops. Therefore a solution
+is to ensure that explorer api handles weave gitops domain entities
+
+This translates into practice that facets endpoint adapt from indexer to weave gitops domain
+
+```
+func (s *server) ListFacets(ctx context.Context, msg *pb.ListFacetsRequest) (*pb.ListFacetsResponse, error) {
+	facets, err := s.qs.ListFacets(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list facets: %w", err)
+	}
+
+	return &pb.ListFacetsResponse{
+		Facets: convertToPbFacet(facets),
+	}, nil
+}  
+
+```
+
+
+
+
+
+
+## Decision
+
+
+
+
+
+
 
 
 
