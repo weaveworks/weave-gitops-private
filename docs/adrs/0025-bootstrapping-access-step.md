@@ -1,4 +1,4 @@
-# 24. CLI bootstrapping access step
+# 25. CLI bootstrapping access step
 
 Date: 2023-11-29
 

@@ -25,8 +25,8 @@ This is for tracking weaveworks internal information on weave-gitops. Will inclu
 - [21. Query Scaling Implementation Decisions](docs/adrs/0021-query-scaling-implementation-decisions.md)
 - [22. Explorer Collector Deletion Detection](docs/adrs/0022-explorer-collector-deletion-detection.md)
 - [23. Create Flux sources from the UI](docs/adrs/0023-create-sources-from-the-ui.md)
-- [24. CLI bootstrapping access step](docs/adrs/0024-bootstrapping-access-step.md)
 - [24. Intermediate Explorer Object Statuses](docs/adrs/0024-intermediate-explorer-object-statuses.md)
+- [25. CLI bootstrapping access step](docs/adrs/0025-bootstrapping-access-step.md)
 
 <!-- /ADRS -->
 
