@@ -4,7 +4,7 @@ Date: 2023-11-29
 
 ## Status
 
-Provisional
+Accepted
 
 ## Context
 
@@ -91,18 +91,18 @@ spec:
         https: 8000
       targetPorts:
         https: 8000
-    # nodePorts:
-    #    http: ""
-    #    https: ""
-    #    tcp: {}
-    #    udp: {}
-    #  clusterIP: ""
-    #  externalIPs: []
-    #  loadBalancerIP: ""
-    #  loadBalancerSourceRanges: []
-    #  externalTrafficPolicy: ""
-    #  healthCheckNodePort: 0
-    #  annotations: {}
+      nodePorts:
+        http: ""
+        https: ""
+        tcp: {}
+        udp: {}
+      clusterIP: ""
+      externalIPs: []
+      loadBalancerIP: ""
+      loadBalancerSourceRanges: []
+      externalTrafficPolicy: ""
+      healthCheckNodePort: 0
+      annotations: {}
 ```
 **Drawbacks / Risks:**
 
