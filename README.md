@@ -24,6 +24,9 @@ This is for tracking weaveworks internal information on weave-gitops. Will inclu
 - [20. Explorer Monitoring](docs/adrs/0020-explorer-monitoring.md)
 - [21. Query Scaling Implementation Decisions](docs/adrs/0021-query-scaling-implementation-decisions.md)
 - [22. Explorer Collector Deletion Detection](docs/adrs/0022-explorer-collector-deletion-detection.md)
+- [23. Create Flux sources from the UI](docs/adrs/0023-create-sources-from-the-ui.md)
+- [24. CLI bootstrapping access step](docs/adrs/0024-bootstrapping-access-step.md)
+- [24. Intermediate Explorer Object Statuses](docs/adrs/0024-intermediate-explorer-object-statuses.md)
 
 <!-- /ADRS -->
 
@@ -37,5 +40,6 @@ This is for tracking weaveworks internal information on weave-gitops. Will inclu
 - [RFC-0004 Fluent-Bit Log Forwarding in GitOps Run](docs/rfcs/0004-log-forwarder-for-gitops-run)
 - [RFC-0004 Multi-cluster Query Scaling (Observability Phase 3)](docs/rfcs/0004-query-scaling)
 - [RFC-0005 Markers in YAML Comments for Application Promotion](docs/rfcs/0005-promotion-markers)
+- [Pipelines: level-triggered architecture](docs/rfcs/0006-pipelines-level-triggered)
 
 <!-- /RFCS -->
