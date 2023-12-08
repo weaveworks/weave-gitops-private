@@ -54,6 +54,7 @@ A solution that would work for EE controllers would involve:
 (-) costs of maintenance and extension
 (-) needs extension of existing api and UI
 
+
 ### Option B: Creating a new UI in EE that leverages explorer. The old UI remains.
 
 This solution would include:
@@ -85,7 +86,55 @@ This would include the previous solution but also requires:
 ## Decision
 
 Given the previous alternatives, we are going to prioritise Option A due to its applicability to OSS and EE and 
-because any of the alternatives requires extending Explorer or OSS Explorer which also involves additional effort. 
+because any of the alternatives requires extending Explorer or OSS Explorer which also involves additional effort.
+
+#### Proof of Concept on Selected options
+
+**Scenario A: OSS has weave gitops runtime**
+
+In https://github.com/weaveworks/weave-gitops/pull/4162 where
+
+1. Extended api runtime to also match deployments by label `app.kubernetes.io/part-of: weave-gitops`
+2. Weave Gitops Controllers should be labelled with that weave-gitops label. For example, tf-controller should be labelled as follows:
+
+```yaml 
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: tf-controller
+  namespace: flux-system
+spec:
+  ...
+  postRenderers:
+    - kustomize:
+        patchesStrategicMerge:
+          - kind: Deployment
+            apiVersion: apps/v1
+            metadata:
+              name: tf-controller
+              labels:
+                app.kubernetes.io/part-of: weave-gitops
+```
+An example of OSS runtime with controllers beyond Flux could be:
+
+![gitops-runtime-oss.png](images%2Fgitops-runtime-oss.png)
+
+Note: CRDs not included
+
+**Scenario A: EE has weave gitops runtime**
+
+Given EE uses runtime api endpoints directly, importing OSS branch would
+make the logic available to WGE.
+
+The following branch has the spike changes https://github.com/weaveworks/weave-gitops-enterprise/tree/wge-3600-gitops-runtime
+
+![gitops-runtime-ee.png](images%2Fgitops-runtime-ee.png)
+
+To solution:
+
+- Finalise spike
+- Ensure runtime controllers are decorated during release process with `app.kubernetes.io/part-of: weave-gitops`
+- Rename Flux Runtime to Weave Gitops Runtime or just Runtime
 
 ## Consequences
 
