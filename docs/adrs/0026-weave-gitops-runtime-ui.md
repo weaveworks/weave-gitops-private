@@ -1,4 +1,4 @@
-# 26. Explorer Collector Deletion Detection
+# 26. Extend Flux Runtime UI to Weave GitOps Runtime UI 
 
 Date: 2023-12-04
 
@@ -88,7 +88,7 @@ This would include the previous solution but also requires:
 Given the previous alternatives, we are going to prioritise Option A due to its applicability to OSS and EE and 
 because any of the alternatives requires extending Explorer or OSS Explorer which also involves additional effort.
 
-#### Proof of Concept on Selected options
+### Proof of Concept on selected options
 
 **Scenario A: OSS has weave gitops runtime**
 
@@ -114,12 +114,16 @@ spec:
               name: tf-controller
               labels:
                 app.kubernetes.io/part-of: weave-gitops
+          - kind: CustomResourceDefinition
+            apiVersion: apiextensions.k8s.io/v1
+            metadata:
+               name: terraforms.infra.contrib.fluxcd.io
+               labels:
+                  app.kubernetes.io/part-of: weave-gitops
 ```
 An example of OSS runtime with controllers beyond Flux could be:
 
 ![gitops-runtime-oss.png](images%2Fgitops-runtime-oss.png)
-
-Note: CRDs not included
 
 **Scenario A: EE has weave gitops runtime**
 
