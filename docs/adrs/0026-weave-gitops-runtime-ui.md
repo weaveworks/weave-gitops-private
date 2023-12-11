@@ -138,7 +138,7 @@ To solution:
 
 - Finalise spike
 - Ensure runtime controllers are decorated during release process with `app.kubernetes.io/part-of: weave-gitops`
-- Rename Flux Runtime to Weave Gitops Runtime or just Runtime
+- Rename Flux Runtime to Weave GitOps Runtime or just Runtime
 
 ## Consequences
 
