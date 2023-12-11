@@ -8,7 +8,7 @@ Proposed
 
 ## Context
 
-Requested from CX to extend flux runtime UI for weave gitops enterprise to include also controllers ecosystem under 
+Requested from CX to extend Flux Runtime UI for Weave GitOps Enterprise to include also controllers ecosystem under 
 
 https://github.com/weaveworks/weave-gitops-interlock/issues/265
 
