@@ -95,7 +95,7 @@ because any of the alternatives requires extending Explorer or OSS Explorer whic
 In https://github.com/weaveworks/weave-gitops/pull/4162 where
 
 1. Extended api runtime to also match deployments by label `app.kubernetes.io/part-of: weave-gitops`
-2. Weave Gitops Controllers should be labelled with that weave-gitops label. For example, tf-controller should be labelled as follows:
+2. Weave GitOps Controllers should be labelled with that weave-gitops label. For example, tf-controller should be labelled as follows:
 
 ```yaml 
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
