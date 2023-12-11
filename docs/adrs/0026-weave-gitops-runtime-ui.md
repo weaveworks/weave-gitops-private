@@ -16,7 +16,7 @@ The following alternatives are possible:
 
 a) extending the current solution so it works for both OSS and EE
 b) replacing the current solution using Explorer-based UI that works in OSS and EE
-c) creating a new UI in EE that leverages explorer. the old UI remains
+c) creating a new UI in EE that leverages Explorer. The old UI remains
 
 ### Option A: Extending the current solution, so it works for both OSS and EE controllers.
 
