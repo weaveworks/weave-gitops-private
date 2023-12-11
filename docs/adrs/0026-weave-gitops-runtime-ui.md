@@ -20,7 +20,7 @@ c) creating a new UI in EE that leverages Explorer. The old UI remains
 
 ### Option A: Extending the current solution, so it works for both OSS and EE controllers.
 
-Current solutions is available in OSS in [flux runtime](https://github.com/weaveworks/weave-gitops/blob/8779391d2ff2ecba59309b0d7b3fac5714da89e4/core/server/fluxruntime.go#L56). 
+Current solutions is available in OSS in [Flux Runtime](https://github.com/weaveworks/weave-gitops/blob/8779391d2ff2ecba59309b0d7b3fac5714da89e4/core/server/fluxruntime.go#L56). 
 Where we are listing deployment by label:  
 
 ```
