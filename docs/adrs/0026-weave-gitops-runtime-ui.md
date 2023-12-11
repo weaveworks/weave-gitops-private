@@ -42,7 +42,7 @@ A solution that would work for EE controllers would involve:
 1. Refactor this experience to make it generic so we could include 
 2. Use configuration to define the deployments to show in the UI:
    - OSS: to show Flux, Weave GitOps app, Tf-controller, Policy Agent, etc ...  
-   - ee: the previous + ee controllers like pipeline, gitopssets, cluster-xxx 
+   - EE: the previous + EE controllers like pipeline, gitopssets, cluster-xxx 
 3. Create UI via either option:
    1. To Rename Flux Runtime to Weave Gitops Runtime or 
    2. to Create another UI for Weave Gitops Runtime
