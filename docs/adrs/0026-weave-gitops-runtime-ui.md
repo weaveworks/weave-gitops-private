@@ -127,7 +127,7 @@ An example of OSS runtime with controllers beyond Flux could be:
 
 **Scenario A: EE has weave gitops runtime**
 
-Given EE uses runtime api endpoints directly, importing OSS branch would
+Given EE uses runtime API endpoints directly, importing an OSS branch would
 make the logic available to WGE.
 
 The following branch has the spike changes https://github.com/weaveworks/weave-gitops-enterprise/tree/wge-3600-gitops-runtime
