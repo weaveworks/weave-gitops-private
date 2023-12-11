@@ -55,7 +55,7 @@ A solution that would work for EE controllers would involve:
 (-) needs extension of existing API and UI
 
 
-### Option B: Creating a new UI in EE that leverages explorer. The old UI remains.
+### Option B: Creating a new UI in EE that leverages Explorer. The old UI remains.
 
 This solution would include:
 
