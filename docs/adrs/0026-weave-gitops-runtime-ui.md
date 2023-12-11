@@ -44,7 +44,7 @@ A solution that would work for EE controllers would involve:
    - OSS: to show Flux, Weave GitOps app, Tf-controller, Policy Agent, etc ...  
    - EE: the previous + EE controllers like pipeline, gitopssets, cluster-xxx 
 3. Create UI via either option:
-   1. To Rename Flux Runtime to Weave Gitops Runtime or 
+   1. To Rename Flux Runtime to Weave GitOps Runtime or 
    2. to Create another UI for Weave Gitops Runtime
 
 #### Evaluation
