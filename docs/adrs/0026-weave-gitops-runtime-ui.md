@@ -52,7 +52,7 @@ A solution that would work for EE controllers would involve:
 (+) available to OSS and EE out of the box
 (+) easily customizable to provide WGA runtime
 (-) costs of maintenance and extension
-(-) needs extension of existing api and UI
+(-) needs extension of existing API and UI
 
 
 ### Option B: Creating a new UI in EE that leverages explorer. The old UI remains.
