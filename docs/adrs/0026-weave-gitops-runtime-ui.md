@@ -125,7 +125,7 @@ An example of OSS runtime with controllers beyond Flux could be:
 
 ![gitops-runtime-oss.png](images%2Fgitops-runtime-oss.png)
 
-**Scenario A: EE has weave gitops runtime**
+**Scenario A: EE has Weave GitOps runtime**
 
 Given EE uses runtime API endpoints directly, importing an OSS branch would
 make the logic available to WGE.
