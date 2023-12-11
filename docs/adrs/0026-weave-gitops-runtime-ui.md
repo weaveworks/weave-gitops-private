@@ -45,7 +45,7 @@ A solution that would work for EE controllers would involve:
    - EE: the previous + EE controllers like pipeline, gitopssets, cluster-xxx 
 3. Create UI via either option:
    1. To Rename Flux Runtime to Weave GitOps Runtime or 
-   2. to Create another UI for Weave Gitops Runtime
+   2. to Create another UI for Weave GitOps Runtime
 
 #### Evaluation
 
