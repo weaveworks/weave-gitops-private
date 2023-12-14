@@ -13,7 +13,9 @@ will lead to degraded bootstrapping process for users and maintaining it will re
 
 ## Decision
 
-Fetching the values file from the corresponding version
+### Options
+
+#### option a) Fetching the values file from the corresponding version
 
 example response for fetching the chart from [wge charts url](https://charts.dev.wkp.weave.works/releases/charts-v3)
 
@@ -74,13 +76,27 @@ images:
 
 After that, This values file will be converted to `map[string]interface{}` then update the specific values from installation like `oidc` values.
 
-## Consequences
-
-### Pros
+**Pros**
 
 - Values will always be up to date
 
-### Cons
+**Cons**
 
 - Lost the structured values files
 - Extra overhead for downloading / uncompressing the chart file
+
+
+
+#### option B) Refactoring the `install wge` step to the shape of [terraform](https://github.com/weaveworks/weave-gitops-enterprise/blob/7a26044174a046fbf25e7f005b895f8a0a5400dc/pkg/bootstrap/steps/terraform.go)
+
+where we dont manage values.  Something like consuming a helmrelease manifest as stated [here](https://docs.gitops.weave.works/docs/enterprise/getting-started/install-enterprise/#configure-helm-chart-and-commit).
+To generate and publish that manifest could be done as part of the release process (we have to do it as part of https://github.com/weaveworks/weave-gitops-enterprise/issues/2213) 
+
+#### option C) How flux does it where flux v2.1.0 can only bootstrap flux for v2.1.0
+
+so in this case refactoring install wge to just install the version that the cli belongs to. for example gitops-ee v0.38 only install v0.38, etc ... 
+see artifacts in https://github.com/fluxcd/flux2/releases/tag/v2.2.0 and https://github.com/fluxcd/flux2/blob/00c6ac81b9938e80a79c5b625b06cfb4f220c3db/pkg/manifestgen/install/manifests.go#L37
+
+
+
+
