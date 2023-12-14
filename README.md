@@ -27,6 +27,7 @@ This is for tracking weaveworks internal information on weave-gitops. Will inclu
 - [23. Create Flux sources from the UI](docs/adrs/0023-create-sources-from-the-ui.md)
 - [24. Intermediate Explorer Object Statuses](docs/adrs/0024-intermediate-explorer-object-statuses.md)
 - [25. CLI bootstrapping access step](docs/adrs/0025-bootstrapping-access-step.md)
+- [26. Extend Flux Runtime UI to Weave GitOps Runtime UI](docs/adrs/0026-weave-gitops-runtime-ui.md)
 
 <!-- /ADRS -->
 
