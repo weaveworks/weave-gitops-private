@@ -60,8 +60,8 @@ A solution that would work for EE controllers would involve:
 This solution would include:
 
 1. Do not touch Flux Runtime 
-2. Create Weave Gitops Runtime based on explorer by 
-   - extend explorer to watch deployment 
+2. Create Weave GitOps Runtime based on Explorer by 
+   - extend Explorer to watch deployment 
    - define controller runtime kind to watch via label 
    - create generic UI to show the runtime controllers.
 
@@ -69,13 +69,13 @@ This solution would include:
 
 (+) costs of maintenance and extension
 (-) not available in OSS
-(-) needs extension of explorer
+(-) needs extension of Explorer
 
-### Option C: Replacing the current solution using explorer-based UI that works in OSS and EE
+### Option C: Replacing the current solution using Explorer-based UI that works in OSS and EE
 
 This would include the previous solution but also requires:
 
-1. OSS Explorer so it could be used in Weave Gitops OSS.  
+1. OSS Explorer so it could be used in Weave GitOps OSS.  
 
 #### Evaluation
 
@@ -90,7 +90,7 @@ because any of the alternatives requires extending Explorer or OSS Explorer whic
 
 ### Proof of Concept on selected options
 
-**Scenario A: OSS has weave gitops runtime**
+**Scenario A: OSS has Weave GitOps runtime**
 
 In https://github.com/weaveworks/weave-gitops/pull/4162 where
 
