@@ -4,7 +4,7 @@ Date: 2023-12-04
 
 ## Status
 
-Proposed
+Accepted
 
 ## Context
 
@@ -142,5 +142,6 @@ To solution:
 
 ## Consequences
 
-TBA
+- Users have a way to track runtime components beyond flux.   
+- We have a simple way to extend it with limited costs (over other alternatives).  
 
